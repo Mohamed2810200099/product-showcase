@@ -72,7 +72,8 @@ function ProductsList() {
           <p className="text-sm text-muted-foreground mt-1">{products.length} منتج</p>
         </div>
         <Link
-          to="/admin/products/new"
+          to="/admin/products/$id"
+          params={{ id: "new" }}
           className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full inline-flex items-center gap-2 font-medium shadow-soft hover:opacity-90"
         >
           <Plus className="h-4 w-4" /> منتج جديد
