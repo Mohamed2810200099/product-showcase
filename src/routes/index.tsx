@@ -75,6 +75,7 @@ function HomePage() {
   return (
     <PublicLayout>
       <HeroPremium />
+      <ReferralSection />
 
       {/* TRUST BADGES */}
       <section className="border-y border-border bg-secondary/40">
