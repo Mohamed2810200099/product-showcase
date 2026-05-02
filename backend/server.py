@@ -15,10 +15,14 @@ from typing import List, Optional
 
 import bcrypt
 import jwt
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query, status, UploadFile, File, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query, status, UploadFile, File, Header, BackgroundTasks
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+from notifications import (
+    send_whatsapp, send_email, format_order_whatsapp, format_order_email,
+)
 
 
 # ----------------------------- DB ---------------------------------
@@ -596,7 +600,7 @@ def generate_order_number() -> str:
 
 
 @api_router.post("/orders")
-async def create_order(body: OrderCreate):
+async def create_order(body: OrderCreate, background: BackgroundTasks):
     if not body.items:
         raise HTTPException(status_code=400, detail="السلة فارغة")
 
@@ -677,6 +681,14 @@ async def create_order(body: OrderCreate):
             {"id": it["product_id"]},
             {"$inc": {"stock": -it["quantity"]}},
         )
+
+    # Send admin notifications in background (no impact on order response)
+    background.add_task(send_whatsapp, format_order_whatsapp(order_doc))
+    background.add_task(
+        send_email,
+        f"🎀 طلب جديد {order_doc['order_number']} — {order_doc['customer_name']}",
+        format_order_email(order_doc),
+    )
 
     return order_doc
 
@@ -798,9 +810,6 @@ DEFAULT_SETTINGS = {
         "whatsapp": True,
         "vodafone_cash": True,
         "instapay": True,
-        "stripe": False,
-        "paymob": False,
-        "fawry": False,
     },
     "free_delivery_threshold": 2000,
 }
@@ -884,20 +893,158 @@ async def dashboard_stats(user: dict = Depends(require_admin)):
 # ------------------------- Stripe ---------------------------------
 @api_router.post("/checkout/stripe")
 async def create_stripe_session(body: OrderCreate):
-    """Placeholder for Stripe Checkout. Returns mock URL.
-    To enable, set STRIPE_SECRET_KEY env and implement stripe.checkout.Session.create()."""
-    raise HTTPException(status_code=501, detail="الدفع الإلكتروني بالبطاقة غير مفعّل حاليًا. اختاري الدفع عند الاستلام أو عبر واتساب.")
+    """Placeholder for Stripe Checkout — not enabled."""
+    raise HTTPException(status_code=501, detail="الدفع الإلكتروني بالبطاقة غير مفعّل حاليًا.")
 
 
-# ------------------------- Paymob / Fawry placeholders -------------
-@api_router.post("/checkout/paymob")
-async def create_paymob_session(body: OrderCreate):
-    raise HTTPException(status_code=501, detail="Paymob غير مفعّل. الرجاء اختيار وسيلة دفع أخرى.")
+# ------------------------- Products Excel Import -------------------
+@api_router.get("/products/template/excel")
+async def products_excel_template(user: dict = Depends(require_admin)):
+    """Download an empty Excel template with correct headers."""
+    from openpyxl import Workbook
+    from io import BytesIO
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Products"
+    headers = [
+        "name", "name_ar", "brand", "category_slug",
+        "short_description", "description", "price", "old_price", "stock",
+        "benefits", "how_to_use", "ingredients", "suitable_for", "warnings",
+        "concerns", "images",
+        "is_active", "is_best_seller", "is_new_arrival", "is_offer", "is_limited",
+    ]
+    ws.append(headers)
+    # Example row
+    ws.append([
+        "Balea Shampoo",
+        "شامبو بليا",
+        "Balea",
+        "haircare",
+        "شامبو لطيف للشعر اليومي",
+        "شامبو يومي من بليا الألمانية...",
+        300, 380, 25,
+        "ينظف بلطف|يعطي لمعان|آمن على الألوان",
+        "ضعيه على شعر مبلل ودلكي ثم اشطفي.",
+        "Aqua, Sodium Laureth Sulfate, Panthenol",
+        "كل أنواع الشعر, شعر مصبوغ",
+        "استخدام خارجي فقط",
+        "damaged-hair|dry-hair",
+        "https://example.com/img1.jpg|https://example.com/img2.jpg",
+        "yes", "no", "yes", "yes", "no",
+    ])
+    # Style header row
+    from openpyxl.styles import Font, PatternFill
+    for c in ws[1]:
+        c.font = Font(bold=True, color="FFFFFF")
+        c.fill = PatternFill(start_color="B76E79", end_color="B76E79", fill_type="solid")
+    for col in ws.columns:
+        ws.column_dimensions[col[0].column_letter].width = 22
+    bio = BytesIO()
+    wb.save(bio)
+    bio.seek(0)
+    return Response(
+        content=bio.read(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=products_template.xlsx"},
+    )
 
 
-@api_router.post("/checkout/fawry")
-async def create_fawry_session(body: OrderCreate):
-    raise HTTPException(status_code=501, detail="فوري غير مفعّل. الرجاء اختيار وسيلة دفع أخرى.")
+def _parse_bool(v) -> bool:
+    s = str(v).strip().lower()
+    return s in ("1", "true", "yes", "y", "نعم", "صح", "on")
+
+
+def _parse_list(v) -> list:
+    if v is None or v == "":
+        return []
+    return [x.strip() for x in str(v).replace("\n", "|").split("|") if x.strip()]
+
+
+@api_router.post("/products/import/excel")
+async def import_products_excel(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    """Import products from an Excel file using the expected column headers."""
+    from openpyxl import load_workbook
+    from io import BytesIO
+    if not file.filename.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="الملف يجب أن يكون Excel (.xlsx)")
+    data = await file.read()
+    try:
+        wb = load_workbook(BytesIO(data))
+        ws = wb.active
+    except Exception:
+        raise HTTPException(status_code=400, detail="فشل قراءة الملف")
+
+    rows = list(ws.iter_rows(values_only=True))
+    if len(rows) < 2:
+        raise HTTPException(status_code=400, detail="الملف فارغ")
+    headers = [(h or "").strip() for h in rows[0]]
+    required = {"name", "brand", "category_slug", "price"}
+    if not required.issubset(set(headers)):
+        raise HTTPException(
+            status_code=400,
+            detail=f"الأعمدة الإلزامية ناقصة: {required - set(headers)}",
+        )
+
+    created = 0
+    updated = 0
+    skipped = []
+    for idx, row in enumerate(rows[1:], start=2):
+        record = dict(zip(headers, row))
+        if not record.get("name") or not record.get("brand") or not record.get("price"):
+            skipped.append({"row": idx, "reason": "بيانات إلزامية ناقصة"})
+            continue
+
+        try:
+            price = float(record.get("price") or 0)
+            old_price_raw = record.get("old_price")
+            old_price = float(old_price_raw) if old_price_raw not in (None, "", 0) else None
+            stock = int(record.get("stock") or 0)
+        except (ValueError, TypeError):
+            skipped.append({"row": idx, "reason": "قيمة رقمية غير صحيحة"})
+            continue
+
+        name = str(record["name"]).strip()
+        slug_base = slugify(name)
+        existing = await db.products.find_one({"name": name, "brand": str(record["brand"]).strip()}, {"_id": 0})
+
+        payload = {
+            "name": name,
+            "name_ar": str(record.get("name_ar") or "").strip(),
+            "brand": str(record["brand"]).strip(),
+            "category_slug": str(record["category_slug"]).strip(),
+            "concerns": _parse_list(record.get("concerns")),
+            "short_description": str(record.get("short_description") or "").strip(),
+            "description": str(record.get("description") or "").strip(),
+            "benefits": _parse_list(record.get("benefits")),
+            "how_to_use": str(record.get("how_to_use") or "").strip(),
+            "ingredients": str(record.get("ingredients") or "").strip(),
+            "suitable_for": _parse_list(record.get("suitable_for")),
+            "warnings": str(record.get("warnings") or "").strip(),
+            "price": price,
+            "old_price": old_price,
+            "stock": stock,
+            "images": _parse_list(record.get("images")),
+            "is_active": _parse_bool(record.get("is_active", "yes")),
+            "is_best_seller": _parse_bool(record.get("is_best_seller", "no")),
+            "is_new_arrival": _parse_bool(record.get("is_new_arrival", "no")),
+            "is_offer": _parse_bool(record.get("is_offer", "no")),
+            "is_limited": _parse_bool(record.get("is_limited", "no")),
+        }
+
+        if existing:
+            payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+            await db.products.update_one({"id": existing["id"]}, {"$set": payload})
+            updated += 1
+        else:
+            # ensure unique slug
+            slug = slug_base
+            while await db.products.find_one({"slug": slug}):
+                slug = f"{slug_base}-{str(uuid.uuid4())[:6]}"
+            prod = Product(**payload, slug=slug)
+            await db.products.insert_one(prod.model_dump())
+            created += 1
+
+    return {"created": created, "updated": updated, "skipped": skipped}
 
 
 # ------------------------- File Upload -----------------------------
