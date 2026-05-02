@@ -1,0 +1,144 @@
+{
+  "theme_and_archetype": {
+    "theme": "Light",
+    "archetype": "Archetype 1 (Organic & Earthy) mixed with Archetype 5 (Jewel & Luxury - Light Variant)",
+    "vibe": "Elegant, feminine, trustworthy, premium, fast, and highly conversion-focused.",
+    "core_concept": "The aesthetic relies on soft pastel tones (blush, nude, champagne) grounded by high-contrast charcoal for readability, giving a high-end editorial feel akin to top-tier cosmetics brands."
+  },
+  "colors": {
+    "backgrounds": {
+      "primary": "#FAFAFA",
+      "secondary": "#F9EAEA",
+      "accent": "#F2EAE0",
+      "elevated": "#FFFFFF"
+    },
+    "text": {
+      "primary": "#2C2C2C",
+      "secondary": "#595959",
+      "muted": "#8C8C8C",
+      "inverse": "#FAFAFA"
+    },
+    "brand": {
+      "primary": "#B76E79",
+      "primary_hover": "#A05A65",
+      "champagne": "#F7E7CE",
+      "gold_accent": "#D4AF37",
+      "success": "#4A7c59",
+      "whatsapp": "#25D366"
+    },
+    "borders": {
+      "default": "#EAEAEA",
+      "focus": "#B76E79"
+    }
+  },
+  "typography": {
+    "font_families": {
+      "arabic_display": "El Messiri, serif",
+      "arabic_body": "Tajawal, sans-serif",
+      "latin_display": "Cormorant Garamond, serif",
+      "latin_body": "Outfit, sans-serif"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-tight font-arabic_display",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-arabic_display",
+      "h3": "text-xl sm:text-2xl font-arabic_display",
+      "body": "text-base leading-relaxed font-arabic_body text-text-primary",
+      "small": "text-sm text-text-secondary font-arabic_body uppercase tracking-wider"
+    },
+    "rules": {
+      "anti_default": "Never use Inter or generic sans for headings. Headings must feel editorial and luxurious.",
+      "letter_spacing": "Use tight spacing for English display fonts, but natural/default spacing for Arabic to preserve legibility of connected scripts."
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing. Use 2-3x more spacing than typical to let the products breathe. p-8, p-12, gap-8.",
+    "bento_grid": "Use Mode A 'Tetris Grid' for the home page promotional sections (Asymmetrical, mixing large hero product shots with small feature cards).",
+    "product_grid": "Grid-cols-2 on mobile, grid-cols-3 or 4 on desktop. Gap-4 on mobile, Gap-8 on desktop.",
+    "rtl_specific": {
+      "logical_properties": "CRITICAL: Use Tailwind logical properties (ms-, me-, ps-, pe-, border-s) instead of physical ones (ml, mr, pl, pr).",
+      "alignment": "Text defaults to right-aligned. Use text-start to respect RTL direction natively."
+    }
+  },
+  "surfaces": {
+    "glassmorphism": {
+      "usage": "Sticky header, Mobile bottom bar, Filter drawers.",
+      "classes": "bg-white/70 backdrop-blur-xl border-b border-white/40 shadow-sm backdrop-saturate-150"
+    },
+    "product_cards": {
+      "usage": "Shop page items, best sellers.",
+      "classes": "bg-white border border-borders-default rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+    }
+  },
+  "components": {
+    "hero_section": "RTL-native. Split layout: Text/CTA on the right (start), overlapping a massive high-quality image of a model on the left (end). Use Framer Motion for floating cosmetic items over the image.",
+    "trust_badges": "Use react-fast-marquee with slow speed. Soft beige background, dark text. Icons for 'German Quality', 'Secure Payment', 'Fast Delivery'.",
+    "shop_filters": "Desktop: Left (or logical right in RTL) sidebar. Mobile: Shadcn Sheet (Drawer) sliding from the start (right).",
+    "product_gallery": "Use Swiper for image carousels. Enable React Zoom Pan Pinch for detail views.",
+    "checkout_stepper": "Clean vertical or horizontal stepper. Highly usable, minimal distractions. Arabic labels.",
+    "admin_dashboard": "Use Shadcn Sidebar, Recharts for analytics. Flat surfaces, compact grid (Mode B Control Room layout). Status badges in data tables.",
+    "floating_whatsapp": "Fixed bottom-start (left in RTL). Green, highly visible but elegant, soft shadow."
+  },
+  "motion_and_interaction": {
+    "libraries": ["framer-motion", "react-fast-marquee", "lenis"],
+    "patterns": {
+      "page_load": "Soft fade-in and slight slide-up (y: 20) for main elements.",
+      "hover_states": "Product cards lift slightly. Add-to-cart buttons smoothly transition bg color and reveal text/icon.",
+      "scrolling": "Lenis for smooth scroll. Parallax on hero backgrounds."
+    },
+    "accessibility": "Respect prefers-reduced-motion in all Framer Motion variants."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "Light/Thin weight where possible to maintain the elegant aesthetic."
+  },
+  "media": {
+    "hero_lifestyle": {
+      "url": "https://images.unsplash.com/photo-1622925492533-67508d80cc66",
+      "alt": "Elegant Arab woman wearing a scarf, lifestyle portrait",
+      "usage": "Main hero banner background or split image"
+    },
+    "soft_silk_background": {
+      "url": "https://images.unsplash.com/photo-1766713655634-22fb109f28a3",
+      "alt": "Soft pink silk fabric with subtle folds",
+      "usage": "Background for 'Why German DM' section or testimonials"
+    },
+    "cosmetics_flatlay": {
+      "url": "https://images.unsplash.com/photo-1762651356493-c492ca111a07",
+      "alt": "Assortment of luxury skincare products",
+      "usage": "Category headers, promo banners"
+    },
+    "serum_product": {
+      "url": "https://images.unsplash.com/photo-1773567844398-debd18f215b4",
+      "alt": "Minimalist serum bottles",
+      "usage": "Placeholder for DM serums (e.g., Balea)"
+    },
+    "cream_texture": {
+      "url": "https://images.pexels.com/photos/20469563/pexels-photo-20469563.jpeg",
+      "alt": "Macro texture of moisturizing cream",
+      "usage": "Ingredients or 'How to use' section background"
+    },
+    "dropper_bottles": {
+      "url": "https://images.unsplash.com/photo-1578083877418-fd77ebb175e8",
+      "alt": "Amber glass dropper bottles flatlay",
+      "usage": "Oils/Serums category image"
+    }
+  },
+  "testing_guidelines": {
+    "attributes": "CRITICAL: All interactive and key informational elements MUST include a data-testid attribute in kebab-case format.",
+    "examples": [
+      "data-testid=\"add-to-cart-button\"",
+      "data-testid=\"category-filter-checkbox\"",
+      "data-testid=\"whatsapp-contact-button\"",
+      "data-testid=\"checkout-submit-button\""
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Set <html dir=\"rtl\" lang=\"ar\"> in the root document.",
+    "Use Tailwind logical properties heavily (e.g., ps-4, ms-4) to ensure the layout flips perfectly without manual RTL overrides.",
+    "Implement Lenis for smooth scrolling on the customer-facing site (disable on admin dashboard).",
+    "Use Shadcn UI extensively for the Admin Dashboard and complex forms (Checkout), but strip Vercel-like styles and apply our soft border radii (rounded-2xl) and brand colors.",
+    "For the e-commerce frontend, build custom product cards and layout structures using pure Tailwind to achieve the elegant, asymmetrical bento grids.",
+    "Do NOT use generic placeholders (like via.placeholder.com). Use the provided Unsplash/Pexels URLs in the media section.",
+    "Add 'data-testid' to EVERY button, link, and form input."
+  ]
+}
