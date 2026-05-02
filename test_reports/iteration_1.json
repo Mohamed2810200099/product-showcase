@@ -1,0 +1,51 @@
+{
+  "summary": "Backend testing for The Girl House e-commerce API. 42/43 pytest tests passed (97.7%). All critical flows verified: auth+cookies, admin protection, product CRUD, filters/search/sort, order creation with COD/coupon/delivery-fee/stock-decrement, public order lookup, status transitions, dashboard stats, settings, coupon WELCOME10 (10% percent), Stripe placeholder 501. ONE critical bug: brute-force lockout (5-fail 429) does not trigger because request.client.host returns the load-balancer proxy IP and there are multiple proxy IPs in front of the backend, so the per-IP+email counter splits across proxies and never reaches 5.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "Brute-force lockout never triggers under real ingress. Identifier uses request.client.host which is the immediate proxy IP. Logs show login_attempts split across at least 2 proxy IPs (10.64.134.179 and 10.64.128.142) for the same email, so the count per record never reaches 5 -> 429 not returned. Security risk: unbounded password guessing.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "GET /api/products/dm-girl-house",
+        "issue": "Spec asked to verify slug 'dm-girl-house' but no such product is seeded (only 12 products with slugs like balea-hair-repair-mask, langhaarmadchen-hair-oil, etc). Returns 404. Likely a typo in the testing spec; functionally correct."
+      },
+      {
+        "endpoint": "Cookies",
+        "issue": "Auth cookies set with secure=False. Acceptable for preview but should be True in production (env-driven)."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix brute-force lockout: use X-Forwarded-For (first IP) or rate-limit by email only. Example: ip = request.headers.get('x-forwarded-for','').split(',')[0].strip() or request.client.host",
+    "Optionally seed a product with slug 'dm-girl-house' if the spec really wants it, or update the spec/test wording.",
+    "Set cookie secure=True when serving over HTTPS (env-controlled COOKIE_SECURE)."
+  ],
+  "critical_code_review_comments": [
+    "server.py is ~1140 lines - acceptable for MVP but consider splitting into routers (auth, products, orders, admin, settings) when feature set grows.",
+    "Brute-force identifier should not rely on request.client.host behind a reverse proxy.",
+    "delete_category/delete_product/delete_coupon return {'deleted': 0} with HTTP 200 even when nothing was deleted - prefer 404 for consistency.",
+    "create_order updates stock without checking availability; could go negative under concurrent orders. Consider atomic conditional update {'stock': {'$gte': qty}} and reject when match fails.",
+    "Coupon usage increment is not protected by an atomic check on max_uses (race condition).",
+    "JWT_SECRET fallback removed (good) but ADMIN_PASSWORD has a default 'Admin@123' fallback - production hardening should require it.",
+    "Pydantic models with extra='ignore' silently drop unknown fields - fine, but watch for typos."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "97.7% (42/43)", "frontend": "n/a (skipped per request)"},
+  "test_credentials": "admin@thegirlhouse.eg / Admin@123 - works",
+  "seed_data_creation": "Created TEST_-prefixed orders/products/coupons during tests; admin product was deleted; some TEST_ orders remain in DB (acceptable for further testing).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All endpoints in scope are wired correctly. Only failing test is TestBruteForce::test_zzz_brute_force_lockout - root cause is multi-proxy ingress masking the real client IP. Tests are idempotent (use unique uuids) and safe to re-run. To re-run: pytest /app/backend/tests/backend_test.py -v",
+  "rca of the issue": "Brute-force lockout: db.login_attempts is keyed by (proxy_ip + email). Kubernetes ingress load-balances incoming requests across multiple proxy pods, so the same client's failed attempts get distributed across multiple identifier records, none reaching the threshold of 5. Reproduction: hit /api/auth/login with the same wrong credentials 8+ times - status stays 401. DB inspection shows two records with counts 3 and 5 split across IPs 10.64.128.142 and 10.64.134.179. Mitigation: derive client IP from X-Forwarded-For header (first hop) or simply key the counter by email only (or both)."
+}
