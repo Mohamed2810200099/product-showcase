@@ -1,15 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Search, Menu, X, Heart } from "lucide-react";
+import { ShoppingBag, Search, Menu, User } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import logo from "@/assets/logo.png";
 
 const navItems = [
-  { to: "/", label: "الرئيسية" },
-  { to: "/shop", label: "المتجر" },
-  { to: "/shop", label: "العناية بالشعر", search: { category: "hair-care" } },
-  { to: "/shop", label: "العناية بالبشرة", search: { category: "skin-care" } },
-  { to: "/shop", label: "المكياج", search: { category: "makeup" } },
+  { to: "/", label: "Home" },
+  { to: "/shop", label: "Shop" },
+  { to: "/shop", label: "Hair Care", search: { category: "hair-care" } },
+  { to: "/shop", label: "Skincare", search: { category: "skin-care" } },
+  { to: "/shop", label: "Makeup", search: { category: "makeup" } },
+  { to: "/shop", label: "Offers" },
+  { to: "/shop", label: "Contact" },
 ] as const;
 
 export function Header() {
@@ -17,7 +20,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+    <header dir="ltr" className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/60 shadow-[0_2px_20px_-10px_rgba(217,108,157,0.2)]">
       <div className="container mx-auto flex items-center justify-between gap-4 px-4 h-16 sm:h-20">
         {/* Mobile menu */}
         <Sheet open={open} onOpenChange={setOpen}>
@@ -50,26 +53,28 @@ export function Header() {
         </Sheet>
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="h-10 w-10 rounded-full bg-gradient-blush flex items-center justify-center text-primary-foreground font-display text-lg shadow-soft group-hover:scale-105 transition">
-            G
-          </div>
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src={logo}
+            alt="The Girl House"
+            className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover ring-1 ring-white shadow-[0_6px_18px_-6px_rgba(217,108,157,0.4)] group-hover:scale-105 transition"
+          />
           <div className="hidden sm:block leading-tight">
-            <div className="font-display text-lg sm:text-xl text-primary font-semibold">The Girl House</div>
-            <div className="text-[10px] sm:text-xs text-muted-foreground tracking-widest">ALEMANIA · DM · EGYPT</div>
+            <div className="font-display text-lg sm:text-xl text-[#3A2430] font-semibold">The Girl House</div>
+            <div className="text-[10px] sm:text-[11px] text-[#3A2430]/55 tracking-[0.18em]">Curated German Beauty • Egypt</div>
           </div>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 mx-auto">
-          {navItems.slice(0, 5).map((it, i) => (
+          {navItems.map((it, i) => (
             <Link
               key={i}
               to={it.to}
               // @ts-expect-error optional search
               search={it.search}
-              className="px-3 py-2 text-sm font-medium hover:text-primary transition relative after:absolute after:bottom-0 after:right-1/2 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-1/2 hover:after:right-1/4"
-              activeProps={{ className: "text-primary" }}
+              className="px-3 py-2 text-sm font-medium text-[#3A2430]/80 hover:text-[#D96C9D] transition relative after:absolute after:bottom-1 after:left-1/2 after:h-0.5 after:w-0 after:-translate-x-1/2 after:bg-[#D96C9D] after:transition-all hover:after:w-1/2"
+              activeProps={{ className: "text-[#D96C9D]" }}
             >
               {it.label}
             </Link>
@@ -78,13 +83,16 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <button aria-label="بحث" className="p-2 rounded-full hover:bg-accent transition hidden sm:block">
-            <Search className="h-5 w-5" />
+          <button aria-label="Search" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+            <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
-          <Link to="/cart" className="relative p-2 rounded-full hover:bg-accent transition" aria-label="السلة">
-            <ShoppingBag className="h-5 w-5" />
+          <Link to="/admin/login" aria-label="Account" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+            <User className="h-5 w-5 text-[#3A2430]" />
+          </Link>
+          <Link to="/cart" className="relative p-2 rounded-full hover:bg-[#F9EEF3] transition" aria-label="Cart">
+            <ShoppingBag className="h-5 w-5 text-[#3A2430]" />
             {count > 0 && (
-              <span className="absolute -top-0.5 -left-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 bg-[#D96C9D] text-white text-[10px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">
                 {count}
               </span>
             )}
