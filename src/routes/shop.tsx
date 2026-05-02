@@ -61,7 +61,7 @@ function ShopPage() {
   });
 
   const setCategory = (slug?: string) =>
-    navigate({ search: (s) => ({ ...s, category: slug }) });
+    navigate({ search: (s: any) => ({ ...s, category: slug }) });
 
   const Filters = (
     <aside className="bg-card rounded-2xl border border-border p-5 space-y-5">
@@ -115,7 +115,7 @@ function ShopPage() {
           </button>
           <select
             value={search.sort ?? "new"}
-            onChange={(e) => navigate({ search: (s) => ({ ...s, sort: e.target.value as any }) })}
+            onChange={(e) => navigate({ search: (s: any) => ({ ...s, sort: e.target.value as any }) })}
             className="bg-card border border-border rounded-full px-4 py-2 text-sm"
           >
             <option value="new">الأحدث</option>
@@ -130,7 +130,7 @@ function ShopPage() {
           <div className="hidden md:flex justify-end mb-4">
             <select
               value={search.sort ?? "new"}
-              onChange={(e) => navigate({ search: (s) => ({ ...s, sort: e.target.value as any }) })}
+              onChange={(e) => navigate({ search: (s: any) => ({ ...s, sort: e.target.value as any }) })}
               className="bg-card border border-border rounded-full px-4 py-2 text-sm"
             >
               <option value="new">الأحدث</option>
