@@ -4,7 +4,7 @@ import { Sparkles, Truck, ShieldCheck, Award, Heart, ArrowLeft, Star, Flame } fr
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
-import { useBrand } from "@/hooks/use-brand";
+
 import { HeroPremium } from "@/components/HeroPremium";
 
 export const Route = createFileRoute("/")({
@@ -26,7 +26,7 @@ const trustBadges = [
 ];
 
 function HomePage() {
-  const brand = useBrand();
+  
 
   const { data: featured = [] } = useQuery({
     queryKey: ["featured-products"],
