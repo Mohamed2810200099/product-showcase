@@ -24,12 +24,12 @@ export function Header() {
       <div className="container mx-auto flex items-center justify-between gap-4 px-4 h-16 sm:h-20">
         {/* Mobile menu */}
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger className="md:hidden p-2 -mx-2 rounded-md hover:bg-accent" aria-label="القائمة">
+          <SheetTrigger className="md:hidden p-2 -mx-2 rounded-md hover:bg-[#F9EEF3]" aria-label="Menu">
             <Menu className="h-5 w-5" />
           </SheetTrigger>
-          <SheetContent side="right" className="w-72">
+          <SheetContent side="left" className="w-72">
             <SheetHeader>
-              <SheetTitle className="font-display text-2xl text-primary">The Girl House</SheetTitle>
+              <SheetTitle className="font-display text-2xl text-[#D96C9D]">The Girl House</SheetTitle>
             </SheetHeader>
             <nav className="mt-6 flex flex-col gap-1">
               {navItems.map((it, i) => (
@@ -39,14 +39,14 @@ export function Header() {
                   // @ts-expect-error optional search
                   search={it.search}
                   onClick={() => setOpen(false)}
-                  className="py-3 px-3 rounded-lg text-sm hover:bg-accent transition"
+                  className="py-3 px-3 rounded-lg text-sm hover:bg-[#F9EEF3] transition"
                 >
                   {it.label}
                 </Link>
               ))}
               <div className="border-t border-border my-2" />
-              <Link to="/admin/login" onClick={() => setOpen(false)} className="py-3 px-3 rounded-lg text-sm text-muted-foreground hover:bg-accent">
-                دخول الإدارة
+              <Link to="/admin/login" onClick={() => setOpen(false)} className="py-3 px-3 rounded-lg text-sm text-muted-foreground hover:bg-[#F9EEF3]">
+                Admin
               </Link>
             </nav>
           </SheetContent>
