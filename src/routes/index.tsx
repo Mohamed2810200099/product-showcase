@@ -6,6 +6,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
 
 import { HeroPremium } from "@/components/HeroPremium";
+import { ReferralSection } from "@/components/ReferralSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
