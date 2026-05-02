@@ -314,85 +314,19 @@ export function HeroPremium() {
           </motion.div>
 
           {/* Floating products */}
-          {products.map((p, i) => {
-            const isFocus = i === focus;
-            const isHover = hover === i;
-            const active = isHover || isFocus;
-            const px = useTransform(sx, (v) => v * p.parallax);
-            const py = useTransform(sy, (v) => v * p.parallax);
-            const rx = useTransform(sy, (v) => v * -6);
-            const ry = useTransform(sx, (v) => v * 6);
-
-            return (
-              <motion.div
-                key={p.src}
-                className={`absolute ${p.className}`}
-                onMouseEnter={() => setHover(i)}
-                onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-                initial={{ opacity: 0, scale: 0.6, y: 30 }}
-                animate={{
-                  opacity: active ? 1 : 0.92,
-                  scale: active ? 1.1 : 1,
-                  y: 0,
-                }}
-                transition={{
-                  opacity: { duration: 0.7, delay: p.delay },
-                  scale: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
-                  y: { duration: 0.7, delay: p.delay },
-                }}
-                style={{
-                  x: px,
-                  y: py,
-                  rotateX: rx,
-                  rotateY: ry,
-                  transformStyle: "preserve-3d",
-                  zIndex: active ? 30 : 10,
-                }}
-              >
-                <motion.div
-                  animate={
-                    reduce
-                      ? undefined
-                      : { y: [0, -8, 0], rotate: [-1, 1, -1] }
-                  }
-                  transition={{
-                    duration: 7 + i,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: i * 0.4,
-                  }}
-                  className="relative"
-                >
-                  {/* Halo */}
-                  <motion.div
-                    aria-hidden
-                    className={`absolute -inset-8 rounded-full bg-gradient-to-br ${p.glow} blur-2xl`}
-                    animate={{ opacity: active ? 0.95 : 0.55 }}
-                    transition={{ duration: 0.6 }}
-                  />
-                  {/* Glass card */}
-                  <div className="relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3">
-                    <img
-                      src={p.src}
-                      alt={p.label}
-                      loading="lazy"
-                      className="relative w-full h-auto object-contain drop-shadow-[0_18px_30px_rgba(58,36,48,0.25)]"
-                    />
-                  </div>
-                  <motion.span
-                    animate={{
-                      opacity: active ? 1 : 0.85,
-                      y: active ? 0 : 2,
-                    }}
-                    className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 backdrop-blur px-3 py-1 text-[10px] sm:text-xs font-semibold text-[#3A2430] shadow-[0_6px_18px_-6px_rgba(58,36,48,0.3)] border border-white"
-                  >
-                    {p.accent && <Sparkles className="inline h-3 w-3 mr-1 text-[#D96C9D]" />}
-                    {p.label}
-                  </motion.span>
-                </motion.div>
-              </motion.div>
-            );
-          })}
+          {products.map((p, i) => (
+            <FloatingProduct
+              key={p.src}
+              p={p}
+              index={i}
+              sx={sx}
+              sy={sy}
+              active={hover === i || focus === i}
+              onEnter={() => setHover(i)}
+              onLeave={() => setHover((h) => (h === i ? null : h))}
+              reduce={!!reduce}
+            />
+          ))}
 
           {/* Glossy floor reflection */}
           <div className="absolute bottom-0 inset-x-10 h-12 rounded-[100%] bg-gradient-to-b from-white/60 to-transparent blur-xl" />
