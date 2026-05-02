@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, Truck, ShieldCheck, Award, MessageCircle, Heart, ArrowLeft, Star, Flame } from "lucide-react";
+import { Sparkles, Truck, ShieldCheck, Award, Heart, ArrowLeft, Star, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
-import { useBrand } from "@/hooks/use-brand";
+
+import { HeroPremium } from "@/components/HeroPremium";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,7 +26,7 @@ const trustBadges = [
 ];
 
 function HomePage() {
-  const brand = useBrand();
+  
 
   const { data: featured = [] } = useQuery({
     queryKey: ["featured-products"],
@@ -72,44 +73,7 @@ function HomePage() {
 
   return (
     <PublicLayout>
-      {/* HERO */}
-      <section className="relative bg-gradient-hero overflow-hidden">
-        <div className="container mx-auto px-4 py-16 sm:py-24 md:py-32 grid md:grid-cols-2 gap-10 items-center">
-          <div className="space-y-6 text-center md:text-right relative z-10">
-            <span className="inline-flex items-center gap-2 bg-background/70 backdrop-blur px-4 py-1.5 rounded-full text-xs font-medium text-primary border border-primary/20">
-              <Sparkles className="h-3.5 w-3.5" /> منتجات أصلية من ألمانيا 🇩🇪
-            </span>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-foreground">
-              جمالك الألماني<br />
-              <span className="text-primary">في انتظارك</span>
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
-              اكتشفي تشكيلة فخمة من منتجات DM الألمانية الأصلية — عناية، مكياج، وفخامة بأسعار تستحقينها.
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <Link to="/shop" className="bg-primary text-primary-foreground px-7 py-3.5 rounded-full font-medium hover:opacity-90 transition shadow-elegant inline-flex items-center gap-2">
-                تسوقي الآن <ArrowLeft className="h-4 w-4" />
-              </Link>
-              <a
-                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent("مرحباً، عايزة أعرف عروض اليوم 💕")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-[#25D366] text-white px-7 py-3.5 rounded-full font-medium hover:opacity-90 transition shadow-soft inline-flex items-center gap-2"
-              >
-                <MessageCircle className="h-4 w-4" /> اطلبي عبر واتساب
-              </a>
-            </div>
-          </div>
-          <div className="relative aspect-square max-w-md mx-auto md:mx-0">
-            <div className="absolute inset-0 bg-gradient-gold rounded-full blur-3xl opacity-40 animate-float-soft" />
-            <img
-              src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=900&auto=format&fit=crop"
-              alt="منتجات تجميل ألمانية فاخرة"
-              className="relative rounded-3xl object-cover w-full h-full shadow-elegant"
-            />
-          </div>
-        </div>
-      </section>
+      <HeroPremium />
 
       {/* TRUST BADGES */}
       <section className="border-y border-border bg-secondary/40">
