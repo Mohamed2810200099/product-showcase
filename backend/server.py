@@ -1006,7 +1006,24 @@ async def approve_review(rid: str, user: dict = Depends(require_admin)):
 
 @api_router.delete("/admin/reviews/{rid}")
 async def delete_review(rid: str, user: dict = Depends(require_admin)):
+    existing = await db.reviews.find_one({"id": rid}, {"_id": 0})
     res = await db.reviews.delete_one({"id": rid})
+    # If an approved review was deleted, recalc product aggregates
+    if existing and existing.get("is_approved"):
+        approved = await db.reviews.find(
+            {"product_id": existing["product_id"], "is_approved": True}, {"_id": 0, "rating": 1}
+        ).to_list(1000)
+        if approved:
+            avg = round(sum(r["rating"] for r in approved) / len(approved), 1)
+            await db.products.update_one(
+                {"id": existing["product_id"]},
+                {"$set": {"rating": avg, "reviews_count": len(approved)}},
+            )
+        else:
+            await db.products.update_one(
+                {"id": existing["product_id"]},
+                {"$set": {"rating": 5.0, "reviews_count": 0}},
+            )
     return {"deleted": res.deleted_count}
 
 

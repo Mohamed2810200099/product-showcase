@@ -1,31 +1,49 @@
 # The Girl House — PRD
 
 ## Original Problem Statement
-Build a premium, modern, animated e-commerce website for an Egypt-based beauty and cosmetics brand called "The Girl House". Sells authentic Germany-sourced (German DM) beauty & cosmetics products (haircare, skincare, masks, oils, serums, creams, shampoos, conditioners, bundles). Audience: women in Egypt 18–45. Website must be Arabic-first (RTL), elegant, feminine, trustworthy, premium, fast, conversion-focused, mobile-first. Currency EGP. Full shop with Home, Shop, Product details, Cart, Checkout, Order success, Admin login, Admin dashboard (products/orders/coupons/settings).
+Build a premium, modern, animated e-commerce website for an Egypt-based beauty and cosmetics brand called "The Girl House". Sells authentic Germany-sourced (German DM) beauty & cosmetics products. Audience: women in Egypt 18–45. Arabic-first (RTL), elegant, feminine, trustworthy, mobile-first. Currency EGP.
 
 ## Architecture
-- **Backend:** FastAPI + MongoDB (motor), JWT auth (bcrypt, httpOnly cookies), all routes under /api.
-- **Frontend:** React 19 + Tailwind + shadcn/ui + framer-motion + sonner toasts. Arabic RTL.
-- **Design:** El Messiri (Arabic display) + Cormorant Garamond (Latin display) + Tajawal (body). Blush/nude/champagne/gold palette on light background. Glassmorphism header. No generic AI-slop gradients.
-- **Data:** Seeded on startup — 16 categories (7 shop + 9 concerns), 12 sample products (Balea, Langhaarmädchen, Plex Care, Alverde, DM Selection, The Girl House bundles), default settings, WELCOME10 coupon.
+- **Backend:** FastAPI + MongoDB (motor), JWT auth (bcrypt, httpOnly cookies), Emergent Object Storage for images, all routes under /api.
+- **Frontend:** React 19 + Tailwind + shadcn/ui + framer-motion + sonner toasts. Arabic RTL. El Messiri + Cormorant Garamond + Tajawal fonts. Blush/nude/champagne/gold palette.
 
 ## Admin Credentials
 - Email: `admin@thegirlhouse.eg`
 - Password: `Admin@123`
 
-## What's Implemented (2026-05-02)
-- Full storefront: Home (hero + trust badges + categories + best sellers + new arrivals + offers + "why German DM" + testimonials + Instagram CTA + newsletter capture), Shop with filters (category, concern, offer/best/new, search, sort), Product Details (gallery, benefits, how-to-use, ingredients, delivery, FAQ, related), Cart page + Cart drawer, Multi-field Checkout (Egyptian governorates, COD/WhatsApp/Vodafone Cash/InstaPay/Stripe placeholder, coupon), Order Success.
-- Floating WhatsApp button, mobile bottom bar, announcement marquee, sticky header with search.
-- Admin: login, dashboard (sales chart 7d, stat cards, low-stock, recent orders), Products CRUD (image URLs, concerns, badges), Orders list with status flow (new→confirmed→preparing→shipped→delivered/cancelled), Coupons, Settings (branding, socials, delivery fees per governorate, payment methods toggle).
-- Stripe endpoint returns 501 placeholder — structure in place for future enablement.
-- Public endpoint `/api/orders/public/{order_number}` for order success page.
+## Brand Info (live in DB settings)
+- WhatsApp: **201554087371**
+- Instagram: https://www.instagram.com/thegirlhouse_eg
+- TikTok: https://www.tiktok.com/@thegirlhouse_eg
+- Facebook: https://www.facebook.com/share/18hzaYDPkr/
+- Announcement: "منتجات DM الألمانية وصلت مصر أخيرًا 🇩🇪✨ الكمية محدودة — اطلبي قبل النفاد"
+
+## Phase 1 — MVP (2026-05-02)
+- Full storefront (Home, Shop with filters, Product Details, Cart, Checkout, Order Success).
+- Admin login + dashboard + products CRUD + orders + coupons + settings.
+- 12 seeded products, 16 categories, WELCOME10 coupon.
+- Stripe placeholder (501).
+- 43/43 backend tests pass.
+
+## Phase 2 — Same day (2026-05-02)
+- **Real image upload** via Emergent Object Storage (JPG/PNG/WebP, 6MB max). Drag-and-drop `ImageUploader` with reorder + delete.
+- **Reviews system**: public submission → admin approval → auto-calculated product rating & reviews_count. `AdminReviews` page.
+- **Testimonials CRUD**: `AdminTestimonials` admin page, 5 seeded. Home consumes `/api/testimonials`.
+- **Admin password change** from Settings with current-password verification + 8-char min.
+- **WhatsApp admin notification** on order success — auto-opens wa.me with full order details to brand WhatsApp.
+- **Paymob / Fawry** placeholder endpoints (501); toggles exist in settings.
+- **Home enhancements**: "اطلبي عبر واتساب" hero CTA, 5-badge trust strip, **Limited Stock urgency section**, **Routine section** (3 routines, no medical claims), dynamic testimonials.
+- **Brand settings** loaded from user's real accounts.
+- **Deleting approved review** recalculates product aggregates.
+- Phase 1 43/43 + Phase 2 27/27 = 70/70 backend tests pass.
 
 ## Prioritized Backlog
-- **P1** — Stripe live integration (requires business Stripe account in supported country).
-- **P1** — Testimonials and hero banners management from admin (currently hardcoded testimonials).
-- **P2** — Real product reviews (users can review after purchase).
-- **P2** — Email/SMS order notifications (Twilio/SendGrid).
-- **P2** — Paymob / Fawry Egyptian gateway integration.
-- **P2** — Image upload via object storage (currently uses URLs).
-- **P3** — Wishlist / favorites persistence.
+- **P1** — Paymob live integration (needs Paymob API key, Integration IDs, iframe ID, HMAC secret).
+- **P1** — Fawry live integration (needs Merchant Code, Security Key).
+- **P1** — Stripe live integration (needs business Stripe account in supported country).
+- **P2** — Twilio server-side WhatsApp notifications (replaces client-side wa.me).
+- **P2** — SendGrid email notifications for orders.
+- **P2** — Excel/CSV product bulk import.
+- **P3** — Rate-limit public review submissions (spam protection).
+- **P3** — Wishlist / favorites.
 - **P3** — Multi-admin roles.
