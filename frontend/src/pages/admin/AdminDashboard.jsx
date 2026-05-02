@@ -4,7 +4,7 @@ import {
   TrendingUp, ShoppingBag, Package, Clock, AlertTriangle, ArrowUpRight,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { api, formatEGP, STATUS_LABELS, STATUS_COLORS } from "@/lib/api";
+import { api, formatEGP, STATUS_LABELS, STATUS_COLORS, resolveImg } from "@/lib/api";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
             ) : (
               stats.low_stock.map((p) => (
                 <div key={p.id} className="flex items-center gap-3 text-sm">
-                  <img src={p.images?.[0]} alt="" className="w-10 h-10 rounded-xl object-cover bg-blush-50 flex-shrink-0" />
+                  <img src={resolveImg(p.images?.[0])} alt="" className="w-10 h-10 rounded-xl object-cover bg-blush-50 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="line-clamp-1 text-ink">{p.name_ar || p.name}</p>
                     <p className="text-rose-600 text-xs font-semibold">باقي {p.stock} قطع</p>

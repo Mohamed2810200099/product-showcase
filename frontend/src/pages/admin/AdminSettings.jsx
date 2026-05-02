@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, KeyRound } from "lucide-react";
 import { api, EGYPT_GOVERNORATES, formatApiErrorDetail } from "@/lib/api";
 import { toast } from "sonner";
 
 const AdminSettings = () => {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [pwForm, setPwForm] = useState({ current_password: "", new_password: "", confirm: "" });
+  const [pwSaving, setPwSaving] = useState(false);
 
   const load = async () => {
     const { data } = await api.get("/settings");
@@ -40,6 +42,31 @@ const AdminSettings = () => {
 
   const setPayment = (m, val) =>
     setForm((f) => ({ ...f, payment_methods: { ...f.payment_methods, [m]: val } }));
+
+  const changePassword = async () => {
+    if (!pwForm.current_password || !pwForm.new_password) {
+      return toast.error("كل الحقول مطلوبة");
+    }
+    if (pwForm.new_password.length < 8) {
+      return toast.error("كلمة السر الجديدة يجب أن تكون 8 أحرف على الأقل");
+    }
+    if (pwForm.new_password !== pwForm.confirm) {
+      return toast.error("تأكيد كلمة السر غير مطابق");
+    }
+    setPwSaving(true);
+    try {
+      await api.post("/auth/change-password", {
+        current_password: pwForm.current_password,
+        new_password: pwForm.new_password,
+      });
+      toast.success("تم تغيير كلمة السر بنجاح");
+      setPwForm({ current_password: "", new_password: "", confirm: "" });
+    } catch (e) {
+      toast.error(formatApiErrorDetail(e.response?.data?.detail));
+    } finally {
+      setPwSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-5 max-w-4xl" data-testid="admin-settings-page">
@@ -144,6 +171,56 @@ const AdminSettings = () => {
           حفظ الإعدادات
         </button>
       </div>
+
+      {/* Password Change */}
+      <Card title="تغيير كلمة سر الأدمن">
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl mb-4">
+          <KeyRound className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            غيّري كلمة السر الافتراضية لحماية حسابك. الحد الأدنى: 8 أحرف.
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Field label="كلمة السر الحالية">
+            <input
+              type="password"
+              className="input"
+              value={pwForm.current_password}
+              onChange={(e) => setPwForm({ ...pwForm, current_password: e.target.value })}
+              data-testid="pw-current"
+            />
+          </Field>
+          <Field label="كلمة السر الجديدة">
+            <input
+              type="password"
+              className="input"
+              value={pwForm.new_password}
+              onChange={(e) => setPwForm({ ...pwForm, new_password: e.target.value })}
+              data-testid="pw-new"
+            />
+          </Field>
+          <Field label="تأكيد كلمة السر الجديدة">
+            <input
+              type="password"
+              className="input"
+              value={pwForm.confirm}
+              onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })}
+              data-testid="pw-confirm"
+            />
+          </Field>
+        </div>
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={changePassword}
+            disabled={pwSaving}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-blush-500 text-white font-semibold hover:bg-blush-600 transition-colors disabled:opacity-50 text-sm"
+            data-testid="change-password-btn"
+          >
+            {pwSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+            تغيير كلمة السر
+          </button>
+        </div>
+      </Card>
 
       <style>{`
         .input {

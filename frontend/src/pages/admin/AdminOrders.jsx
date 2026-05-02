@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, Eye, X, Loader2, Phone, MapPin, CreditCard } from "lucide-react";
-import { api, formatEGP, STATUS_LABELS, STATUS_COLORS } from "@/lib/api";
+import { api, formatEGP, STATUS_LABELS, STATUS_COLORS, resolveImg } from "@/lib/api";
 import { toast } from "sonner";
 
 const STATUS_FLOW = ["new", "confirmed", "preparing", "shipped", "delivered", "cancelled"];
@@ -181,7 +181,7 @@ const AdminOrders = () => {
                 <div className="space-y-2">
                   {open.items.map((i, idx) => (
                     <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-blush-100 rounded-2xl">
-                      <img src={i.image} alt="" className="w-12 h-12 rounded-xl object-cover bg-blush-50" />
+                      <img src={resolveImg(i.image)} alt="" className="w-12 h-12 rounded-xl object-cover bg-blush-50" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-ink line-clamp-1">{i.name}</p>
                         <p className="text-[11px] text-ink-muted">{i.brand}</p>

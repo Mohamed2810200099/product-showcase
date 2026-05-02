@@ -1,0 +1,53 @@
+{
+  "summary": "Phase 2 backend testing for The Girl House. 27/27 pytest tests passed (100%). Verified: real Object Storage upload (PNG OK, non-image rejected, >6MB rejected, unauthorized rejected), public file serving with correct Content-Type, change-password (short/wrong/success + revert flow), reviews CRUD with approval flow auto-recalculating product rating & reviews_count, testimonials public-vs-admin filter (5 seeded) + create/update/delete, Paymob/Fawry/Stripe all return 501, and existing flows (login, products, settings, stats, coupons) still work. Admin password verified back to Admin@123 after change-password test.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "[Carry-over from iter1] Brute-force lockout still relies on x-forwarded-for; not re-tested in Phase 2. Already documented and acknowledged."
+      },
+      {
+        "endpoint": "PUT /api/admin/testimonials/{tid}",
+        "issue": "Uses TestimonialCreate (full body) so partial updates (e.g., toggling is_active only) require resending the full object. Acceptable but consider a TestimonialUpdate model with optional fields for parity with products/settings."
+      },
+      {
+        "endpoint": "DELETE /api/admin/testimonials/{tid} & /api/admin/reviews/{rid}",
+        "issue": "Returns 200 with {'deleted':0} on missing id instead of 404 (consistent with categories/coupons; cosmetic)."
+      },
+      {
+        "endpoint": "GET /api/files/{path}",
+        "issue": "If the file exists in object storage but no db.files record, response still 200 (record is queried with find_one but only used to override media_type). Not a bug, just note."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_phase2.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [
+    "(carry-over) Fix brute-force lockout to use X-Forwarded-For first IP or rate-limit by email only.",
+    "Optional: switch DELETE handlers (testimonials/reviews/categories/coupons/products) to return 404 when nothing was deleted, for API consistency.",
+    "Optional: add TestimonialUpdate (all-optional) for partial PATCH-style updates."
+  ],
+  "critical_code_review_comments": [
+    "server.py is now ~1460 lines — split into routers (auth, products, orders, reviews, testimonials, files) when convenient.",
+    "global storage_key in init_storage() is fine for single-process uvicorn; under multi-worker would need a shared cache. Currently OK with re-init on 403.",
+    "approve_review correctly recalculates rating/reviews_count; delete_review does NOT recalc — so deleting an approved review leaves stale aggregates on the product. Suggest mirroring the recalc logic in delete_review when the deleted review was is_approved=True.",
+    "Upload reads the entire file into memory before size check (await file.read()) — for 6MB cap this is fine, but if cap grows consider streaming and aborting early.",
+    "Public review submission has no rate limiting / spam protection — spam risk on a public endpoint.",
+    "/api/files/{path:path} relies on Emergent storage round-trip for every request and has Cache-Control 7d; consider redirecting to a signed/CDN URL if the storage service supports it to reduce backend bandwidth."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_phase2.py"
+  ],
+  "success_rate": {"backend": "100% (27/27 Phase 2)", "frontend": "n/a (skipped per request)"},
+  "test_credentials": "admin@thegirlhouse.eg / Admin@123 - verified working AFTER change-password revert flow",
+  "seed_data_creation": "Tests created and cleaned up: 1 review (TEST_Reviewer) — approved then deleted; 1 testimonial (TEST_Inactive→TEST_Updated) — created/updated/deleted. Admin password temporarily changed and reverted. No residual TEST_ data from this run.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All Phase 2 endpoints pass. Use /app/backend/tests/test_phase2.py for regression. Admin creds are Admin@123. The minor issue about delete_review not recalculating product rating is the main correctness gap worth fixing if Phase 3 needs it. backend_test.py from iter1 still has the brute-force test as the only pre-existing failure.",
+  "rca of the issue": "n/a — no blocking issues this iteration."
+}

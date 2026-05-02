@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Plus, Minus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { formatEGP } from "@/lib/api";
+import { formatEGP, resolveImg } from "@/lib/api";
 
 const Cart = () => {
   const { items, updateQty, removeItem, subtotal } = useCart();
@@ -51,7 +51,7 @@ const Cart = () => {
                 to={`/product/${item.slug}`}
                 className="flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden bg-blush-50"
               >
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                <img src={resolveImg(item.image)} alt={item.name} className="w-full h-full object-cover" />
               </Link>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] text-champagne-400 tracking-wider uppercase font-latin">

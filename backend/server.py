@@ -9,12 +9,13 @@ import logging
 import uuid
 import re
 import secrets
+import requests
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
 import bcrypt
 import jwt
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query, status
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query, status, UploadFile, File, Header
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
@@ -105,6 +106,69 @@ async def require_admin(user: dict = Depends(get_current_user)) -> dict:
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="صلاحيات غير كافية")
     return user
+
+
+# -------------------- Object Storage (Emergent) ---------------------
+STORAGE_URL = "https://integrations.emergentagent.com/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+APP_NAME = os.environ.get("APP_NAME", "thegirlhouse")
+storage_key = None
+
+MIME_TYPES = {
+    "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
+    "gif": "image/gif", "webp": "image/webp",
+}
+
+
+def init_storage():
+    global storage_key
+    if storage_key:
+        return storage_key
+    if not EMERGENT_KEY:
+        raise RuntimeError("EMERGENT_LLM_KEY not set")
+    resp = requests.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30)
+    resp.raise_for_status()
+    storage_key = resp.json()["storage_key"]
+    return storage_key
+
+
+def put_object(path: str, data: bytes, content_type: str) -> dict:
+    key = init_storage()
+    resp = requests.put(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key, "Content-Type": content_type},
+        data=data, timeout=120,
+    )
+    if resp.status_code == 403:
+        # re-init on auth failure
+        global storage_key
+        storage_key = None
+        key = init_storage()
+        resp = requests.put(
+            f"{STORAGE_URL}/objects/{path}",
+            headers={"X-Storage-Key": key, "Content-Type": content_type},
+            data=data, timeout=120,
+        )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_object(path: str) -> tuple:
+    key = init_storage()
+    resp = requests.get(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key}, timeout=60,
+    )
+    if resp.status_code == 403:
+        global storage_key
+        storage_key = None
+        key = init_storage()
+        resp = requests.get(
+            f"{STORAGE_URL}/objects/{path}",
+            headers={"X-Storage-Key": key}, timeout=60,
+        )
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
 
 
 # ------------------------- Models ---------------------------------
@@ -293,6 +357,50 @@ class SettingsUpdate(BaseModel):
     delivery_fees: Optional[dict] = None  # governorate -> fee
     payment_methods: Optional[dict] = None  # method -> enabled bool
     free_delivery_threshold: Optional[float] = None
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class ReviewCreate(BaseModel):
+    product_id: str
+    customer_name: str
+    rating: int = Field(ge=1, le=5)
+    comment: str = ""
+
+
+class Review(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str
+    customer_name: str
+    rating: int
+    comment: str = ""
+    is_approved: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class TestimonialCreate(BaseModel):
+    name: str
+    city: str = ""
+    rating: int = Field(ge=1, le=5, default=5)
+    text: str
+    is_active: bool = True
+    order: int = 0
+
+
+class Testimonial(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    city: str = ""
+    rating: int = 5
+    text: str
+    is_active: bool = True
+    order: int = 0
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 # ------------------------- Slug helper ---------------------------
@@ -781,6 +889,163 @@ async def create_stripe_session(body: OrderCreate):
     raise HTTPException(status_code=501, detail="الدفع الإلكتروني بالبطاقة غير مفعّل حاليًا. اختاري الدفع عند الاستلام أو عبر واتساب.")
 
 
+# ------------------------- Paymob / Fawry placeholders -------------
+@api_router.post("/checkout/paymob")
+async def create_paymob_session(body: OrderCreate):
+    raise HTTPException(status_code=501, detail="Paymob غير مفعّل. الرجاء اختيار وسيلة دفع أخرى.")
+
+
+@api_router.post("/checkout/fawry")
+async def create_fawry_session(body: OrderCreate):
+    raise HTTPException(status_code=501, detail="فوري غير مفعّل. الرجاء اختيار وسيلة دفع أخرى.")
+
+
+# ------------------------- File Upload -----------------------------
+@api_router.post("/upload")
+async def upload_file(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    ext = (file.filename.rsplit(".", 1)[-1] if "." in file.filename else "bin").lower()
+    if ext not in MIME_TYPES:
+        raise HTTPException(status_code=400, detail="نوع الملف غير مدعوم. استخدمي jpg/png/webp.")
+    data = await file.read()
+    if len(data) > 6 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="حجم الملف أكبر من 6MB")
+    content_type = MIME_TYPES[ext]
+    path = f"{APP_NAME}/products/{uuid.uuid4()}.{ext}"
+    try:
+        result = put_object(path, data, content_type)
+    except Exception as e:
+        logger.error(f"Upload failed: {e}")
+        raise HTTPException(status_code=500, detail="فشل رفع الصورة. حاولي مجددًا.")
+    stored_path = result["path"]
+    await db.files.insert_one({
+        "id": str(uuid.uuid4()),
+        "storage_path": stored_path,
+        "original_filename": file.filename,
+        "content_type": content_type,
+        "size": result.get("size", len(data)),
+        "is_deleted": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    # Return a public URL (served via our backend)
+    return {"path": stored_path, "url": f"/api/files/{stored_path}"}
+
+
+@api_router.get("/files/{path:path}")
+async def serve_file(path: str):
+    """Public image serving (product images are public)."""
+    record = await db.files.find_one({"storage_path": path, "is_deleted": False}, {"_id": 0})
+    try:
+        data, ct = get_object(path)
+    except Exception:
+        raise HTTPException(status_code=404, detail="الملف غير موجود")
+    media_type = (record or {}).get("content_type") or ct
+    return Response(content=data, media_type=media_type, headers={"Cache-Control": "public, max-age=604800"})
+
+
+# ------------------------- Password Change -------------------------
+@api_router.post("/auth/change-password")
+async def change_password(body: PasswordChangeRequest, user: dict = Depends(get_current_user)):
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=400, detail="كلمة السر يجب أن تكون 8 أحرف على الأقل")
+    full = await db.users.find_one({"id": user["id"]})
+    if not full or not verify_password(body.current_password, full["password_hash"]):
+        raise HTTPException(status_code=401, detail="كلمة السر الحالية غير صحيحة")
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password_hash": hash_password(body.new_password)}},
+    )
+    return {"success": True}
+
+
+# ------------------------- Reviews ---------------------------------
+@api_router.get("/reviews/{product_id}")
+async def list_product_reviews(product_id: str):
+    reviews = await db.reviews.find(
+        {"product_id": product_id, "is_approved": True}, {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    return reviews
+
+
+@api_router.post("/reviews")
+async def submit_review(body: ReviewCreate):
+    prod = await db.products.find_one({"id": body.product_id}, {"_id": 0})
+    if not prod:
+        raise HTTPException(status_code=404, detail="المنتج غير موجود")
+    review = Review(**body.model_dump())
+    await db.reviews.insert_one(review.model_dump())
+    return {"success": True, "message": "شكرًا، سيظهر التقييم بعد المراجعة."}
+
+
+@api_router.get("/admin/reviews")
+async def admin_list_reviews(user: dict = Depends(require_admin), approved: Optional[bool] = None):
+    q = {}
+    if approved is not None:
+        q["is_approved"] = approved
+    reviews = await db.reviews.find(q, {"_id": 0}).sort("created_at", -1).limit(500).to_list(500)
+    return reviews
+
+
+@api_router.patch("/admin/reviews/{rid}/approve")
+async def approve_review(rid: str, user: dict = Depends(require_admin)):
+    review = await db.reviews.find_one({"id": rid}, {"_id": 0})
+    if not review:
+        raise HTTPException(status_code=404, detail="التقييم غير موجود")
+    await db.reviews.update_one({"id": rid}, {"$set": {"is_approved": True}})
+    # Recalculate product rating and review count
+    approved = await db.reviews.find(
+        {"product_id": review["product_id"], "is_approved": True}, {"_id": 0, "rating": 1}
+    ).to_list(1000)
+    if approved:
+        avg = round(sum(r["rating"] for r in approved) / len(approved), 1)
+        await db.products.update_one(
+            {"id": review["product_id"]},
+            {"$set": {"rating": avg, "reviews_count": len(approved)}},
+        )
+    return {"success": True}
+
+
+@api_router.delete("/admin/reviews/{rid}")
+async def delete_review(rid: str, user: dict = Depends(require_admin)):
+    res = await db.reviews.delete_one({"id": rid})
+    return {"deleted": res.deleted_count}
+
+
+# ------------------------- Testimonials ----------------------------
+@api_router.get("/testimonials")
+async def list_testimonials():
+    ts = await db.testimonials.find(
+        {"is_active": True}, {"_id": 0}
+    ).sort("order", 1).limit(20).to_list(20)
+    return ts
+
+
+@api_router.get("/admin/testimonials")
+async def admin_list_testimonials(user: dict = Depends(require_admin)):
+    ts = await db.testimonials.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return ts
+
+
+@api_router.post("/admin/testimonials", response_model=Testimonial)
+async def create_testimonial(body: TestimonialCreate, user: dict = Depends(require_admin)):
+    t = Testimonial(**body.model_dump())
+    await db.testimonials.insert_one(t.model_dump())
+    return t
+
+
+@api_router.put("/admin/testimonials/{tid}")
+async def update_testimonial(tid: str, body: TestimonialCreate, user: dict = Depends(require_admin)):
+    res = await db.testimonials.update_one({"id": tid}, {"$set": body.model_dump()})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="غير موجود")
+    return {"success": True}
+
+
+@api_router.delete("/admin/testimonials/{tid}")
+async def delete_testimonial(tid: str, user: dict = Depends(require_admin)):
+    res = await db.testimonials.delete_one({"id": tid})
+    return {"deleted": res.deleted_count}
+
+
 # ------------------------- Root ----------------------------------
 @api_router.get("/")
 async def root():
@@ -1120,6 +1385,48 @@ async def seed_data():
         logger.info("Seeded sample coupon WELCOME10")
 
 
+async def seed_brand_updates():
+    """Update live settings with current brand info if they still have placeholders."""
+    existing = await db.settings.find_one({"id": "global"}, {"_id": 0}) or {}
+    updates = {}
+    if existing.get("whatsapp_number") in (None, "", "201000000000"):
+        updates["whatsapp_number"] = DEFAULT_SETTINGS["whatsapp_number"]
+    if "thegirlhouse_eg" not in (existing.get("instagram") or ""):
+        updates["instagram"] = DEFAULT_SETTINGS["instagram"]
+    if "thegirlhouse_eg" not in (existing.get("tiktok") or ""):
+        updates["tiktok"] = DEFAULT_SETTINGS["tiktok"]
+    if not existing.get("facebook"):
+        updates["facebook"] = DEFAULT_SETTINGS["facebook"]
+    # Keep the stronger announcement (only update if currently the old generic one)
+    if existing.get("announcement") == "توصيل داخل مصر | منتجات ألمانية مختارة | الكمية محدودة":
+        updates["announcement"] = DEFAULT_SETTINGS["announcement"]
+    if updates:
+        await db.settings.update_one({"id": "global"}, {"$set": updates}, upsert=True)
+        logger.info(f"Brand settings updated: {list(updates.keys())}")
+
+
+SAMPLE_TESTIMONIALS = [
+    {"name": "نورا م.", "city": "القاهرة", "rating": 5,
+     "text": "صراحة المنتج أصلي وطلع أحسن من توقعاتي. الشحن كان سريع والتغليف فاخر ❤️"},
+    {"name": "هنا ا.", "city": "الإسكندرية", "rating": 5,
+     "text": "كنت بشتري من ألمانيا وكان صعب ومكلف. The Girl House حلت المشكلة وبأسعار أفضل!"},
+    {"name": "سلمى ه.", "city": "الجيزة", "rating": 5,
+     "text": "سيروم فيتامين C غير شكل بشرتي في 3 أسابيع. توصية 10/10"},
+    {"name": "دينا ش.", "city": "المنصورة", "rating": 5,
+     "text": "أول تجربة معاهم وكانت روعة. التوصيل وصل أسرع من المتوقع والتغليف بيرفع المعنويات."},
+    {"name": "مريم ع.", "city": "طنطا", "rating": 5,
+     "text": "بقيت أطلب كل شهر، منتجات بليا الألمانية غيرت روتيني بالكامل."},
+]
+
+
+async def seed_testimonials():
+    if await db.testimonials.count_documents({}) == 0:
+        for i, t in enumerate(SAMPLE_TESTIMONIALS):
+            t_obj = Testimonial(**{**t, "order": i})
+            await db.testimonials.insert_one(t_obj.model_dump())
+        logger.info(f"Seeded {len(SAMPLE_TESTIMONIALS)} testimonials")
+
+
 @app.on_event("startup")
 async def on_startup():
     try:
@@ -1132,10 +1439,19 @@ async def on_startup():
         await db.categories.create_index("slug", unique=True)
         await db.coupons.create_index("code", unique=True)
         await db.login_attempts.create_index("identifier")
+        await db.reviews.create_index("product_id")
+        await db.testimonials.create_index("order")
     except Exception as e:
         logger.warning(f"Index creation issue: {e}")
+    try:
+        init_storage()
+        logger.info("Object storage initialized")
+    except Exception as e:
+        logger.warning(f"Storage init failed (uploads will retry on first use): {e}")
     await seed_admin()
     await seed_data()
+    await seed_brand_updates()
+    await seed_testimonials()
     logger.info("Startup complete")
 
 

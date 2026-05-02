@@ -5,7 +5,7 @@ import {
   Plus, Minus, Sparkles, ChevronDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { api, formatEGP } from "@/lib/api";
+import { api, formatEGP, resolveImg } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useSettings } from "@/context/SettingsContext";
 import { toast } from "sonner";
@@ -23,6 +23,9 @@ const ProductDetails = () => {
   const [related, setRelated] = useState([]);
   const [tab, setTab] = useState("description");
   const [faqOpen, setFaqOpen] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [reviewForm, setReviewForm] = useState({ customer_name: "", rating: 5, comment: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -32,10 +35,12 @@ const ProductDetails = () => {
       try {
         const { data } = await api.get(`/products/${slug}`);
         setProduct(data);
-        const r = await api.get("/products", {
-          params: { category: data.category_slug, limit: 8 },
-        });
+        const [r, reviewsRes] = await Promise.all([
+          api.get("/products", { params: { category: data.category_slug, limit: 8 } }),
+          api.get(`/reviews/${data.id}`),
+        ]);
         setRelated(r.data.filter((p) => p.id !== data.id).slice(0, 4));
+        setReviews(reviewsRes.data);
       } catch {
         toast.error("المنتج غير موجود");
         navigate("/shop");
@@ -97,7 +102,7 @@ const ProductDetails = () => {
               className="relative aspect-square rounded-[2rem] overflow-hidden bg-blush-50"
             >
               <img
-                src={product.images?.[activeImg] || product.images?.[0]}
+                src={resolveImg(product.images?.[activeImg] || product.images?.[0])}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -117,7 +122,7 @@ const ProductDetails = () => {
                       i === activeImg ? "border-blush-500" : "border-transparent"
                     }`}
                   >
-                    <img src={img} alt={`${product.name} ${i}`} className="w-full h-full object-cover" />
+                    <img src={resolveImg(img)} alt={`${product.name} ${i}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -333,6 +338,113 @@ const ProductDetails = () => {
                 <li>💳 متاح الدفع عند الاستلام، فودافون كاش، إنستاباي، أو عبر واتساب.</li>
               </ul>
             )}
+          </div>
+        </div>
+
+        {/* Reviews */}
+        <div className="mt-14">
+          <h2 className="font-display text-2xl lg:text-3xl text-ink mb-6">تقييمات العميلات</h2>
+          <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+            <div className="space-y-3">
+              {reviews.length === 0 ? (
+                <div className="bg-blush-50/50 rounded-2xl p-6 text-center text-ink-muted text-sm">
+                  لسه مفيش تقييمات. كوني أول واحدة تشاركي تجربتك ❤️
+                </div>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="bg-white border border-blush-100 rounded-2xl p-5">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-blush-100 flex items-center justify-center font-display text-blush-700">
+                          {r.customer_name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-ink">{r.customer_name}</p>
+                          <p className="text-[11px] text-ink-muted">
+                            {new Date(r.created_at).toLocaleDateString("ar-EG")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: r.rating }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-champagne-400 text-champagne-400" />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="text-sm text-ink-soft leading-relaxed">{r.comment}</p>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!reviewForm.customer_name.trim()) return toast.error("الاسم مطلوب");
+                setSubmittingReview(true);
+                try {
+                  await api.post("/reviews", { ...reviewForm, product_id: product.id });
+                  toast.success("شكرًا لكِ ❤️ هيظهر التقييم بعد المراجعة");
+                  setReviewForm({ customer_name: "", rating: 5, comment: "" });
+                } catch {
+                  toast.error("فشل إرسال التقييم");
+                } finally {
+                  setSubmittingReview(false);
+                }
+              }}
+              className="bg-blush-50/50 border border-blush-100 rounded-3xl p-5 h-fit sticky top-28 space-y-3"
+              data-testid="review-form"
+            >
+              <h3 className="font-display text-lg text-ink">شاركينا تجربتك</h3>
+              <input
+                type="text"
+                placeholder="اسمك"
+                value={reviewForm.customer_name}
+                onChange={(e) => setReviewForm({ ...reviewForm, customer_name: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-blush-200 bg-white outline-none focus:border-blush-500 text-sm"
+                data-testid="review-name"
+              />
+              <div>
+                <p className="text-xs text-ink-soft mb-1.5">تقييمك</p>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      type="button"
+                      key={n}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: n })}
+                      className="focus:outline-none"
+                      data-testid={`review-star-${n}`}
+                    >
+                      <Star
+                        className={`w-6 h-6 transition-colors ${
+                          n <= reviewForm.rating
+                            ? "fill-champagne-400 text-champagne-400"
+                            : "text-blush-200"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                rows={3}
+                placeholder="رأيك في المنتج..."
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border border-blush-200 bg-white outline-none focus:border-blush-500 text-sm resize-none"
+                data-testid="review-comment"
+              />
+              <button
+                type="submit"
+                disabled={submittingReview}
+                className="w-full py-2.5 rounded-full bg-ink text-white text-sm font-semibold hover:bg-blush-600 transition-colors disabled:opacity-50"
+                data-testid="submit-review-btn"
+              >
+                {submittingReview ? "جاري الإرسال..." : "إرسال التقييم"}
+              </button>
+            </form>
           </div>
         </div>
 

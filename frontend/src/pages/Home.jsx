@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Sparkles, Truck, ShieldCheck, MessageCircle, Star, ArrowLeft, Instagram, Heart,
-  Flower2, Droplets, Zap, Gift, Leaf, Moon,
+  Flower2, Droplets, Zap, Gift, Leaf, Moon, Flame, Clock,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import ProductCard, { ProductCardSkeleton } from "@/components/ProductCard";
@@ -20,18 +20,24 @@ const Home = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [limited, setLimited] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [b, n, o] = await Promise.all([
+        const [b, n, o, l, t] = await Promise.all([
           api.get("/products", { params: { is_best_seller: true, limit: 8 } }),
           api.get("/products", { params: { is_new_arrival: true, limit: 8 } }),
           api.get("/products", { params: { is_offer: true, limit: 8 } }),
+          api.get("/products", { params: { limit: 50 } }),
+          api.get("/testimonials"),
         ]);
         setBestSellers(b.data);
         setNewArrivals(n.data);
         setOffers(o.data);
+        setLimited(l.data.filter((p) => p.is_limited || p.stock <= 5).slice(0, 4));
+        setTestimonials(t.data);
       } finally {
         setLoading(false);
       }
@@ -73,13 +79,16 @@ const Home = () => {
                   تسوقي الآن
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 </Link>
-                <Link
-                  to="/shop?is_offer=true"
-                  className="inline-flex items-center gap-2 px-7 py-4 rounded-full border-2 border-ink text-ink font-semibold hover:bg-ink hover:text-white transition-colors"
-                  data-testid="hero-offers-cta"
+                <a
+                  href={whatsappLink("السلام عليكم، حابة أستفسر عن منتجاتكم")}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-[#25D366] text-white font-semibold hover:bg-emerald-600 transition-colors shadow-soft"
+                  data-testid="hero-whatsapp-cta"
                 >
-                  شاهدي العروض
-                </Link>
+                  <MessageCircle className="w-4 h-4" />
+                  اطلبي عبر واتساب
+                </a>
               </div>
 
               <div className="flex flex-wrap items-center gap-6 pt-4 text-xs lg:text-sm text-ink-soft">
@@ -145,12 +154,13 @@ const Home = () => {
 
       {/* Trust badges */}
       <section className="bg-white border-y border-blush-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
           {[
-            { icon: ShieldCheck, title: "منتجات من ألمانيا", sub: "أصلية 100%" },
+            { icon: ShieldCheck, title: "منتجات مختارة من ألمانيا", sub: "جودة أوروبية" },
             { icon: Truck, title: "توصيل داخل مصر", sub: "لكل المحافظات" },
-            { icon: Sparkles, title: "دفع آمن", sub: "عند الاستلام" },
-            { icon: MessageCircle, title: "دعم عبر واتساب", sub: "خدمة فورية" },
+            { icon: Sparkles, title: "دفع عند الاستلام", sub: "بدون أي مقدم" },
+            { icon: MessageCircle, title: "طلب سريع عبر واتساب", sub: "خدمة فورية" },
+            { icon: Flame, title: "كميات محدودة", sub: "اطلبي قبل النفاد" },
           ].map((b, i) => (
             <motion.div
               key={i}
@@ -158,14 +168,14 @@ const Home = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-3"
             >
-              <div className="w-12 h-12 rounded-2xl bg-blush-50 flex items-center justify-center flex-shrink-0">
-                <b.icon className="w-5 h-5 text-blush-600" />
+              <div className="w-11 h-11 rounded-2xl bg-blush-50 flex items-center justify-center flex-shrink-0">
+                <b.icon className="w-4 h-4 text-blush-600" />
               </div>
               <div>
-                <p className="font-display text-base text-ink">{b.title}</p>
-                <p className="text-xs text-ink-muted">{b.sub}</p>
+                <p className="font-display text-sm lg:text-base text-ink leading-tight">{b.title}</p>
+                <p className="text-[11px] text-ink-muted">{b.sub}</p>
               </div>
             </motion.div>
           ))}
@@ -211,7 +221,7 @@ const Home = () => {
 
       {/* Best Sellers */}
       <ProductSection
-        title="الأكثر مبيعًا"
+        title="الأكثر طلبًا"
         subtitle="Best Sellers"
         desc="المنتجات اللي بنات مصر بيطلبوها أكتر"
         products={bestSellers}
@@ -219,6 +229,34 @@ const Home = () => {
         link="/shop?is_best_seller=true"
         testId="home-best-sellers"
       />
+
+      {/* Limited Stock — Urgency section */}
+      {limited.length > 0 && (
+        <section className="py-14 bg-gradient-to-br from-blush-500 via-blush-400 to-blush-500 text-white relative overflow-hidden" data-testid="home-limited-stock">
+          <div className="absolute inset-0 noise opacity-40" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
+              <div>
+                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+                  <Flame className="w-3.5 h-3.5" />
+                  <span className="text-xs font-bold tracking-wide">اطلبي قبل النفاد</span>
+                </div>
+                <h2 className="font-display text-3xl lg:text-4xl">كميات محدودة جدًا</h2>
+                <p className="mt-1 text-white/80 text-sm">المنتجات دي أوشكت على النفاد — اغتنمي الفرصة</p>
+              </div>
+              <Link
+                to="/shop"
+                className="hidden sm:inline-flex items-center gap-2 text-sm font-medium bg-white text-blush-600 px-5 py-2.5 rounded-full hover:bg-ink hover:text-white transition-colors"
+              >
+                عرض الكل <ArrowLeft className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              {limited.map((p, i) => <ProductCard key={p.id} product={p} idx={i} />)}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Why German DM */}
       <section className="py-16 bg-gradient-to-br from-champagne-50 via-white to-blush-50 relative overflow-hidden">
@@ -283,6 +321,65 @@ const Home = () => {
         dark
       />
 
+      {/* Before / After inspired section (no medical claims) */}
+      <section className="py-16 bg-gradient-to-br from-nude-50 to-blush-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="text-xs text-champagne-400 tracking-[0.3em] uppercase font-latin mb-2">Real Results</p>
+            <h2 className="font-display text-3xl lg:text-4xl text-ink">تجربة روتين العناية</h2>
+            <p className="mt-2 text-sm text-ink-muted max-w-xl mx-auto">
+              استخدام منتجاتنا الألمانية بانتظام يساعد على الحصول على مظهر بشرة أكثر نضارة وشعر بمظهر أنعم
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                title: "روتين الشعر التالف",
+                desc: "شامبو + ماسك + زيت — ثلاثي يساعد على تحسين ملمس الشعر وإحساس أنعم",
+                img: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800",
+                duration: "٢١ يوم",
+              },
+              {
+                title: "روتين الإشراقة",
+                desc: "غسول + سيروم + كريم ترطيب — يدعم مظهر بشرة أكثر إشراقة وتوحيد اللون",
+                img: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800",
+                duration: "٣٠ يوم",
+              },
+              {
+                title: "روتين الترطيب",
+                desc: "ماسك + سيروم ترطيب — يمنح إحساسًا بالنعومة ومظهر بشرة مشبّعة بالترطيب",
+                img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800",
+                duration: "١٤ يوم",
+              },
+            ].map((r, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group bg-white rounded-3xl overflow-hidden border border-blush-100 hover:shadow-soft transition-all"
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-blush-50">
+                  <img src={r.img} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-2 text-[11px] text-blush-600 mb-2">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span className="font-bold tracking-wide">خلال {r.duration}</span>
+                  </div>
+                  <h3 className="font-display text-xl text-ink mb-1">{r.title}</h3>
+                  <p className="text-sm text-ink-muted leading-relaxed">{r.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-ink-muted mt-6 max-w-2xl mx-auto">
+            * النتائج تختلف من شخص لآخر. المنتجات لا تقدّم ادعاءات طبية، وهي منتجات عناية جمالية عادية.
+          </p>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -293,13 +390,9 @@ const Home = () => {
             <h2 className="font-display text-3xl lg:text-4xl text-ink">آراء عميلاتنا</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { name: "نورا.م", text: "صراحة المنتج أصلي وطلع أحسن من توقعاتي. الشحن كان سريع والتغليف فاخر ❤️", rating: 5, city: "القاهرة" },
-              { name: "هنا.ا", text: "كنت بشتري من ألمانيا وكان صعب ومكلف. The Girl House حلت المشكلة وبأسعار أفضل!", rating: 5, city: "الإسكندرية" },
-              { name: "سلمى.ه", text: "سيروم فيتامين C غير شكل بشرتي في 3 أسابيع. توصية 10/10", rating: 5, city: "الجيزة" },
-            ].map((t, i) => (
+            {(testimonials.length > 0 ? testimonials : []).slice(0, 3).map((t, i) => (
               <motion.div
-                key={i}
+                key={t.id || i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -307,7 +400,7 @@ const Home = () => {
                 className="bg-gradient-to-br from-blush-50 to-white border border-blush-100 rounded-3xl p-6 relative"
               >
                 <div className="flex gap-0.5 mb-3">
-                  {Array.from({ length: t.rating }).map((_, j) => (
+                  {Array.from({ length: t.rating || 5 }).map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-champagne-400 text-champagne-400" />
                   ))}
                 </div>

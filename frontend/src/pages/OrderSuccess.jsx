@@ -8,7 +8,8 @@ import { useSettings } from "@/context/SettingsContext";
 const OrderSuccess = () => {
   const { orderNumber } = useParams();
   const [order, setOrder] = useState(null);
-  const { whatsappLink } = useSettings();
+  const { settings, whatsappLink } = useSettings();
+  const [notified, setNotified] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -20,6 +21,51 @@ const OrderSuccess = () => {
       }
     })();
   }, [orderNumber]);
+
+  const methodText = (m) => methodLabel(m);
+
+  // Auto-compose a WhatsApp notification message containing the order details
+  // This opens the customer's WhatsApp (or web wa.me) with a ready-made message to admin.
+  const adminNotifyLink = (() => {
+    if (!order || !order.order_number) return null;
+    const itemsTxt = (order.items || [])
+      .map((i) => `• ${i.name} × ${i.quantity} — ${i.price * i.quantity} ج.م`)
+      .join("%0A");
+    const msg =
+      `🎀 *طلب جديد من The Girl House* 🎀%0A` +
+      `━━━━━━━━━━━━━━%0A` +
+      `*رقم الطلب:* ${order.order_number}%0A` +
+      `*الاسم:* ${order.customer_name}%0A` +
+      `*التليفون:* ${order.phone}%0A` +
+      (order.whatsapp && order.whatsapp !== order.phone ? `*واتساب:* ${order.whatsapp}%0A` : "") +
+      `*المحافظة:* ${order.governorate}%0A` +
+      `*المدينة:* ${order.city}%0A` +
+      `*العنوان:* ${order.address}%0A` +
+      (order.notes ? `*ملاحظات:* ${order.notes}%0A` : "") +
+      `━━━━━━━━━━━━━━%0A` +
+      `*المنتجات:*%0A${itemsTxt}%0A` +
+      `━━━━━━━━━━━━━━%0A` +
+      `*المجموع الفرعي:* ${order.subtotal} ج.م%0A` +
+      `*التوصيل:* ${order.delivery_fee} ج.م%0A` +
+      (order.discount > 0 ? `*الخصم:* -${order.discount} ج.م%0A` : "") +
+      `*الإجمالي:* *${order.total} ج.م*%0A` +
+      `*الدفع:* ${methodText(order.payment_method)}`;
+    return `https://wa.me/${settings.whatsapp_number}?text=${msg}`;
+  })();
+
+  // Auto-open WhatsApp notification once (in new tab) so admin gets it quickly
+  useEffect(() => {
+    if (adminNotifyLink && !notified && order?.order_number) {
+      // open after 1.2s so the success animation renders first
+      const t = setTimeout(() => {
+        try {
+          window.open(adminNotifyLink, "_blank", "noopener");
+          setNotified(true);
+        } catch {}
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [adminNotifyLink, notified, order]);
 
   const wa = whatsappLink(
     `أهلاً، تم تأكيد طلبي رقم ${orderNumber} 🎀 حابة أتأكد من التفاصيل.`
@@ -83,6 +129,19 @@ const OrderSuccess = () => {
             📦 هنحضر طلبك ونتواصل معكِ خلال 24 ساعة لتأكيد الشحن.
             للاستعجال، تواصلي معنا عبر واتساب.
           </div>
+
+          {adminNotifyLink && (
+            <a
+              href={adminNotifyLink}
+              target="_blank"
+              rel="noreferrer"
+              className="block w-full text-center py-3 rounded-full bg-[#25D366] text-white font-semibold hover:bg-emerald-600 transition-colors text-sm"
+              data-testid="notify-admin-wa"
+            >
+              <MessageCircle className="w-4 h-4 inline ml-1.5" />
+              إرسال تفاصيل الطلب على واتساب The Girl House
+            </a>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <a

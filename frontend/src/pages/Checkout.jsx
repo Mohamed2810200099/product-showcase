@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Check, ShoppingBag, CreditCard, Wallet, MessageCircle, Tag, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useSettings } from "@/context/SettingsContext";
-import { api, formatEGP, EGYPT_GOVERNORATES, formatApiErrorDetail } from "@/lib/api";
+import { api, formatEGP, EGYPT_GOVERNORATES, formatApiErrorDetail, resolveImg } from "@/lib/api";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -258,7 +258,7 @@ const Checkout = () => {
                 {items.map((i) => (
                   <div key={i.product_id} className="flex gap-3 text-sm">
                     <div className="w-14 h-14 rounded-xl overflow-hidden bg-blush-50 flex-shrink-0 relative">
-                      <img src={i.image} alt="" className="w-full h-full object-cover" />
+                      <img src={resolveImg(i.image)} alt="" className="w-full h-full object-cover" />
                       <span className="absolute -top-1 -right-1 bg-ink text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold">
                         {i.quantity}
                       </span>

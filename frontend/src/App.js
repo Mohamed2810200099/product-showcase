@@ -21,6 +21,8 @@ import AdminProducts from "@/pages/admin/AdminProducts";
 import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminCoupons from "@/pages/admin/AdminCoupons";
+import AdminTestimonials from "@/pages/admin/AdminTestimonials";
+import AdminReviews from "@/pages/admin/AdminReviews";
 
 function App() {
   return (
@@ -51,6 +53,8 @@ function App() {
                   <Route index element={<AdminDashboard />} />
                   <Route path="products" element={<AdminProducts />} />
                   <Route path="orders" element={<AdminOrders />} />
+                  <Route path="reviews" element={<AdminReviews />} />
+                  <Route path="testimonials" element={<AdminTestimonials />} />
                   <Route path="coupons" element={<AdminCoupons />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>

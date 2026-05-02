@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Outlet, Link, NavLink, useNavigate, Navigate } from "react-router-dom";
 import {
   LayoutDashboard, Package, ShoppingCart, Tag, Settings, LogOut,
-  Menu, X, Loader2, Home,
+  Menu, X, Loader2, Home, MessageSquareQuote, Star,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ const NAV = [
   { to: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, end: true, testId: "admin-nav-dashboard" },
   { to: "/admin/products", label: "المنتجات", icon: Package, testId: "admin-nav-products" },
   { to: "/admin/orders", label: "الطلبات", icon: ShoppingCart, testId: "admin-nav-orders" },
+  { to: "/admin/reviews", label: "تقييمات المنتجات", icon: Star, testId: "admin-nav-reviews" },
+  { to: "/admin/testimonials", label: "شهادات العميلات", icon: MessageSquareQuote, testId: "admin-nav-testimonials" },
   { to: "/admin/coupons", label: "أكواد الخصم", icon: Tag, testId: "admin-nav-coupons" },
   { to: "/admin/settings", label: "الإعدادات", icon: Settings, testId: "admin-nav-settings" },
 ];

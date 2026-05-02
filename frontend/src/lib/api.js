@@ -8,6 +8,13 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+// Convert relative backend file paths (e.g. /api/files/...) to full URLs
+export const resolveImg = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 export const formatEGP = (n) =>
   `${Number(n).toLocaleString("ar-EG", { maximumFractionDigits: 0 })} ج.م`;
 

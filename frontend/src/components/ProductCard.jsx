@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ShoppingBag, MessageCircle, Eye } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useSettings } from "@/context/SettingsContext";
-import { formatEGP } from "@/lib/api";
+import { formatEGP, resolveImg } from "@/lib/api";
 import { toast } from "sonner";
 
 const Badge = ({ children, color = "blush" }) => {
@@ -55,7 +55,7 @@ const ProductCard = ({ product, idx = 0 }) => {
       <Link to={`/product/${product.slug}`} className="block">
         <div className="relative aspect-square bg-blush-50 overflow-hidden">
           <img
-            src={product.images?.[0] || "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600"}
+            src={resolveImg(product.images?.[0]) || "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600"}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             loading="lazy"

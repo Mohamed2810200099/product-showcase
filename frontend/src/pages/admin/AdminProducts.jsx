@@ -3,12 +3,17 @@ import { Plus, Edit, Trash2, Search, X, Loader2, Image as ImageIcon } from "luci
 import { api, formatEGP, formatApiErrorDetail } from "@/lib/api";
 import { useSettings } from "@/context/SettingsContext";
 import { toast } from "sonner";
+import ImageUploader from "@/components/admin/ImageUploader";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const toPublicUrl = (u) => (u && !u.startsWith("http") ? `${BACKEND_URL}${u}` : u);
 
 const emptyForm = {
   name: "", name_ar: "", slug: "", brand: "", category_slug: "",
   concerns: [], short_description: "", description: "",
   benefits: "", how_to_use: "", ingredients: "", suitable_for: "",
-  warnings: "", price: 0, old_price: 0, stock: 0, images_text: "",
+  warnings: "", price: 0, old_price: 0, stock: 0,
+  images: [],
   is_active: true, is_featured: false, is_best_seller: false,
   is_new_arrival: false, is_offer: false, is_limited: false,
 };
@@ -57,7 +62,7 @@ const AdminProducts = () => {
       old_price: p.old_price || 0,
       benefits: (p.benefits || []).join("\n"),
       suitable_for: (p.suitable_for || []).join("، "),
-      images_text: (p.images || []).join("\n"),
+      images: p.images || [],
     });
   };
 
@@ -88,9 +93,8 @@ const AdminProducts = () => {
         stock: Number(form.stock),
         benefits: form.benefits.split("\n").map((s) => s.trim()).filter(Boolean),
         suitable_for: form.suitable_for.split(/[،,]/).map((s) => s.trim()).filter(Boolean),
-        images: form.images_text.split("\n").map((s) => s.trim()).filter(Boolean),
+        images: form.images || [],
       };
-      delete payload.images_text;
 
       if (editing === "new") {
         await api.post("/products", payload);
@@ -169,7 +173,7 @@ const AdminProducts = () => {
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src={p.images?.[0] || ""}
+                          src={toPublicUrl(p.images?.[0]) || ""}
                           alt=""
                           className="w-12 h-12 rounded-xl object-cover bg-blush-50 flex-shrink-0"
                         />
@@ -290,7 +294,10 @@ const AdminProducts = () => {
               </Field>
 
               <Field label="روابط الصور (كل رابط في سطر)">
-                <textarea rows={3} className="input" value={form.images_text} onChange={(e) => setForm({ ...form, images_text: e.target.value })} placeholder="https://images.unsplash.com/..." data-testid="prod-images" />
+                <ImageUploader
+                  value={form.images}
+                  onChange={(imgs) => setForm({ ...form, images: imgs })}
+                />
               </Field>
 
               <div>

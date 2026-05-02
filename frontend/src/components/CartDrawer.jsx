@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { X, Plus, Minus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { formatEGP } from "@/lib/api";
+import { formatEGP, resolveImg } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CartDrawer = () => {
@@ -75,7 +75,7 @@ const CartDrawer = () => {
                         onClick={() => setDrawerOpen(false)}
                         className="flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden bg-blush-50"
                       >
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <img src={resolveImg(item.image)} alt={item.name} className="w-full h-full object-cover" />
                       </Link>
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] text-champagne-400 uppercase tracking-wider font-latin">
