@@ -306,7 +306,9 @@ def slugify(text: str) -> str:
 @api_router.post("/auth/login")
 async def login(body: LoginRequest, response: Response, request: Request):
     email = body.email.lower().strip()
-    ip = request.client.host if request.client else "unknown"
+    # Behind ingress/load-balancer there can be multiple proxy IPs. Prefer X-Forwarded-For.
+    xff = request.headers.get("x-forwarded-for", "")
+    ip = xff.split(",")[0].strip() if xff else (request.client.host if request.client else "unknown")
     identifier = f"{ip}:{email}"
 
     # Brute force check
