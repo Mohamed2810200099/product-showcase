@@ -22,8 +22,18 @@ export function Footer() {
           {socials.length > 0 && (
             <div className="flex gap-2 mt-4">
               {socials.map((s) => (
-                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                  className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
+                <a
+                  key={s.label}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(s.url, "_blank", "noopener,noreferrer");
+                  }}
+                  className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition"
+                >
                   <s.icon className="h-4 w-4" />
                 </a>
               ))}
