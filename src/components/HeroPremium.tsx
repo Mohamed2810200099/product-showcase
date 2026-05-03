@@ -17,6 +17,8 @@ type FloatProduct = {
   delay: number;
   parallax: number;
   accent?: boolean;
+  to: string;
+  search?: Record<string, string>;
 };
 
 const products: FloatProduct[] = [
@@ -27,6 +29,8 @@ const products: FloatProduct[] = [
     className: "top-[2%] left-[4%] w-[28%] sm:w-[22%]",
     delay: 0.7,
     parallax: -20,
+    to: "/shop",
+    search: { search: "keratin" },
   },
   {
     src: langhaarImg,
@@ -35,6 +39,8 @@ const products: FloatProduct[] = [
     className: "top-[6%] right-[3%] w-[26%] sm:w-[20%]",
     delay: 0.9,
     parallax: 22,
+    to: "/shop",
+    search: { category: "hair-care" },
   },
   {
     src: plexMaskImg,
@@ -44,6 +50,8 @@ const products: FloatProduct[] = [
     delay: 1.1,
     parallax: -16,
     accent: true,
+    to: "/shop",
+    search: { search: "plex" },
   },
   {
     src: plexSpuelungImg,
@@ -52,6 +60,8 @@ const products: FloatProduct[] = [
     className: "bottom-[12%] right-[2%] w-[26%] sm:w-[20%]",
     delay: 1.3,
     parallax: 18,
+    to: "/shop",
+    search: { search: "plex" },
   },
 ];
 
