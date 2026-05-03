@@ -9,6 +9,7 @@ import { Product3DCard } from "@/components/three-d/Product3DCard";
 export type Product = {
   id: string;
   name: string;
+  arabic_title?: string | null;
   slug: string;
   price: number;
   compare_at_price: number | null;
@@ -55,7 +56,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="p-4">
         <Link to="/product/$slug" params={{ slug: product.slug }}>
           <h3 className="font-display text-base sm:text-lg font-semibold line-clamp-2 hover:text-primary transition min-h-[3rem]">
-            {product.name}
+            {product.arabic_title || product.name}
           </h3>
         </Link>
         {product.reviews_count > 0 && (

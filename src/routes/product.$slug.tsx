@@ -68,7 +68,7 @@ function ProductPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
+        .select("id,name,arabic_title,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
         .eq("category_id", product!.category_id as string)
         .neq("id", product!.id)
