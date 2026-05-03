@@ -247,7 +247,7 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
       <button
         onClick={() => setOpen(true)}
         aria-label="افتحي مساعدة الجمال"
-        className="fixed bottom-24 sm:bottom-6 left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] items-center justify-center hover:scale-105 transition motion-reduce:transform-none flex flex-row"
+        className="fixed bottom-[146px] sm:bottom-[90px] left-4 sm:left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] flex items-center justify-center hover:scale-105 transition motion-reduce:transform-none"
       >
         <MessageCircle className="h-6 w-6" />
       </button>
