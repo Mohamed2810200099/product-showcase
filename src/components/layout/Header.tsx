@@ -84,7 +84,7 @@ export function Header() {
           <button aria-label="Search" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
             <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
-          <Link to="/admin/login" aria-label="Account" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+          <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
             <User className="h-5 w-5 text-[#3A2430]" />
           </Link>
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-[#F9EEF3] transition" aria-label="Cart">
