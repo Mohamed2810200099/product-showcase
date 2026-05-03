@@ -114,24 +114,36 @@ function ProductForm() {
     if (!form.name || form.price <= 0) return toast.error("الاسم والسعر مطلوبين");
 
     setSaving(true);
+    const splitLines = (s: string) => s.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const payload = {
       name: form.name,
       name_en: form.name_en || null,
+      arabic_title: form.arabic_title || null,
       slug: form.slug || slugify(form.name),
       description: form.description || null,
       short_description: form.short_description || null,
       price: form.price,
       compare_at_price: form.compare_at_price > 0 ? form.compare_at_price : null,
+      dm_price_eur: form.dm_price_eur > 0 ? form.dm_price_eur : null,
       sku: form.sku || null,
       stock: form.stock,
       brand: form.brand || null,
       category_id: form.category_id || null,
+      sub_category: form.sub_category || null,
       images: form.images,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : null,
+      order_index: form.order_index,
+      key_benefits: form.key_benefits ? splitLines(form.key_benefits) : null,
+      suitable_for: form.suitable_for || null,
+      how_to_use: form.how_to_use || null,
+      key_ingredients: form.key_ingredients ? splitLines(form.key_ingredients) : null,
+      product_details: form.product_details || null,
+      warnings: form.warnings || null,
+      source_url: form.source_url || null,
       is_active: form.is_active,
       is_featured: form.is_featured,
       is_limited: form.is_limited,
-    };
+    } as any;
 
     const { error } = isNew
       ? await supabase.from("products").insert(payload)
