@@ -139,6 +139,11 @@ function CheckoutPage() {
     const waUrl = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(lines)}`;
     window.open(waUrl, "_blank");
 
+    if (appliedCoupon) {
+      const usedKey = `coupon_used_${appliedCoupon.code}`;
+      localStorage.setItem(usedKey, String(Number(localStorage.getItem(usedKey) ?? "0") + 1));
+    }
+    localStorage.setItem("tgh_has_ordered", "1");
     clear();
     navigate({ to: "/order-success", search: { order: data.order_number } });
   };
