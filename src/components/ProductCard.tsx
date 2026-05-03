@@ -4,6 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
 import placeholderImg from "@/assets/product-placeholder.jpg";
+import { Product3DCard } from "@/components/three-d/Product3DCard";
 
 export type Product = {
   id: string;
@@ -32,9 +33,9 @@ export function ProductCard({ product }: { product: Product }) {
   const isOut = status === "out_of_stock" || (product.stock_tracking_enabled === true && product.stock === 0);
 
   return (
-    <div className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-      <Link to="/product/$slug" params={{ slug: product.slug }} className="block aspect-square overflow-hidden bg-muted relative">
-        <img src={img} alt={product.name} loading="lazy" className="w-full h-full object-cover object-center scale-[1.08] sm:scale-[1.12] group-hover:scale-[1.18] transition-transform duration-500" />
+    <Product3DCard className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:shadow-[0_25px_60px_-20px_rgba(217,108,157,0.45)] transition-shadow duration-500">
+      <Link to="/product/$slug" params={{ slug: product.slug }} className="block aspect-square overflow-hidden bg-muted relative" style={{ transform: "translateZ(20px)" }}>
+        <img src={img} alt={product.name} loading="lazy" className="w-full h-full object-cover object-center scale-[1.08] sm:scale-[1.12] group-hover:scale-[1.2] transition-transform duration-700 ease-out" />
         {discount && (
           <span className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full shadow-soft">
             -{discount}%
