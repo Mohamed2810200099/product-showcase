@@ -38,6 +38,12 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [coupon, setCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [form, setForm] = useState({
+    customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
+    address: "", city: "", governorate: "القاهرة", notes: "",
+  });
 
   if (authLoading) {
     return (
@@ -66,12 +72,7 @@ function CheckoutPage() {
       </PublicLayout>
     );
   }
-  const [coupon, setCoupon] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const [form, setForm] = useState({
-    customer_name: "", customer_phone: "", customer_email: "",
-    address: "", city: "", governorate: "القاهرة", notes: "",
-  });
+
 
   if (items.length === 0) {
     return (
