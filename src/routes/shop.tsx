@@ -38,7 +38,7 @@ function ShopPage() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["shop-products", search.category, search.sort, search.q],
+    queryKey: ["shop-products", search.category, search.sort, activeQuery],
     queryFn: async () => {
       // Resolve category inside queryFn so we don't depend on outer query state
       let categoryId: string | null = null;
@@ -57,7 +57,7 @@ function ShopPage() {
         .eq("is_active", true);
 
       if (categoryId) q = q.eq("category_id", categoryId);
-      if (search.q) q = q.or(`name.ilike.%${search.q}%,arabic_title.ilike.%${search.q}%`);
+      if (activeQuery) q = q.or(`name.ilike.%${activeQuery}%,arabic_title.ilike.%${activeQuery}%`);
 
       switch (search.sort) {
         case "price-asc": q = q.order("price", { ascending: true }); break;
