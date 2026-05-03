@@ -37,16 +37,24 @@ function ShopPage() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["shop-products", search.category, search.sort, search.q],
     queryFn: async () => {
+      // Resolve category inside queryFn so we don't depend on outer query state
+      let categoryId: string | null = null;
+      if (search.category) {
+        const { data: cat } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("slug", search.category)
+          .maybeSingle();
+        categoryId = cat?.id ?? null;
+      }
+
       let q = supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled,category_id,categories(slug)")
+        .select("id,name,arabic_title,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled,category_id,categories(slug)")
         .eq("is_active", true);
 
-      if (search.category) {
-        const cat = (categories as any[]).find((c) => c.slug === search.category);
-        if (cat) q = q.eq("category_id", cat.id);
-      }
-      if (search.q) q = q.ilike("name", `%${search.q}%`);
+      if (categoryId) q = q.eq("category_id", categoryId);
+      if (search.q) q = q.or(`name.ilike.%${search.q}%,arabic_title.ilike.%${search.q}%`);
 
       switch (search.sort) {
         case "price-asc": q = q.order("price", { ascending: true }); break;
@@ -58,7 +66,6 @@ function ShopPage() {
       const { data } = await q;
       return (data ?? []) as unknown as Product[];
     },
-    enabled: categories.length > 0 || !search.category,
   });
 
   const setCategory = (slug?: string) =>
