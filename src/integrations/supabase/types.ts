@@ -154,73 +154,106 @@ export type Database = {
       }
       products: {
         Row: {
+          arabic_title: string | null
           brand: string | null
           category_id: string | null
           compare_at_price: number | null
           created_at: string
           description: string | null
+          dm_price_eur: number | null
+          how_to_use: string | null
           id: string
           images: Json
           is_active: boolean
           is_featured: boolean
           is_limited: boolean
+          key_benefits: string[] | null
+          key_ingredients: string[] | null
           name: string
           name_en: string | null
+          order_index: number
           price: number
+          product_details: string | null
           rating: number
           reviews_count: number
           short_description: string | null
           sku: string | null
           slug: string
+          source_url: string | null
           stock: number
+          sub_category: string | null
+          suitable_for: string | null
           tags: string[] | null
           updated_at: string
+          warnings: string | null
         }
         Insert: {
+          arabic_title?: string | null
           brand?: string | null
           category_id?: string | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null
+          dm_price_eur?: number | null
+          how_to_use?: string | null
           id?: string
           images?: Json
           is_active?: boolean
           is_featured?: boolean
           is_limited?: boolean
+          key_benefits?: string[] | null
+          key_ingredients?: string[] | null
           name: string
           name_en?: string | null
+          order_index?: number
           price: number
+          product_details?: string | null
           rating?: number
           reviews_count?: number
           short_description?: string | null
           sku?: string | null
           slug: string
+          source_url?: string | null
           stock?: number
+          sub_category?: string | null
+          suitable_for?: string | null
           tags?: string[] | null
           updated_at?: string
+          warnings?: string | null
         }
         Update: {
+          arabic_title?: string | null
           brand?: string | null
           category_id?: string | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null
+          dm_price_eur?: number | null
+          how_to_use?: string | null
           id?: string
           images?: Json
           is_active?: boolean
           is_featured?: boolean
           is_limited?: boolean
+          key_benefits?: string[] | null
+          key_ingredients?: string[] | null
           name?: string
           name_en?: string | null
+          order_index?: number
           price?: number
+          product_details?: string | null
           rating?: number
           reviews_count?: number
           short_description?: string | null
           sku?: string | null
           slug?: string
+          source_url?: string | null
           stock?: number
+          sub_category?: string | null
+          suitable_for?: string | null
           tags?: string[] | null
           updated_at?: string
+          warnings?: string | null
         }
         Relationships: [
           {

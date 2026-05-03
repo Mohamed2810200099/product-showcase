@@ -39,7 +39,7 @@ function ProductsList() {
     const { data } = await supabase
       .from("products")
       .select("id,name,slug,price,stock,is_active,is_featured,images")
-      .order("created_at", { ascending: false });
+      .order("order_index", { ascending: true });
     setProducts((data as Product[]) ?? []);
     setLoading(false);
   };

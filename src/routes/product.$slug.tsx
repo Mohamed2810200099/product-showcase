@@ -1,13 +1,15 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Minus, Plus, Star, ShoppingBag, MessageCircle, ShieldCheck, Truck, Heart, ArrowLeft } from "lucide-react";
+import { Minus, Plus, Star, ShoppingBag, MessageCircle, ShieldCheck, Truck, Heart, ArrowLeft, Zap, Check, AlertTriangle, Sparkles, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { ProductCard, type Product } from "@/components/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
+import placeholderImg from "@/assets/product-placeholder.jpg";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
@@ -25,6 +27,7 @@ function ProductPage() {
   const { slug } = Route.useParams();
   const { add } = useCart();
   const brand = useBrand();
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [reviewName, setReviewName] = useState("");
@@ -59,16 +62,47 @@ function ProductPage() {
     },
   });
 
+  const { data: related = [] } = useQuery({
+    queryKey: ["related", product?.id, product?.category_id],
+    enabled: !!product?.id && !!product?.category_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
+        .eq("is_active", true)
+        .eq("category_id", product!.category_id as string)
+        .neq("id", product!.id)
+        .order("order_index", { ascending: true })
+        .limit(4);
+      return (data ?? []) as unknown as Product[];
+    },
+  });
+
   if (isLoading) return <PublicLayout><div className="container mx-auto py-20 text-center">جاري التحميل…</div></PublicLayout>;
   if (!product) throw notFound();
 
-  const images = ((product.images as string[]) ?? []).length > 0
-    ? (product.images as string[])
-    : ["https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=900&auto=format&fit=crop"];
+  const hasImages = Array.isArray(product.images) && (product.images as string[]).length > 0;
+  const images = hasImages ? (product.images as string[]) : [placeholderImg];
 
   const discount = product.compare_at_price && Number(product.compare_at_price) > Number(product.price)
     ? Math.round((1 - Number(product.price) / Number(product.compare_at_price)) * 100)
     : null;
+
+  const productUrl = typeof window !== "undefined" ? `${window.location.origin}/product/${product.slug}` : `/product/${product.slug}`;
+  const waMsg = `السلام عليكم 🌸 عايزة أطلب:\n${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالرابط: ${productUrl}`;
+
+  const handleAdd = () => {
+    add(
+      { id: product.id, name: product.name, slug: product.slug, price: Number(product.price), image: images[0] },
+      qty,
+    );
+    toast.success("تمت الإضافة للسلة 🛍️");
+  };
+
+  const handleBuyNow = () => {
+    handleAdd();
+    navigate({ to: "/checkout" });
+  };
 
   const submitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +122,9 @@ function ProductPage() {
     refetchReviews();
   };
 
+  const benefits = (product.key_benefits as string[] | null) ?? [];
+  const ingredients = (product.key_ingredients as string[] | null) ?? [];
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-8">
@@ -96,19 +133,27 @@ function ProductPage() {
           <ArrowLeft className="h-3 w-3" />
           <Link to="/shop" className="hover:text-primary">المتجر</Link>
           <ArrowLeft className="h-3 w-3" />
-          <span className="text-foreground">{product.name}</span>
+          <span className="text-foreground">{product.arabic_title || product.name}</span>
         </nav>
 
         <div className="grid md:grid-cols-2 gap-10">
           {/* Gallery */}
           <div>
             <div className="aspect-square bg-muted rounded-3xl overflow-hidden relative">
-              <img src={images[activeImg]} alt={product.name} className="w-full h-full object-cover" />
+              <img src={images[activeImg]} alt={product.arabic_title || product.name} className="w-full h-full object-cover" />
               {discount && (
                 <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-sm font-bold px-3 py-1.5 rounded-full shadow-soft">
                   -{discount}%
                 </span>
               )}
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
+                <span className="bg-background/90 backdrop-blur text-xs font-semibold px-3 py-1.5 rounded-full text-primary shadow-soft">
+                  🇩🇪 منتج ألماني أصلي
+                </span>
+                <span className="bg-background/90 backdrop-blur text-xs font-semibold px-3 py-1.5 rounded-full text-foreground shadow-soft">
+                  مستورد من ألمانيا
+                </span>
+              </div>
             </div>
             {images.length > 1 && (
               <div className="grid grid-cols-5 gap-2 mt-3">
@@ -127,8 +172,14 @@ function ProductPage() {
 
           {/* Info */}
           <div className="space-y-5">
-            {product.brand && <div className="text-xs uppercase tracking-widest text-muted-foreground">{product.brand}</div>}
-            <h1 className="font-display text-3xl sm:text-4xl font-bold">{product.name}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              {product.brand && <span className="text-xs uppercase tracking-widest text-muted-foreground">{product.brand}</span>}
+              {(product as any).sub_category && (
+                <span className="text-xs bg-secondary px-2 py-1 rounded-full">{(product as any).sub_category}</span>
+              )}
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold leading-tight">{product.arabic_title || product.name}</h1>
+            <p className="text-sm text-muted-foreground" dir="ltr">{product.name}</p>
 
             {Number(product.reviews_count) > 0 && (
               <div className="flex items-center gap-2">
@@ -141,10 +192,13 @@ function ProductPage() {
               </div>
             )}
 
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-3xl font-bold text-primary">{formatEGP(Number(product.price))}</span>
               {product.compare_at_price && (
                 <span className="text-lg text-muted-foreground line-through">{formatEGP(Number(product.compare_at_price))}</span>
+              )}
+              {(product as any).dm_price_eur && (
+                <span className="text-xs text-muted-foreground">سعر dm الأصلي: €{(product as any).dm_price_eur}</span>
               )}
             </div>
 
@@ -157,34 +211,33 @@ function ProductPage() {
               <div className="flex items-center border border-border rounded-full">
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-2 hover:bg-accent rounded-r-full"><Minus className="h-4 w-4" /></button>
                 <span className="w-10 text-center font-semibold">{qty}</span>
-                <button onClick={() => setQty((q) => Math.min(product.stock, q + 1))} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
+                <button onClick={() => setQty((q) => Math.min(Math.max(product.stock, 1), q + 1))} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
               </div>
-              <span className={`text-xs ${product.stock < 5 ? "text-destructive" : "text-muted-foreground"}`}>
-                {product.stock > 0 ? `متاح ${product.stock} قطعة` : "نفد المخزون"}
+              <span className={`text-xs ${product.stock === 0 ? "text-muted-foreground" : product.stock < 5 ? "text-destructive" : "text-muted-foreground"}`}>
+                {product.stock > 0 ? `متاح ${product.stock} قطعة` : "اطلبي مسبقًا"}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
-                disabled={product.stock === 0}
-                onClick={() => {
-                  add(
-                    { id: product.id, name: product.name, slug: product.slug, price: Number(product.price), image: images[0] },
-                    qty,
-                  );
-                  toast.success("تمت الإضافة للسلة 🛍️");
-                }}
-                className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition disabled:opacity-40 inline-flex items-center justify-center gap-2"
+                onClick={handleAdd}
+                className="bg-card border-2 border-primary text-primary py-3.5 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition inline-flex items-center justify-center gap-2"
               >
                 <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
               </button>
+              <button
+                onClick={handleBuyNow}
+                className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition inline-flex items-center justify-center gap-2"
+              >
+                <Zap className="h-4 w-4" /> اشتري الآن
+              </button>
               <a
-                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`عايزة أطلب: ${product.name} بسعر ${formatEGP(Number(product.price))}`)}`}
+                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
                 target="_blank"
                 rel="noreferrer"
                 className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
               >
-                <MessageCircle className="h-4 w-4" /> اطلبي عبر واتساب
+                <MessageCircle className="h-4 w-4" /> واتساب
               </a>
             </div>
 
@@ -200,14 +253,63 @@ function ProductPage() {
                 </div>
               ))}
             </div>
-
-            {product.description && (
-              <div className="pt-4 border-t border-border">
-                <h2 className="font-display text-xl font-semibold mb-2">الوصف</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{product.description}</p>
-              </div>
-            )}
           </div>
+        </div>
+
+        {/* DETAILS SECTIONS */}
+        <div className="mt-14 grid md:grid-cols-2 gap-6">
+          {benefits.length > 0 && (
+            <Section icon={Sparkles} title="الفوائد الرئيسية">
+              <ul className="space-y-2">
+                {benefits.map((b, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {(product as any).suitable_for && (
+            <Section icon={Heart} title="مناسب لـ">
+              <p className="text-sm leading-relaxed text-muted-foreground">{(product as any).suitable_for}</p>
+            </Section>
+          )}
+
+          {(product as any).how_to_use && (
+            <Section icon={Info} title="طريقة الاستخدام">
+              <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{(product as any).how_to_use}</p>
+            </Section>
+          )}
+
+          {ingredients.length > 0 && (
+            <Section icon={Sparkles} title="المكونات الفعّالة">
+              <div className="flex flex-wrap gap-2">
+                {ingredients.map((ing, i) => (
+                  <span key={i} className="text-xs bg-secondary/60 border border-border rounded-full px-3 py-1.5" dir="ltr">{ing}</span>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {(product as any).product_details && (
+            <Section icon={Info} title="تفاصيل المنتج">
+              <p className="text-sm leading-relaxed text-muted-foreground">{(product as any).product_details}</p>
+            </Section>
+          )}
+
+          {(product as any).warnings && (
+            <Section icon={AlertTriangle} title="تحذيرات وملاحظات">
+              <p className="text-sm leading-relaxed text-muted-foreground">{(product as any).warnings}</p>
+            </Section>
+          )}
+
+          {product.description && (
+            <Section icon={Info} title="الوصف الكامل" className="md:col-span-2">
+              <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{product.description}</p>
+            </Section>
+          )}
         </div>
 
         {/* REVIEWS */}
@@ -215,13 +317,20 @@ function ProductPage() {
           <div>
             <h2 className="font-display text-2xl font-bold mb-5">آراء العميلات</h2>
             {reviews.length === 0 ? (
-              <p className="text-muted-foreground text-sm">لا توجد تقييمات بعد. كوني أول من يقيم! 💕</p>
+              <div className="bg-secondary/40 border border-border rounded-2xl p-8 text-center">
+                <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">لا توجد تقييمات بعد</p>
+                <p className="text-xs text-muted-foreground mt-1">كوني أول من يقيم هذا المنتج 💕</p>
+              </div>
             ) : (
               <ul className="space-y-4">
                 {reviews.map((r: any) => (
                   <li key={r.id} className="bg-card border border-border rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-sm">{r.customer_name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm">{r.customer_name}</span>
+                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">عميلة موثّقة</span>
+                      </div>
                       <div className="flex">
                         {Array.from({ length: r.rating }).map((_, i) => (
                           <Star key={i} className="h-3.5 w-3.5 fill-gold text-gold" />
@@ -229,13 +338,14 @@ function ProductPage() {
                       </div>
                     </div>
                     {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
+                    <p className="text-[10px] text-muted-foreground mt-2">{new Date(r.created_at).toLocaleDateString("ar-EG")}</p>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          <form onSubmit={submitReview} className="bg-secondary/40 rounded-2xl p-6 border border-border">
+          <form onSubmit={submitReview} className="bg-secondary/40 rounded-2xl p-6 border border-border h-fit">
             <h3 className="font-display text-xl font-semibold mb-4">شاركينا رأيك</h3>
             <div className="space-y-3">
               <input
@@ -262,7 +372,28 @@ function ProductPage() {
             </div>
           </form>
         </section>
+
+        {/* RELATED */}
+        {related.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-display text-2xl font-bold mb-6">منتجات ذات صلة</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </section>
+        )}
       </div>
     </PublicLayout>
+  );
+}
+
+function Section({ icon: Icon, title, children, className = "" }: { icon: any; title: string; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`bg-card border border-border rounded-2xl p-5 ${className}`}>
+      <h2 className="font-display text-lg font-semibold mb-3 flex items-center gap-2">
+        <Icon className="h-4 w-4 text-primary" /> {title}
+      </h2>
+      {children}
+    </section>
   );
 }

@@ -35,17 +35,28 @@ function ProductForm() {
   const [form, setForm] = useState({
     name: "",
     name_en: "",
+    arabic_title: "",
     slug: "",
     description: "",
     short_description: "",
     price: 0,
     compare_at_price: 0,
+    dm_price_eur: 0,
     sku: "",
     stock: 0,
     brand: "",
     category_id: "",
+    sub_category: "",
     images: [] as string[],
     tags: "",
+    order_index: 0,
+    key_benefits: "",
+    suitable_for: "",
+    how_to_use: "",
+    key_ingredients: "",
+    product_details: "",
+    warnings: "",
+    source_url: "",
     is_active: true,
     is_featured: false,
     is_limited: false,
@@ -66,17 +77,28 @@ function ProductForm() {
             setForm({
               name: data.name ?? "",
               name_en: data.name_en ?? "",
+              arabic_title: (data as any).arabic_title ?? "",
               slug: data.slug ?? "",
               description: data.description ?? "",
               short_description: data.short_description ?? "",
               price: Number(data.price ?? 0),
               compare_at_price: Number(data.compare_at_price ?? 0),
+              dm_price_eur: Number((data as any).dm_price_eur ?? 0),
               sku: data.sku ?? "",
               stock: Number(data.stock ?? 0),
               brand: data.brand ?? "",
               category_id: data.category_id ?? "",
+              sub_category: (data as any).sub_category ?? "",
               images: Array.isArray(data.images) ? (data.images as string[]) : [],
               tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
+              order_index: Number((data as any).order_index ?? 0),
+              key_benefits: Array.isArray((data as any).key_benefits) ? (data as any).key_benefits.join("\n") : "",
+              suitable_for: (data as any).suitable_for ?? "",
+              how_to_use: (data as any).how_to_use ?? "",
+              key_ingredients: Array.isArray((data as any).key_ingredients) ? (data as any).key_ingredients.join("\n") : "",
+              product_details: (data as any).product_details ?? "",
+              warnings: (data as any).warnings ?? "",
+              source_url: (data as any).source_url ?? "",
               is_active: !!data.is_active,
               is_featured: !!data.is_featured,
               is_limited: !!data.is_limited,
@@ -92,24 +114,36 @@ function ProductForm() {
     if (!form.name || form.price <= 0) return toast.error("الاسم والسعر مطلوبين");
 
     setSaving(true);
+    const splitLines = (s: string) => s.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const payload = {
       name: form.name,
       name_en: form.name_en || null,
+      arabic_title: form.arabic_title || null,
       slug: form.slug || slugify(form.name),
       description: form.description || null,
       short_description: form.short_description || null,
       price: form.price,
       compare_at_price: form.compare_at_price > 0 ? form.compare_at_price : null,
+      dm_price_eur: form.dm_price_eur > 0 ? form.dm_price_eur : null,
       sku: form.sku || null,
       stock: form.stock,
       brand: form.brand || null,
       category_id: form.category_id || null,
+      sub_category: form.sub_category || null,
       images: form.images,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : null,
+      order_index: form.order_index,
+      key_benefits: form.key_benefits ? splitLines(form.key_benefits) : null,
+      suitable_for: form.suitable_for || null,
+      how_to_use: form.how_to_use || null,
+      key_ingredients: form.key_ingredients ? splitLines(form.key_ingredients) : null,
+      product_details: form.product_details || null,
+      warnings: form.warnings || null,
+      source_url: form.source_url || null,
       is_active: form.is_active,
       is_featured: form.is_featured,
       is_limited: form.is_limited,
-    };
+    } as any;
 
     const { error } = isNew
       ? await supabase.from("products").insert(payload)
@@ -146,31 +180,47 @@ function ProductForm() {
         <div className="space-y-6">
           <Section title="المعلومات الأساسية">
             <div className="grid sm:grid-cols-2 gap-3">
-              <Field label="اسم المنتج (عربي) *" value={form.name} onChange={(v) => setForm({ ...form, name: v, slug: form.slug || slugify(v) })} />
-              <Field label="الاسم بالإنجليزية" value={form.name_en} onChange={(v) => setForm({ ...form, name_en: v })} />
-              <Field label="Slug (الرابط)" value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} className="sm:col-span-2" dir="ltr" />
+              <Field label="اسم المنتج (ألماني/إنجليزي) *" value={form.name} onChange={(v) => setForm({ ...form, name: v, slug: form.slug || slugify(v) })} dir="ltr" />
+              <Field label="العنوان بالعربية" value={form.arabic_title} onChange={(v) => setForm({ ...form, arabic_title: v })} />
+              <Field label="الاسم بالإنجليزية (اختياري)" value={form.name_en} onChange={(v) => setForm({ ...form, name_en: v })} dir="ltr" />
+              <Field label="Slug (الرابط)" value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} dir="ltr" />
               <TextArea label="وصف مختصر" value={form.short_description} onChange={(v) => setForm({ ...form, short_description: v })} className="sm:col-span-2" rows={2} />
-              <TextArea label="الوصف الكامل" value={form.description} onChange={(v) => setForm({ ...form, description: v })} className="sm:col-span-2" rows={5} />
+              <TextArea label="الوصف الكامل" value={form.description} onChange={(v) => setForm({ ...form, description: v })} className="sm:col-span-2" rows={4} />
             </div>
           </Section>
 
-          <Section title="الصور">
+          <Section title="الصور (سحب وإفلات لإعادة الترتيب — أول صورة هي الرئيسية)">
             <ImageUploader
               bucket="products"
               value={form.images}
               onChange={(images) => setForm({ ...form, images })}
-              max={10}
+              max={15}
             />
+          </Section>
+
+          <Section title="تفاصيل المنتج للعميلات">
+            <div className="grid sm:grid-cols-1 gap-3">
+              <TextArea label="الفوائد الرئيسية (سطر لكل فائدة)" value={form.key_benefits} onChange={(v) => setForm({ ...form, key_benefits: v })} rows={5} />
+              <TextArea label="مناسب لـ" value={form.suitable_for} onChange={(v) => setForm({ ...form, suitable_for: v })} rows={2} />
+              <TextArea label="طريقة الاستخدام" value={form.how_to_use} onChange={(v) => setForm({ ...form, how_to_use: v })} rows={4} />
+              <TextArea label="المكونات الفعّالة (سطر لكل مكون)" value={form.key_ingredients} onChange={(v) => setForm({ ...form, key_ingredients: v })} rows={5} />
+              <TextArea label="تفاصيل المنتج" value={form.product_details} onChange={(v) => setForm({ ...form, product_details: v })} rows={2} />
+              <TextArea label="تحذيرات / ملاحظات" value={form.warnings} onChange={(v) => setForm({ ...form, warnings: v })} rows={3} />
+            </div>
           </Section>
 
           <Section title="السعر والمخزون">
             <div className="grid sm:grid-cols-3 gap-3">
               <Field label="السعر (ج.م) *" type="number" value={String(form.price)} onChange={(v) => setForm({ ...form, price: Number(v) })} />
               <Field label="السعر قبل الخصم" type="number" value={String(form.compare_at_price)} onChange={(v) => setForm({ ...form, compare_at_price: Number(v) })} />
+              <Field label="سعر dm الأصلي (€)" type="number" value={String(form.dm_price_eur)} onChange={(v) => setForm({ ...form, dm_price_eur: Number(v) })} />
               <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => setForm({ ...form, stock: Number(v) })} />
               <Field label="SKU" value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} dir="ltr" />
-              <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} />
-              <Field label="وسوم (مفصولة بفاصلة)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+              <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} dir="ltr" />
+              <Field label="التصنيف الفرعي" value={form.sub_category} onChange={(v) => setForm({ ...form, sub_category: v })} dir="ltr" />
+              <Field label="ترتيب العرض" type="number" value={String(form.order_index)} onChange={(v) => setForm({ ...form, order_index: Number(v) })} />
+              <Field label="وسوم (بفاصلة)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+              <Field label="رابط المصدر (داخلي)" value={form.source_url} onChange={(v) => setForm({ ...form, source_url: v })} className="sm:col-span-3" dir="ltr" />
             </div>
           </Section>
         </div>
