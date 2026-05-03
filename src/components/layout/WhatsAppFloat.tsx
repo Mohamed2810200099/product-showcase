@@ -4,11 +4,16 @@ import { MessageCircle } from "lucide-react";
 export function WhatsAppFloat() {
   const brand = useBrand();
   if (!brand.whatsapp) return null;
+  const url = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent("مرحباً، عايزة استفسر عن منتج")}`;
   return (
     <a
-      href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent("مرحباً، عايزة استفسر عن منتج")}`}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={(e) => {
+        e.preventDefault();
+        window.open(url, "_blank", "noopener,noreferrer");
+      }}
       className="fixed bottom-20 sm:bottom-6 left-4 sm:left-6 z-30 h-14 w-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-elegant hover:scale-110 transition-transform animate-float-soft"
       aria-label="تواصلي عبر واتساب"
     >
