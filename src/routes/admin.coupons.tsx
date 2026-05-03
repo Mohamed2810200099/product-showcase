@@ -105,13 +105,27 @@ function CouponsPage() {
               className="bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             <input type="number" placeholder="حد الاستخدام (اختياري)" value={editing.max_uses ? String(editing.max_uses) : ""} onChange={(e) => setEditing({ ...editing, max_uses: e.target.value ? Number(e.target.value) : null })}
               className="bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input type="number" placeholder="استخدامات لكل عميل" value={editing.max_uses_per_customer ? String(editing.max_uses_per_customer) : ""} onChange={(e) => setEditing({ ...editing, max_uses_per_customer: e.target.value ? Number(e.target.value) : null })}
+              className="bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input type="date" placeholder="تاريخ البدء" value={editing.starts_at ? editing.starts_at.slice(0, 10) : ""} onChange={(e) => setEditing({ ...editing, starts_at: e.target.value || null })}
+              className="bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             <input type="date" placeholder="تاريخ الانتهاء" value={editing.expires_at ? editing.expires_at.slice(0, 10) : ""} onChange={(e) => setEditing({ ...editing, expires_at: e.target.value || null })}
               className="bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
-          <label className="flex items-center gap-2 mt-3 text-sm cursor-pointer">
-            <input type="checkbox" checked={editing.active ?? true} onChange={(e) => setEditing({ ...editing, active: e.target.checked })} className="accent-primary" />
-            نشط
-          </label>
+          <div className="flex flex-wrap gap-4 mt-3 text-sm">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={editing.active ?? true} onChange={(e) => setEditing({ ...editing, active: e.target.checked })} className="accent-primary" />
+              نشط
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={editing.first_order_only ?? false} onChange={(e) => setEditing({ ...editing, first_order_only: e.target.checked })} className="accent-primary" />
+              أول طلب فقط
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={editing.can_stack ?? false} onChange={(e) => setEditing({ ...editing, can_stack: e.target.checked })} className="accent-primary" />
+              يمكن دمجه مع خصومات أخرى
+            </label>
+          
           <div className="flex gap-2 mt-4">
             <button onClick={save} className="bg-primary text-primary-foreground px-5 py-2 rounded-full inline-flex items-center gap-2 text-sm">
               <Save className="h-4 w-4" /> حفظ
