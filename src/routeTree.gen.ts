@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as IndexRouteImport } from './routes/index'
@@ -41,6 +42,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const OrderSuccessRoute = OrderSuccessRouteImport.update({
   id: '/order-success',
   path: '/order-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/login': typeof LoginRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cart'
     | '/checkout'
+    | '/login'
     | '/order-success'
     | '/orders'
     | '/shop'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cart'
     | '/checkout'
+    | '/login'
     | '/order-success'
     | '/orders'
     | '/shop'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cart'
     | '/checkout'
+    | '/login'
     | '/order-success'
     | '/orders'
     | '/shop'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  LoginRoute: typeof LoginRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
   OrdersRoute: typeof OrdersRoute
   ShopRoute: typeof ShopRoute
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/order-success'
       fullPath: '/order-success'
       preLoaderRoute: typeof OrderSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -399,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  LoginRoute: LoginRoute,
   OrderSuccessRoute: OrderSuccessRoute,
   OrdersRoute: OrdersRoute,
   ShopRoute: ShopRoute,
