@@ -26,7 +26,12 @@ type Coupon = {
   max_uses: number | null;
   used_count: number;
   expires_at: string | null;
+  starts_at: string | null;
   active: boolean;
+  first_order_only: boolean;
+  max_uses_per_customer: number | null;
+  can_stack: boolean;
+  source: string;
 };
 
 function CouponsPage() {
@@ -50,8 +55,13 @@ function CouponsPage() {
       value: editing.value,
       min_order: editing.min_order ?? 0,
       max_uses: editing.max_uses || null,
+      max_uses_per_customer: editing.max_uses_per_customer || null,
       expires_at: editing.expires_at || null,
+      starts_at: editing.starts_at || null,
       active: editing.active ?? true,
+      first_order_only: editing.first_order_only ?? false,
+      can_stack: editing.can_stack ?? false,
+      source: editing.source || "admin",
     };
     const { error } = editing.id
       ? await supabase.from("coupons").update(payload).eq("id", editing.id)
