@@ -29,7 +29,7 @@ const GOALS: { id: Goal; label: string; type: "hair" | "skin"; routineName: stri
   { id: "skin_oily", label: "البشرة الدهنية والرؤوس السوداء", type: "skin", routineName: "روتين تنقية البشرة الدهنية", intro: "منتجات لتقليل الدهون وتنظيف المسام بعمق." },
 ];
 
-// Map by product order_index (1-based per user spec)
+// Map by product order_index (1-based per user spec) — fallback
 const RECS: Record<Goal, number[]> = {
   hair_growth: [1, 14],
   hair_repair: [2, 3, 4, 6, 15],
@@ -37,6 +37,16 @@ const RECS: Record<Goal, number[]> = {
   skin_glow: [5, 8, 11],
   skin_hydrate: [10, 12, 13],
   skin_oily: [7, 9, 17, 18, 19],
+};
+
+// Tag keywords for matching products by tags array
+const GOAL_TAGS: Record<Goal, string[]> = {
+  hair_growth: ["hair_growth", "growth", "نمو", "كثافة", "تكثيف", "anti-hair-loss", "hair-loss"],
+  hair_repair: ["hair_repair", "repair", "damaged", "إصلاح", "متضرر", "تالف", "keratin", "كيراتين"],
+  hair_frizz: ["hair_frizz", "frizz", "smooth", "shine", "هيشان", "نعومة", "لمعان"],
+  skin_glow: ["skin_glow", "glow", "brightening", "radiance", "نضارة", "إشراق", "vitamin-c", "فيتامين-سي"],
+  skin_hydrate: ["skin_hydrate", "hydration", "hydrating", "moisturizing", "soothing", "ترطيب", "تهدئة", "hyaluronic"],
+  skin_oily: ["skin_oily", "oily", "acne", "blackheads", "pores", "دهنية", "حبوب", "رؤوس-سوداء", "salicylic"],
 };
 
 const HAIR_DESC = ["جاف", "هايش", "متقصف", "مصبوغ أو معالج كيميائيًا", "ضعيف أو محتاج كثافة"];
@@ -59,7 +69,7 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,arabic_title,slug,price,images,order_index")
+        .select("id,name,arabic_title,slug,price,images,order_index,tags")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
       return data ?? [];
@@ -68,11 +78,25 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
 
   const recommended = useMemo(() => {
     if (!goal || !size) return [] as any[];
-    const indexes = RECS[goal];
-    const limited = size === "single" ? indexes.slice(0, 1) : size === "duo" ? indexes.slice(0, 2) : indexes;
-    return limited
-      .map((idx) => products.find((p: any) => p.order_index === idx))
-      .filter(Boolean);
+
+    // Try tag-based matching first
+    const keywords = GOAL_TAGS[goal].map((k) => k.toLowerCase());
+    const tagMatched = products.filter((p: any) => {
+      const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
+      return tags.some((t: string) => keywords.some((k) => t.includes(k) || k.includes(t)));
+    });
+
+    let pool: any[] = tagMatched;
+    if (pool.length === 0) {
+      // Fallback to order_index logic
+      const indexes = RECS[goal];
+      pool = indexes
+        .map((idx) => products.find((p: any) => p.order_index === idx))
+        .filter(Boolean);
+    }
+
+    const limit = size === "single" ? 1 : size === "duo" ? 2 : pool.length;
+    return pool.slice(0, limit);
   }, [goal, size, products]);
 
   const total = recommended.reduce((s: number, p: any) => s + Number(p.price ?? 0), 0);
