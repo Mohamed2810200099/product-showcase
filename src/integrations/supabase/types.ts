@@ -443,7 +443,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      coupons_public: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          id: string | null
+          min_order: number | null
+          type: string | null
+          value: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          id?: string | null
+          min_order?: number | null
+          type?: string | null
+          value?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          id?: string | null
+          min_order?: number | null
+          type?: string | null
+          value?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
