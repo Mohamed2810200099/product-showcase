@@ -196,6 +196,7 @@ function HomePage() {
           </div>
         </section>
       )}
+      <BeautyAssistant />
     </PublicLayout>
   );
 }
