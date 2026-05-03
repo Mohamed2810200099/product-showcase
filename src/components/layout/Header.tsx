@@ -43,7 +43,7 @@ export function Header() {
                 </Link>
               ))}
               <div className="border-t border-border my-2" />
-              <Link to="/admin/login" onClick={() => setOpen(false)} className="py-3 px-3 rounded-lg text-sm text-muted-foreground hover:bg-[#F9EEF3]">
+              <Link to="/admin/login" onClick={() => setOpen(false)} className="py-2 px-3 rounded-lg text-xs text-muted-foreground/70 hover:bg-[#F9EEF3]">
                 Admin
               </Link>
             </nav>
@@ -84,7 +84,7 @@ export function Header() {
           <button aria-label="Search" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
             <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
-          <Link to="/admin/login" aria-label="Account" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+          <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
             <User className="h-5 w-5 text-[#3A2430]" />
           </Link>
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-[#F9EEF3] transition" aria-label="Cart">
