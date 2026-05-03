@@ -118,7 +118,7 @@ export const createOrder = createServerFn({ method: "POST" })
         city: data.city,
         governorate: data.governorate,
         notes: data.notes || null,
-        items: orderItems,
+        items: orderItems as unknown as never,
         subtotal,
         discount,
         shipping,
