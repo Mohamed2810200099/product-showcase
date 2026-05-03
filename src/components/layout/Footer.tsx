@@ -56,7 +56,18 @@ export function Footer() {
             {brand.whatsapp && (
               <li className="flex items-center gap-2 text-muted-foreground">
                 <MessageCircle className="h-4 w-4" />
-                <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">+{brand.whatsapp}</a>
+                <a
+                  href={`https://wa.me/${brand.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(`https://wa.me/${brand.whatsapp}`, "_blank", "noopener,noreferrer");
+                  }}
+                  className="hover:text-primary"
+                >
+                  +{brand.whatsapp}
+                </a>
               </li>
             )}
             <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> <a href={`mailto:${brand.contact_email}`} className="hover:text-primary">{brand.contact_email}</a></li>
