@@ -36,8 +36,7 @@ function HomePage() {
         .from("products")
         .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
         .eq("is_active", true)
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
+        .order("order_index", { ascending: true })
         .limit(8);
       return (data ?? []) as unknown as Product[];
     },
