@@ -17,6 +17,8 @@ export type Product = {
   stock: number;
   is_limited?: boolean;
   short_description?: string | null;
+  availability_status?: string | null;
+  stock_tracking_enabled?: boolean | null;
 };
 
 export function ProductCard({ product }: { product: Product }) {
@@ -25,6 +27,9 @@ export function ProductCard({ product }: { product: Product }) {
   const discount = product.compare_at_price && product.compare_at_price > product.price
     ? Math.round((1 - product.price / product.compare_at_price) * 100)
     : null;
+
+  const status = product.availability_status ?? "available";
+  const isOut = status === "out_of_stock" || (product.stock_tracking_enabled === true && product.stock === 0);
 
   return (
     <div className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
@@ -40,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
             كمية محدودة
           </span>
         )}
-        {product.stock === 0 && (
+        {isOut && (
           <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
             <span className="font-display text-lg">نفد المخزون</span>
           </div>
@@ -59,6 +64,9 @@ export function ProductCard({ product }: { product: Product }) {
             <span>({product.reviews_count})</span>
           </div>
         )}
+        {!isOut && (
+          <div className="mt-1 text-[11px] text-emerald-600 font-medium">متاح للطلب</div>
+        )}
         <div className="mt-3 flex items-end justify-between gap-2">
           <div>
             <div className="text-primary font-bold text-lg">{formatEGP(product.price)}</div>
@@ -68,11 +76,11 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
           <button
             onClick={() => {
-              if (product.stock === 0) return;
+              if (isOut) return;
               add({ id: product.id, name: product.name, slug: product.slug, price: product.price, image: img });
               toast.success("تمت الإضافة للسلة 🛍️");
             }}
-            disabled={product.stock === 0}
+            disabled={isOut}
             className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-soft"
             aria-label="أضيفي للسلة"
           >
