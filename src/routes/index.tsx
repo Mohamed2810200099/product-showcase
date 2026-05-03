@@ -34,7 +34,7 @@ function HomePage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
         .order("order_index", { ascending: true })
         .limit(8);
@@ -47,7 +47,7 @@ function HomePage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
         .eq("is_limited", true)
         .limit(4);

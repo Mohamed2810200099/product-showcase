@@ -39,7 +39,7 @@ function ShopPage() {
     queryFn: async () => {
       let q = supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,category_id,categories(slug)")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled,category_id,categories(slug)")
         .eq("is_active", true);
 
       if (search.category) {
