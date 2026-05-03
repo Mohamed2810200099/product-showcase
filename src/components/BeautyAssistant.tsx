@@ -244,13 +244,16 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
 
   return (
     <>
-      <button
+      <motion.button
         onClick={() => setOpen(true)}
         aria-label="افتحي مساعدة الجمال"
-        className="fixed bottom-[146px] sm:bottom-[90px] left-4 sm:left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] flex items-center justify-center hover:scale-105 transition motion-reduce:transform-none"
+        whileHover={{ y: -4, scale: 1.06 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 280, damping: 18 }}
+        className="fixed bottom-[146px] sm:bottom-[90px] left-4 sm:left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] flex items-center justify-center motion-reduce:transform-none"
       >
         <MessageCircle className="h-6 w-6" />
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {open && (
