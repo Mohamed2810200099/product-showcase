@@ -3,6 +3,7 @@ import { ShoppingBag, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
+import placeholderImg from "@/assets/product-placeholder.jpg";
 
 export type Product = {
   id: string;
@@ -20,7 +21,7 @@ export type Product = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
-  const img = product.images?.[0] ?? `https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600&auto=format&fit=crop`;
+  const img = (product.images && product.images.length > 0 ? product.images[0] : null) ?? placeholderImg;
   const discount = product.compare_at_price && product.compare_at_price > product.price
     ? Math.round((1 - product.price / product.compare_at_price) * 100)
     : null;
