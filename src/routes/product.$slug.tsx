@@ -197,9 +197,6 @@ function ProductPage() {
               {product.compare_at_price && (
                 <span className="text-lg text-muted-foreground line-through">{formatEGP(Number(product.compare_at_price))}</span>
               )}
-              {(product as any).dm_price_eur && (
-                <span className="text-xs text-muted-foreground">سعر dm الأصلي: €{(product as any).dm_price_eur}</span>
-              )}
             </div>
 
             {product.short_description && (

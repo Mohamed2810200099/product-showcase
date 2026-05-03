@@ -58,10 +58,6 @@ export function Header() {
                   {it.label}
                 </Link>
               ))}
-              <div className="border-t border-border my-2" />
-              <Link to="/admin/login" onClick={() => setOpen(false)} className="py-2 px-3 rounded-lg text-xs text-muted-foreground/70 hover:bg-[#F9EEF3]">
-                Admin
-              </Link>
             </nav>
           </SheetContent>
         </Sheet>
