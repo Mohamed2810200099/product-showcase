@@ -125,7 +125,7 @@ function CouponsPage() {
               <input type="checkbox" checked={editing.can_stack ?? false} onChange={(e) => setEditing({ ...editing, can_stack: e.target.checked })} className="accent-primary" />
               يمكن دمجه مع خصومات أخرى
             </label>
-          
+          </div>
           <div className="flex gap-2 mt-4">
             <button onClick={save} className="bg-primary text-primary-foreground px-5 py-2 rounded-full inline-flex items-center gap-2 text-sm">
               <Save className="h-4 w-4" /> حفظ
