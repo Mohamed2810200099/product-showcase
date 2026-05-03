@@ -50,23 +50,24 @@ export function Product3DCard({ children, className = "" }: { children: ReactNod
       className={`relative will-change-transform ${className}`}
     >
       {/* mouse-following soft rose glow */}
-      {!reduce && (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"
-          style={{
-            background: useTransform(
-              [glowX, glowY] as any,
-              ([x, y]: any) =>
-                `radial-gradient(220px circle at ${x} ${y}, rgba(217,108,157,0.28), transparent 70%)`,
-            ),
-            filter: "blur(14px)",
-          }}
-        />
-      )}
+      {!reduce && <GlowLayer glowX={glowX} glowY={glowY} />}
       <div className="group" style={{ transform: "translateZ(0)" }}>
         {children}
       </div>
     </motion.div>
+  );
+}
+
+function GlowLayer({ glowX, glowY }: { glowX: any; glowY: any }) {
+  const bg = useTransform(
+    [glowX, glowY] as any,
+    ([x, y]: any) => `radial-gradient(220px circle at ${x} ${y}, rgba(217,108,157,0.28), transparent 70%)`,
+  );
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none absolute -inset-2 rounded-3xl opacity-60 -z-10"
+      style={{ background: bg, filter: "blur(14px)" }}
+    />
   );
 }
