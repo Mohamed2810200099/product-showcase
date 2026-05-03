@@ -8,6 +8,8 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
 import { BeautyAssistant } from "@/components/BeautyAssistant";
+import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
+import { RevealOnView } from "@/components/three-d/RevealOnView";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -117,19 +119,26 @@ function HomePage() {
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section className="container mx-auto px-4 py-10">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold">منتجات مميزة</h2>
-            <p className="text-muted-foreground mt-1">اختياراتنا المفضلة لكِ</p>
+      <section className="container mx-auto px-4 py-10 relative">
+        <FloatingBeautyElements variant="pearls" density={5} />
+        <RevealOnView>
+          <div className="flex items-end justify-between mb-8 relative z-10">
+            <div>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold">منتجات مميزة</h2>
+              <p className="text-muted-foreground mt-1">اختياراتنا المفضلة لكِ</p>
+            </div>
+            <Link to="/shop" className="text-primary hover:underline text-sm font-medium hidden sm:flex items-center gap-1">
+              عرض الكل <ArrowLeft className="h-4 w-4" />
+            </Link>
           </div>
-          <Link to="/shop" className="text-primary hover:underline text-sm font-medium hidden sm:flex items-center gap-1">
-            عرض الكل <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </div>
+        </RevealOnView>
         {featured.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
+            {featured.map((p, i) => (
+              <RevealOnView key={p.id} delay={i * 0.06}>
+                <ProductCard product={p} />
+              </RevealOnView>
+            ))}
           </div>
         ) : (
           <p className="text-center text-muted-foreground py-8">قريباً منتجات مميزة 💕</p>
