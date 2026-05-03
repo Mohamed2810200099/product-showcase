@@ -74,6 +74,12 @@ function CheckoutPage() {
     const usedCount = Number(localStorage.getItem(usedKey) ?? "0");
     const maxPer = (data as any).max_uses_per_customer as number | null;
     if (maxPer && usedCount >= maxPer) return toast.error("تم استخدام هذا الكود من قبل");
+    // Server-side check: has this phone used this coupon before?
+    const phone = form.customer_phone.trim();
+    if (phone.length >= 6) {
+      const { data: usedBefore } = await supabase.rpc("has_used_coupon", { _code: code, _phone: phone });
+      if (usedBefore) return toast.error("هذا الرقم استخدم الكوبون من قبل");
+    }
     if ((data as any).first_order_only && localStorage.getItem("tgh_has_ordered") === "1") {
       return toast.error("هذا الكود مخصص لأول طلب فقط");
     }
