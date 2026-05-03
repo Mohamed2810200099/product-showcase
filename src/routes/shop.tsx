@@ -29,6 +29,8 @@ function ShopPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [showFilters, setShowFilters] = useState(false);
+  const activeQuery = search.search ?? search.q ?? "";
+  const [searchInput, setSearchInput] = useState(activeQuery);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
