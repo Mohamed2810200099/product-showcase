@@ -64,13 +64,13 @@ function ProductPage() {
 
   const { data: related = [] } = useQuery({
     queryKey: ["related", product?.id, product?.category_id],
-    enabled: !!product?.id,
+    enabled: !!product?.id && !!product?.category_id,
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
         .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
         .eq("is_active", true)
-        .eq("category_id", product!.category_id)
+        .eq("category_id", product!.category_id as string)
         .neq("id", product!.id)
         .order("order_index", { ascending: true })
         .limit(4);
