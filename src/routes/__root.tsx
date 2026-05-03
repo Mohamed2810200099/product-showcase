@@ -51,6 +51,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "ar_EG" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "The Girl House — منتجات DM الألمانية في مصر" },
+      { name: "description", content: "اكتشفي منتجات عناية ألمانية أصلية للشعر والبشرة من dm وBalea وSchaebens. اختيارات مختارة بعناية، متاحة في مصر بأسعار مناسبة مع طلب سريع عبر The Girl House." },
+      { property: "og:description", content: "اكتشفي منتجات عناية ألمانية أصلية للشعر والبشرة من dm وBalea وSchaebens. اختيارات مختارة بعناية، متاحة في مصر بأسعار مناسبة مع طلب سريع عبر The Girl House." },
+      { name: "twitter:description", content: "اكتشفي منتجات عناية ألمانية أصلية للشعر والبشرة من dm وBalea وSchaebens. اختيارات مختارة بعناية، متاحة في مصر بأسعار مناسبة مع طلب سريع عبر The Girl House." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5e9aef60-4088-461c-aa76-bfd245ca45d2/id-preview-e1a1a7c8--3b6d57ab-7e55-4ba3-86fd-fa7d54c274cf.lovable.app-1777846557956.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5e9aef60-4088-461c-aa76-bfd245ca45d2/id-preview-e1a1a7c8--3b6d57ab-7e55-4ba3-86fd-fa7d54c274cf.lovable.app-1777846557956.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
