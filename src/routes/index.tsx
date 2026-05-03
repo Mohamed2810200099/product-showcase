@@ -7,6 +7,7 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
+import { BeautyAssistant } from "@/components/BeautyAssistant";
 
 export const Route = createFileRoute("/")({
   head: () => ({
