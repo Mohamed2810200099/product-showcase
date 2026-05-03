@@ -69,7 +69,7 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,arabic_title,slug,price,images,order_index")
+        .select("id,name,arabic_title,slug,price,images,order_index,tags")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
       return data ?? [];
@@ -78,11 +78,25 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
 
   const recommended = useMemo(() => {
     if (!goal || !size) return [] as any[];
-    const indexes = RECS[goal];
-    const limited = size === "single" ? indexes.slice(0, 1) : size === "duo" ? indexes.slice(0, 2) : indexes;
-    return limited
-      .map((idx) => products.find((p: any) => p.order_index === idx))
-      .filter(Boolean);
+
+    // Try tag-based matching first
+    const keywords = GOAL_TAGS[goal].map((k) => k.toLowerCase());
+    const tagMatched = products.filter((p: any) => {
+      const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
+      return tags.some((t: string) => keywords.some((k) => t.includes(k) || k.includes(t)));
+    });
+
+    let pool: any[] = tagMatched;
+    if (pool.length === 0) {
+      // Fallback to order_index logic
+      const indexes = RECS[goal];
+      pool = indexes
+        .map((idx) => products.find((p: any) => p.order_index === idx))
+        .filter(Boolean);
+    }
+
+    const limit = size === "single" ? 1 : size === "duo" ? 2 : pool.length;
+    return pool.slice(0, limit);
   }, [goal, size, products]);
 
   const total = recommended.reduce((s: number, p: any) => s + Number(p.price ?? 0), 0);
