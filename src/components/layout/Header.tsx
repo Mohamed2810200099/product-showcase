@@ -117,6 +117,36 @@ export function Header() {
           </Link>
         </div>
       </div>
+      </div>
+      {isSearchOpen && (
+        <div className="border-t border-white/60 bg-white/90 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
+          <form onSubmit={submitSearch} className="container mx-auto px-4 py-3 flex items-center gap-2">
+            <Search className="h-5 w-5 text-[#3A2430]/60 shrink-0" />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحثي عن منتج..."
+              className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-[#3A2430]/40 py-2"
+            />
+            <button
+              type="submit"
+              className="bg-[#D96C9D] hover:bg-[#C95588] text-white text-sm font-medium px-4 py-2 rounded-full transition shrink-0"
+            >
+              بحث
+            </button>
+            <button
+              type="button"
+              aria-label="Close search"
+              onClick={() => setIsSearchOpen(false)}
+              className="p-2 rounded-full hover:bg-[#F9EEF3] transition shrink-0"
+            >
+              <X className="h-5 w-5 text-[#3A2430]" />
+            </button>
+          </form>
+        </div>
+      )}
     </header>
   );
 }
