@@ -405,8 +405,7 @@ function FloatingProduct({
         />
         <Link
           to={p.to}
-          // @ts-expect-error optional search
-          search={p.search}
+          search={p.search as any}
           aria-label={p.label}
           className="block relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3 cursor-pointer hover:shadow-[0_30px_60px_-20px_rgba(217,108,157,0.55)] transition-shadow"
         >
