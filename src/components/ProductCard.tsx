@@ -89,6 +89,6 @@ export function ProductCard({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-    </div>
+    </Product3DCard>
   );
 }
