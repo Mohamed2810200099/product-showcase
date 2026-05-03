@@ -9,6 +9,7 @@ type Brand = {
   announcement: string;
   shipping_fee: number;
   free_shipping_threshold: number;
+  contact_email: string;
 };
 
 const FALLBACK: Brand = {
@@ -19,6 +20,7 @@ const FALLBACK: Brand = {
   announcement: "منتجات DM الألمانية وصلت مصر أخيرًا 🇩🇪✨ الكمية محدودة — اطلبي قبل النفاد",
   shipping_fee: 60,
   free_shipping_threshold: 1500,
+  contact_email: "thegirlhouseeg@yahoo.com",
 };
 
 let cache: Brand | null = null;

@@ -155,6 +155,7 @@ export type Database = {
       products: {
         Row: {
           arabic_title: string | null
+          availability_status: string
           brand: string | null
           category_id: string | null
           compare_at_price: number | null
@@ -181,6 +182,7 @@ export type Database = {
           slug: string
           source_url: string | null
           stock: number
+          stock_tracking_enabled: boolean
           sub_category: string | null
           suitable_for: string | null
           tags: string[] | null
@@ -189,6 +191,7 @@ export type Database = {
         }
         Insert: {
           arabic_title?: string | null
+          availability_status?: string
           brand?: string | null
           category_id?: string | null
           compare_at_price?: number | null
@@ -215,6 +218,7 @@ export type Database = {
           slug: string
           source_url?: string | null
           stock?: number
+          stock_tracking_enabled?: boolean
           sub_category?: string | null
           suitable_for?: string | null
           tags?: string[] | null
@@ -223,6 +227,7 @@ export type Database = {
         }
         Update: {
           arabic_title?: string | null
+          availability_status?: string
           brand?: string | null
           category_id?: string | null
           compare_at_price?: number | null
@@ -249,6 +254,7 @@ export type Database = {
           slug?: string
           source_url?: string | null
           stock?: number
+          stock_tracking_enabled?: boolean
           sub_category?: string | null
           suitable_for?: string | null
           tags?: string[] | null
@@ -264,6 +270,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          friend_discount_pct: number
+          id: string
+          notes: string | null
+          referrer_contact: string
+          referrer_name: string
+          referrer_reward_pct: number
+          status: string
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          friend_discount_pct?: number
+          id?: string
+          notes?: string | null
+          referrer_contact: string
+          referrer_name: string
+          referrer_reward_pct?: number
+          status?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          friend_discount_pct?: number
+          id?: string
+          notes?: string | null
+          referrer_contact?: string
+          referrer_name?: string
+          referrer_reward_pct?: number
+          status?: string
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: []
       }
       reviews: {
         Row: {

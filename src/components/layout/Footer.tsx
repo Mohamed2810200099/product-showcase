@@ -41,7 +41,7 @@ export function Footer() {
           <h4 className="font-display text-lg mb-3">خدمة العملاء</h4>
           <ul className="space-y-2 text-sm">
             <li className="flex items-center gap-2 text-muted-foreground"><MessageCircle className="h-4 w-4" /> +{brand.whatsapp}</li>
-            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> hello@thegirlhouse.eg</li>
+            <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> <a href={`mailto:${brand.contact_email}`} className="hover:text-primary">{brand.contact_email}</a></li>
             <li className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" /> القاهرة، مصر</li>
           </ul>
         </div>

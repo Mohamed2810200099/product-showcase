@@ -7,6 +7,7 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
+import { BeautyAssistant } from "@/components/BeautyAssistant";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,7 +35,7 @@ function HomePage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
         .order("order_index", { ascending: true })
         .limit(8);
@@ -47,7 +48,7 @@ function HomePage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description")
+        .select("id,name,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
         .eq("is_limited", true)
         .limit(4);
@@ -149,28 +150,17 @@ function HomePage() {
         </section>
       )}
 
-      {/* ROUTINES */}
+      {/* BEAUTY ASSISTANT */}
       <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-10">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold">روتينك المثالي</h2>
-          <p className="text-muted-foreground mt-1">جمعنا لكِ روتينات يومية بمنتجاتنا الألمانية الأصلية</p>
+        <div className="text-center mb-8">
+          <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Beauty Match Assistant
+          </span>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mt-3">اختاري روتينك مع The Girl House</h2>
+          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">جاوبي على كام سؤال بسيط، واحنا هنرشح لكِ المنتجات الألمانية الأنسب من اختياراتنا.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { title: "روتين البشرة الصباحي", desc: "غسول لطيف، تونر منعش، وكريم مرطب لإشراقة طبيعية على مدار اليوم.", img: "https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?q=80&w=600&auto=format&fit=crop" },
-            { title: "روتين الشعر اللامع", desc: "شامبو، بلسم، وماسك أسبوعي للحصول على شعر صحي ولامع.", img: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?q=80&w=600&auto=format&fit=crop" },
-            { title: "روتين العناية المسائي", desc: "تنظيف عميق، سيروم، وكريم ليلي مغذي لتجديد البشرة أثناء النوم.", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=600&auto=format&fit=crop" },
-          ].map((r, i) => (
-            <article key={i} className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elegant transition group">
-              <div className="aspect-[4/3] overflow-hidden">
-                <img src={r.img} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-              </div>
-              <div className="p-5">
-                <h3 className="font-display text-xl font-semibold mb-2">{r.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{r.desc}</p>
-              </div>
-            </article>
-          ))}
+        <div className="max-w-md mx-auto">
+          <BeautyAssistant embedded />
         </div>
       </section>
 
@@ -206,6 +196,7 @@ function HomePage() {
           </div>
         </section>
       )}
+      <BeautyAssistant />
     </PublicLayout>
   );
 }
