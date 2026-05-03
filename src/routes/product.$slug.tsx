@@ -89,7 +89,7 @@ function ProductPage() {
     : null;
 
   const productUrl = typeof window !== "undefined" ? `${window.location.origin}/product/${product.slug}` : `/product/${product.slug}`;
-  const waMsg = `السلام عليكم 🌸 عايزة أطلب:\n${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالرابط: ${productUrl}`;
+  const waMsg = `مرحبًا، أريد طلب هذا المنتج من The Girl House:\nالمنتج: ${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالكمية: ${qty}\nالرابط: ${productUrl}`;
 
   const handleAdd = () => {
     add(
