@@ -16,6 +16,22 @@ const navItems = [
 export function Header() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSearchOpen) searchInputRef.current?.focus();
+  }, [isSearchOpen]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = searchQuery.trim();
+    if (!v) return;
+    navigate({ to: "/shop", search: { search: v } });
+    setIsSearchOpen(false);
+  };
 
   return (
     <header dir="ltr" className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/60 shadow-[0_2px_20px_-10px_rgba(217,108,157,0.2)]">
