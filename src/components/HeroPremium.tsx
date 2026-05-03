@@ -403,17 +403,23 @@ function FloatingProduct({
           animate={{ opacity: active ? 0.95 : 0.55 }}
           transition={{ duration: 0.6 }}
         />
-        <div className="relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3">
+        <Link
+          to={p.to}
+          // @ts-expect-error optional search
+          search={p.search}
+          aria-label={p.label}
+          className="block relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3 cursor-pointer hover:shadow-[0_30px_60px_-20px_rgba(217,108,157,0.55)] transition-shadow"
+        >
           <img
             src={p.src}
             alt={p.label}
             loading="lazy"
             className="relative w-full h-auto object-contain drop-shadow-[0_18px_30px_rgba(58,36,48,0.25)]"
           />
-        </div>
+        </Link>
         <motion.span
           animate={{ opacity: active ? 1 : 0.85, y: active ? 0 : 2 }}
-          className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 backdrop-blur px-3 py-1 text-[10px] sm:text-xs font-semibold text-[#3A2430] shadow-[0_6px_18px_-6px_rgba(58,36,48,0.3)] border border-white"
+          className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 backdrop-blur px-3 py-1 text-[10px] sm:text-xs font-semibold text-[#3A2430] shadow-[0_6px_18px_-6px_rgba(58,36,48,0.3)] border border-white"
         >
           {p.accent && <Sparkles className="inline h-3 w-3 mr-1 text-[#D96C9D]" />}
           {p.label}
