@@ -110,6 +110,25 @@ function ShopPage() {
         <div className="container mx-auto px-4 py-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold">المتجر</h1>
           <p className="text-muted-foreground mt-1">{products.length} منتج متاح</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = searchInput.trim();
+              navigate({ search: (s: any) => ({ ...s, search: v || undefined, q: undefined }) });
+            }}
+            className="mt-4 flex gap-2 max-w-xl"
+          >
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="ابحثي عن منتج..."
+              className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <button type="submit" className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:opacity-90">
+              بحث
+            </button>
+          </form>
         </div>
       </div>
 
