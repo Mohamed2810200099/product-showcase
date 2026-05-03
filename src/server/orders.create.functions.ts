@@ -110,7 +110,7 @@ export const createOrder = createServerFn({ method: "POST" })
 
     const { data: inserted, error: iErr } = await supabaseAdmin
       .from("orders")
-      .insert({
+      .insert([{
         customer_name: data.customer_name,
         customer_phone: data.customer_phone,
         customer_email: data.customer_email || null,
@@ -126,7 +126,7 @@ export const createOrder = createServerFn({ method: "POST" })
         coupon_code: couponCode,
         payment_method: "cod",
         status: "pending",
-      })
+      }])
       .select("id, order_number")
       .single();
 
