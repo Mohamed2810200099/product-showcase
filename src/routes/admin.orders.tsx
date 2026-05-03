@@ -62,9 +62,12 @@ function OrdersPage() {
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
+    const previousStatus = orders.find((o) => o.id === id)?.status ?? "pending";
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) return toast.error("فشل التحديث");
-    toast.success("تم تحديث الحالة");
+    toast.success("تم تحديث الحالة", {
+      action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
+    });
     if (selected?.id === id) setSelected({ ...selected, status });
     load();
   };
