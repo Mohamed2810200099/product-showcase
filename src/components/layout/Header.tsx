@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ShoppingBag, Search, Menu, User, X } from "lucide-react";
+import { ShoppingBag, Search, Menu, User, X, LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
 
@@ -15,6 +17,7 @@ const navItems = [
 
 export function Header() {
   const { count } = useCart();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,9 +103,24 @@ export function Header() {
           >
             <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
-          <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
-            <User className="h-5 w-5 text-[#3A2430]" />
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+                <User className="h-5 w-5 text-[#3A2430]" />
+              </Link>
+              <button
+                aria-label="Logout"
+                onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
+                className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block"
+              >
+                <LogOut className="h-5 w-5 text-[#3A2430]" />
+              </button>
+            </>
+          ) : (
+            <Link to="/login" aria-label="Login" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+              <User className="h-5 w-5 text-[#3A2430]" />
+            </Link>
+          )}
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-[#F9EEF3] transition" aria-label="Cart">
             <ShoppingBag className="h-5 w-5 text-[#3A2430]" />
             {count > 0 && (
