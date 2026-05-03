@@ -97,7 +97,11 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <button aria-label="Search" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+          <button
+            aria-label="Search"
+            onClick={() => setIsSearchOpen((s) => !s)}
+            className="p-2 rounded-full hover:bg-[#F9EEF3] transition"
+          >
             <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
           <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
