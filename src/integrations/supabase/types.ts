@@ -453,6 +453,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_used_coupon: {
+        Args: { _code: string; _phone: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
