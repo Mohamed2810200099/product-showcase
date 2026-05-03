@@ -48,7 +48,7 @@ export function ReferralSection() {
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const waText = code ? `جربي معايا منتجات The Girl House الألمانية الأصلية 💗\nاستخدمي كود ${code} وهتاخدي خصم 10% على أول طلب.` : "";
+  const waText = code ? `مرحبًا 💗\nاستخدمي كود الخصم الخاص بي من The Girl House:\n${code}\nواحصلي على خصم 10% على أول طلب.` : "";
 
   return (
     <>
@@ -169,7 +169,7 @@ export function ReferralSection() {
                     </button>
                     <a
                       href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
-                      target="_blank" rel="noreferrer"
+                      target="_blank" rel="noopener noreferrer"
                       className="bg-[#25D366] text-white rounded-full py-2.5 text-sm font-medium inline-flex items-center justify-center gap-2"
                     >
                       <MessageCircle className="h-4 w-4" /> شاركي على واتساب

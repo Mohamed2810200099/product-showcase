@@ -214,13 +214,15 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
               <button onClick={addRoutineToCart} className="bg-primary text-primary-foreground rounded-full py-2.5 text-sm font-medium inline-flex items-center justify-center gap-2 hover:opacity-90">
                 <ShoppingBag className="h-4 w-4" /> أضيفي الروتين للسلة
               </button>
-              <div className="grid grid-cols-2 gap-2">
+              <div className={`grid ${brand.whatsapp ? "grid-cols-2" : "grid-cols-1"} gap-2`}>
                 <Link to="/shop" className="bg-white border border-[#F0CCD9] text-[#3A2430] rounded-full py-2 text-xs font-medium inline-flex items-center justify-center gap-1 hover:bg-[#FFF4F8]">
                   شاهدي المنتجات <ArrowRight className="h-3 w-3" />
                 </Link>
-                <a href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`} target="_blank" rel="noreferrer" className="bg-[#25D366] text-white rounded-full py-2 text-xs font-medium inline-flex items-center justify-center gap-1">
-                  اسألي على واتساب
-                </a>
+                {brand.whatsapp && (
+                  <a href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white rounded-full py-2 text-xs font-medium inline-flex items-center justify-center gap-1">
+                    اسألي على واتساب
+                  </a>
+                )}
               </div>
             </div>
             <p className="text-[10px] text-[#3A2430]/55 mt-3 text-center leading-relaxed">
