@@ -180,31 +180,47 @@ function ProductForm() {
         <div className="space-y-6">
           <Section title="المعلومات الأساسية">
             <div className="grid sm:grid-cols-2 gap-3">
-              <Field label="اسم المنتج (عربي) *" value={form.name} onChange={(v) => setForm({ ...form, name: v, slug: form.slug || slugify(v) })} />
-              <Field label="الاسم بالإنجليزية" value={form.name_en} onChange={(v) => setForm({ ...form, name_en: v })} />
-              <Field label="Slug (الرابط)" value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} className="sm:col-span-2" dir="ltr" />
+              <Field label="اسم المنتج (ألماني/إنجليزي) *" value={form.name} onChange={(v) => setForm({ ...form, name: v, slug: form.slug || slugify(v) })} dir="ltr" />
+              <Field label="العنوان بالعربية" value={form.arabic_title} onChange={(v) => setForm({ ...form, arabic_title: v })} />
+              <Field label="الاسم بالإنجليزية (اختياري)" value={form.name_en} onChange={(v) => setForm({ ...form, name_en: v })} dir="ltr" />
+              <Field label="Slug (الرابط)" value={form.slug} onChange={(v) => setForm({ ...form, slug: v })} dir="ltr" />
               <TextArea label="وصف مختصر" value={form.short_description} onChange={(v) => setForm({ ...form, short_description: v })} className="sm:col-span-2" rows={2} />
-              <TextArea label="الوصف الكامل" value={form.description} onChange={(v) => setForm({ ...form, description: v })} className="sm:col-span-2" rows={5} />
+              <TextArea label="الوصف الكامل" value={form.description} onChange={(v) => setForm({ ...form, description: v })} className="sm:col-span-2" rows={4} />
             </div>
           </Section>
 
-          <Section title="الصور">
+          <Section title="الصور (سحب وإفلات لإعادة الترتيب — أول صورة هي الرئيسية)">
             <ImageUploader
               bucket="products"
               value={form.images}
               onChange={(images) => setForm({ ...form, images })}
-              max={10}
+              max={15}
             />
+          </Section>
+
+          <Section title="تفاصيل المنتج للعميلات">
+            <div className="grid sm:grid-cols-1 gap-3">
+              <TextArea label="الفوائد الرئيسية (سطر لكل فائدة)" value={form.key_benefits} onChange={(v) => setForm({ ...form, key_benefits: v })} rows={5} />
+              <TextArea label="مناسب لـ" value={form.suitable_for} onChange={(v) => setForm({ ...form, suitable_for: v })} rows={2} />
+              <TextArea label="طريقة الاستخدام" value={form.how_to_use} onChange={(v) => setForm({ ...form, how_to_use: v })} rows={4} />
+              <TextArea label="المكونات الفعّالة (سطر لكل مكون)" value={form.key_ingredients} onChange={(v) => setForm({ ...form, key_ingredients: v })} rows={5} />
+              <TextArea label="تفاصيل المنتج" value={form.product_details} onChange={(v) => setForm({ ...form, product_details: v })} rows={2} />
+              <TextArea label="تحذيرات / ملاحظات" value={form.warnings} onChange={(v) => setForm({ ...form, warnings: v })} rows={3} />
+            </div>
           </Section>
 
           <Section title="السعر والمخزون">
             <div className="grid sm:grid-cols-3 gap-3">
               <Field label="السعر (ج.م) *" type="number" value={String(form.price)} onChange={(v) => setForm({ ...form, price: Number(v) })} />
               <Field label="السعر قبل الخصم" type="number" value={String(form.compare_at_price)} onChange={(v) => setForm({ ...form, compare_at_price: Number(v) })} />
+              <Field label="سعر dm الأصلي (€)" type="number" value={String(form.dm_price_eur)} onChange={(v) => setForm({ ...form, dm_price_eur: Number(v) })} />
               <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => setForm({ ...form, stock: Number(v) })} />
               <Field label="SKU" value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} dir="ltr" />
-              <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} />
-              <Field label="وسوم (مفصولة بفاصلة)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+              <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} dir="ltr" />
+              <Field label="التصنيف الفرعي" value={form.sub_category} onChange={(v) => setForm({ ...form, sub_category: v })} dir="ltr" />
+              <Field label="ترتيب العرض" type="number" value={String(form.order_index)} onChange={(v) => setForm({ ...form, order_index: Number(v) })} />
+              <Field label="وسوم (بفاصلة)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+              <Field label="رابط المصدر (داخلي)" value={form.source_url} onChange={(v) => setForm({ ...form, source_url: v })} className="sm:col-span-3" dir="ltr" />
             </div>
           </Section>
         </div>
