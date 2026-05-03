@@ -11,6 +11,7 @@ const searchSchema = z.object({
   category: z.string().optional(),
   sort: z.enum(["new", "price-asc", "price-desc", "rating"]).optional(),
   q: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const Route = createFileRoute("/shop")({
@@ -28,6 +29,8 @@ function ShopPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [showFilters, setShowFilters] = useState(false);
+  const activeQuery = search.search ?? search.q ?? "";
+  const [searchInput, setSearchInput] = useState(activeQuery);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -35,7 +38,7 @@ function ShopPage() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["shop-products", search.category, search.sort, search.q],
+    queryKey: ["shop-products", search.category, search.sort, activeQuery],
     queryFn: async () => {
       // Resolve category inside queryFn so we don't depend on outer query state
       let categoryId: string | null = null;
@@ -54,7 +57,7 @@ function ShopPage() {
         .eq("is_active", true);
 
       if (categoryId) q = q.eq("category_id", categoryId);
-      if (search.q) q = q.or(`name.ilike.%${search.q}%,arabic_title.ilike.%${search.q}%`);
+      if (activeQuery) q = q.or(`name.ilike.%${activeQuery}%,arabic_title.ilike.%${activeQuery}%`);
 
       switch (search.sort) {
         case "price-asc": q = q.order("price", { ascending: true }); break;
@@ -107,6 +110,25 @@ function ShopPage() {
         <div className="container mx-auto px-4 py-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold">المتجر</h1>
           <p className="text-muted-foreground mt-1">{products.length} منتج متاح</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = searchInput.trim();
+              navigate({ search: (s: any) => ({ ...s, search: v || undefined, q: undefined }) });
+            }}
+            className="mt-4 flex gap-2 max-w-xl"
+          >
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="ابحثي عن منتج..."
+              className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <button type="submit" className="bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:opacity-90">
+              بحث
+            </button>
+          </form>
         </div>
       </div>
 

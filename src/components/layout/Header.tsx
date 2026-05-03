@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Search, Menu, User } from "lucide-react";
-import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ShoppingBag, Search, Menu, User, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
@@ -16,6 +16,22 @@ const navItems = [
 export function Header() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSearchOpen) searchInputRef.current?.focus();
+  }, [isSearchOpen]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = searchQuery.trim();
+    if (!v) return;
+    navigate({ to: "/shop", search: { search: v } });
+    setIsSearchOpen(false);
+  };
 
   return (
     <header dir="ltr" className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/60 shadow-[0_2px_20px_-10px_rgba(217,108,157,0.2)]">
@@ -81,7 +97,11 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <button aria-label="Search" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+          <button
+            aria-label="Search"
+            onClick={() => setIsSearchOpen((s) => !s)}
+            className="p-2 rounded-full hover:bg-[#F9EEF3] transition"
+          >
             <Search className="h-5 w-5 text-[#3A2430]" />
           </button>
           <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
@@ -97,6 +117,35 @@ export function Header() {
           </Link>
         </div>
       </div>
+      {isSearchOpen && (
+        <div className="border-t border-white/60 bg-white/90 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
+          <form onSubmit={submitSearch} className="container mx-auto px-4 py-3 flex items-center gap-2">
+            <Search className="h-5 w-5 text-[#3A2430]/60 shrink-0" />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحثي عن منتج..."
+              className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-[#3A2430]/40 py-2"
+            />
+            <button
+              type="submit"
+              className="bg-[#D96C9D] hover:bg-[#C95588] text-white text-sm font-medium px-4 py-2 rounded-full transition shrink-0"
+            >
+              بحث
+            </button>
+            <button
+              type="button"
+              aria-label="Close search"
+              onClick={() => setIsSearchOpen(false)}
+              className="p-2 rounded-full hover:bg-[#F9EEF3] transition shrink-0"
+            >
+              <X className="h-5 w-5 text-[#3A2430]" />
+            </button>
+          </form>
+        </div>
+      )}
     </header>
   );
 }
