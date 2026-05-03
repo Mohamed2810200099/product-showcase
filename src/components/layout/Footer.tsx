@@ -4,6 +4,13 @@ import { useBrand } from "@/hooks/use-brand";
 
 export function Footer() {
   const brand = useBrand();
+  const socials: { url: string; label: string; icon: any }[] = [
+    { url: brand.instagram, label: "Instagram", icon: Instagram },
+    { url: brand.tiktok, label: "TikTok", icon: Music2 },
+    { url: brand.facebook, label: "Facebook", icon: Facebook },
+    ...(brand.whatsapp ? [{ url: `https://wa.me/${brand.whatsapp}`, label: "WhatsApp", icon: MessageCircle }] : []),
+  ].filter((s) => s.url && s.url.trim().length > 0);
+
   return (
     <footer className="bg-secondary mt-20 border-t border-border">
       <div className="container mx-auto px-4 py-12 grid gap-10 md:grid-cols-4">
@@ -12,20 +19,16 @@ export function Footer() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             وجهتك الأولى لمنتجات DM الألمانية الأصلية في مصر — أصلية ١٠٠٪، أسعار صديقة، توصيل لكل المحافظات.
           </p>
-          <div className="flex gap-2 mt-4">
-            <a href={brand.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a href={brand.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok" className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
-              <Music2 className="h-4 w-4" />
-            </a>
-            <a href={brand.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
-              <Facebook className="h-4 w-4" />
-            </a>
-            <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
-              <MessageCircle className="h-4 w-4" />
-            </a>
-          </div>
+          {socials.length > 0 && (
+            <div className="flex gap-2 mt-4">
+              {socials.map((s) => (
+                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                  className="p-2 rounded-full bg-background hover:bg-primary hover:text-primary-foreground transition">
+                  <s.icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -40,7 +43,12 @@ export function Footer() {
         <div>
           <h4 className="font-display text-lg mb-3">خدمة العملاء</h4>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2 text-muted-foreground"><MessageCircle className="h-4 w-4" /> +{brand.whatsapp}</li>
+            {brand.whatsapp && (
+              <li className="flex items-center gap-2 text-muted-foreground">
+                <MessageCircle className="h-4 w-4" />
+                <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">+{brand.whatsapp}</a>
+              </li>
+            )}
             <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> <a href={`mailto:${brand.contact_email}`} className="hover:text-primary">{brand.contact_email}</a></li>
             <li className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" /> القاهرة، مصر</li>
           </ul>

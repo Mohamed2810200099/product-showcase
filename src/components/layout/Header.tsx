@@ -9,10 +9,8 @@ const navItems = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
   { to: "/shop", label: "Hair Care", search: { category: "hair-care" } },
-  { to: "/shop", label: "Skincare", search: { category: "skin-care" } },
-  { to: "/shop", label: "Makeup", search: { category: "makeup" } },
+  { to: "/shop", label: "Skincare", search: { category: "skincare" } },
   { to: "/shop", label: "Offers" },
-  { to: "/shop", label: "Contact" },
 ] as const;
 
 export function Header() {
