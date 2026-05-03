@@ -9,6 +9,7 @@ import { Product3DCard } from "@/components/three-d/Product3DCard";
 export type Product = {
   id: string;
   name: string;
+  arabic_title?: string | null;
   slug: string;
   price: number;
   compare_at_price: number | null;
