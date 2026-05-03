@@ -9,7 +9,7 @@ export function Footer() {
     { url: brand.tiktok, label: "TikTok", icon: Music2 },
     { url: brand.facebook, label: "Facebook", icon: Facebook },
     ...(brand.whatsapp ? [{ url: `https://wa.me/${brand.whatsapp}`, label: "WhatsApp", icon: MessageCircle }] : []),
-  ].filter((s) => s.url && s.url.trim().length > 0);
+  ].filter((s) => s.url && /^https?:\/\//i.test(s.url.trim()));
 
   return (
     <footer className="bg-secondary mt-20 border-t border-border">
