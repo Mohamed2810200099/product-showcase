@@ -206,40 +206,51 @@ function ProductPage() {
               <p className="text-muted-foreground leading-relaxed">{product.short_description}</p>
             )}
 
-            <div className="flex items-center gap-4 py-3 border-y border-border">
-              <span className="text-sm font-medium">الكمية:</span>
-              <div className="flex items-center border border-border rounded-full">
-                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-2 hover:bg-accent rounded-r-full"><Minus className="h-4 w-4" /></button>
-                <span className="w-10 text-center font-semibold">{qty}</span>
-                <button onClick={() => setQty((q) => Math.min(Math.max(product.stock, 1), q + 1))} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
-              </div>
-              <span className={`text-xs ${product.stock === 0 ? "text-muted-foreground" : product.stock < 5 ? "text-destructive" : "text-muted-foreground"}`}>
-                {product.stock > 0 ? `متاح ${product.stock} قطعة` : "اطلبي مسبقًا"}
-              </span>
-            </div>
+            {(() => {
+              const status = (product as any).availability_status ?? "available";
+              const tracking = (product as any).stock_tracking_enabled === true;
+              const isOut = status === "out_of_stock" || (tracking && product.stock === 0);
+              return (
+                <>
+                  <div className="flex items-center gap-4 py-3 border-y border-border">
+                    <span className="text-sm font-medium">الكمية:</span>
+                    <div className="flex items-center border border-border rounded-full">
+                      <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-2 hover:bg-accent rounded-r-full"><Minus className="h-4 w-4" /></button>
+                      <span className="w-10 text-center font-semibold">{qty}</span>
+                      <button onClick={() => setQty((q) => q + 1)} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
+                    </div>
+                    <span className={`text-xs font-medium ${isOut ? "text-destructive" : "text-emerald-600"}`}>
+                      {isOut ? "نفد المخزون" : "متاح للطلب"}
+                    </span>
+                  </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button
-                onClick={handleAdd}
-                className="bg-card border-2 border-primary text-primary py-3.5 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition inline-flex items-center justify-center gap-2"
-              >
-                <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
-              </button>
-              <button
-                onClick={handleBuyNow}
-                className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition inline-flex items-center justify-center gap-2"
-              >
-                <Zap className="h-4 w-4" /> اشتري الآن
-              </button>
-              <a
-                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
-              >
-                <MessageCircle className="h-4 w-4" /> واتساب
-              </a>
-            </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button
+                      onClick={handleAdd}
+                      disabled={isOut}
+                      className="bg-card border-2 border-primary text-primary py-3.5 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={isOut}
+                      className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Zap className="h-4 w-4" /> اشتري الآن
+                    </button>
+                    <a
+                      href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="h-4 w-4" /> واتساب
+                    </a>
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="grid grid-cols-3 gap-2 pt-2">
               {[
