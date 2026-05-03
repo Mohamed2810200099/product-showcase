@@ -53,13 +53,13 @@ function OrdersPage() {
     setError(null);
     setLoading(true);
     setSearched(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select("id, order_number, status, created_at, total, items")
-      .eq("customer_phone", trimmed)
-      .order("created_at", { ascending: false });
-    if (error) setError("حصل خطأ، حاولي تاني.");
-    setOrders((data as OrderRow[] | null) ?? []);
+    try {
+      const rows = await lookupOrdersByPhone({ data: { phone: trimmed } });
+      setOrders(rows as OrderRow[]);
+    } catch {
+      setError("حصل خطأ، حاولي تاني.");
+      setOrders([]);
+    }
     setLoading(false);
   };
 
