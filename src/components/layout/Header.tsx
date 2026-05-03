@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Search, Menu, User } from "lucide-react";
-import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ShoppingBag, Search, Menu, User, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
