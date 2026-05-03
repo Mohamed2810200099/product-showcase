@@ -52,7 +52,8 @@ function ShopPage() {
         case "price-asc": q = q.order("price", { ascending: true }); break;
         case "price-desc": q = q.order("price", { ascending: false }); break;
         case "rating": q = q.order("rating", { ascending: false }); break;
-        default: q = q.order("created_at", { ascending: false });
+        case "new": q = q.order("created_at", { ascending: false }); break;
+        default: q = q.order("order_index", { ascending: true });
       }
       const { data } = await q;
       return (data ?? []) as unknown as Product[];
