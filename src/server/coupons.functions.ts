@@ -6,7 +6,6 @@ const schema = z.object({
   code: z.string().trim().min(1).max(50).transform((s) => s.toUpperCase()),
   subtotal: z.number().nonnegative(),
   phone: z.string().trim().max(20).optional(),
-  hasOrderedBefore: z.boolean().optional(),
 });
 
 export type CouponValidation =
@@ -41,8 +40,13 @@ export const validateCoupon = createServerFn({ method: "POST" })
       if (used) return { ok: false, error: "هذا الرقم استخدم الكوبون من قبل" };
     }
 
-    if (row.first_order_only && data.hasOrderedBefore) {
-      return { ok: false, error: "هذا الكود مخصص لأول طلب فقط" };
+    if (row.first_order_only && data.phone && data.phone.length >= 6) {
+      const { count } = await supabaseAdmin
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("customer_phone", data.phone)
+        .neq("status", "cancelled");
+      if ((count ?? 0) > 0) return { ok: false, error: "هذا الكود مخصص لأول طلب فقط" };
     }
 
     const d = row.type === "percent" ? (data.subtotal * Number(row.value)) / 100 : Number(row.value);

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
@@ -70,7 +69,6 @@ function CheckoutPage() {
         code,
         subtotal,
         phone: phone.length >= 6 ? phone : undefined,
-        hasOrderedBefore: localStorage.getItem("tgh_has_ordered") === "1",
       },
     });
     if (!result.ok) return toast.error(result.error);
@@ -88,33 +86,22 @@ function CheckoutPage() {
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 
     setSubmitting(true);
-    const orderItems = items.map((it) => ({
-      product_id: it.id, name: it.name, slug: it.slug, price: it.price, qty: it.qty, image: it.image,
-    }));
-
-    const { data, error } = await supabase
-      .from("orders")
-      .insert({
+    const { createOrder } = await import("@/server/orders.create.functions");
+    const result = await createOrder({
+      data: {
         ...parsed.data,
-        customer_email: parsed.data.customer_email || null,
-        items: orderItems,
-        subtotal,
-        discount,
-        shipping,
-        total,
+        customer_email: parsed.data.customer_email || "",
+        items: items.map((it) => ({ product_id: it.id, qty: it.qty })),
         coupon_code: appliedCoupon?.code ?? null,
-        payment_method: "cod",
-        status: "pending",
-      })
-      .select()
-      .single();
+      },
+    });
 
     setSubmitting(false);
 
-    if (error || !data) {
-      console.error(error);
-      return toast.error("حصل خطأ في الطلب، حاولي تاني");
+    if (!result.ok) {
+      return toast.error(result.error);
     }
+    const data = { order_number: result.order_number };
 
     // WhatsApp notification (client-side wa.me to brand)
     const lines = [
