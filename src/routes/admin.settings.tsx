@@ -66,10 +66,11 @@ function SettingsPage() {
       <h1 className="font-display text-3xl font-bold mb-6">إعدادات الموقع</h1>
 
       <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-        <Field label="رقم الواتساب (مع كود الدولة، بدون +)" value={brand.whatsapp} onChange={(v) => setBrand({ ...brand, whatsapp: v })} dir="ltr" />
-        <Field label="رابط Instagram" value={brand.instagram} onChange={(v) => setBrand({ ...brand, instagram: v })} dir="ltr" />
-        <Field label="رابط TikTok" value={brand.tiktok} onChange={(v) => setBrand({ ...brand, tiktok: v })} dir="ltr" />
-        <Field label="رابط Facebook" value={brand.facebook} onChange={(v) => setBrand({ ...brand, facebook: v })} dir="ltr" />
+        <Field label="بريد التواصل (Support email)" value={brand.contact_email} onChange={(v) => setBrand({ ...brand, contact_email: v })} dir="ltr" />
+        <Field label="رقم الواتساب (مع كود الدولة، بدون +). اتركيه فاضي لإخفاء أزرار واتساب" value={brand.whatsapp} onChange={(v) => setBrand({ ...brand, whatsapp: v.replace(/[^0-9]/g, "") })} dir="ltr" />
+        <Field label="رابط Instagram (اتركيه فاضي للإخفاء)" value={brand.instagram} onChange={(v) => setBrand({ ...brand, instagram: v })} dir="ltr" />
+        <Field label="رابط TikTok (اتركيه فاضي للإخفاء)" value={brand.tiktok} onChange={(v) => setBrand({ ...brand, tiktok: v })} dir="ltr" />
+        <Field label="رابط Facebook (اتركيه فاضي للإخفاء)" value={brand.facebook} onChange={(v) => setBrand({ ...brand, facebook: v })} dir="ltr" />
         <div>
           <label className="text-xs text-muted-foreground block mb-1">شريط الإعلانات أعلى الموقع</label>
           <textarea rows={2} value={brand.announcement} onChange={(e) => setBrand({ ...brand, announcement: e.target.value })}
