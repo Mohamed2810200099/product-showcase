@@ -47,36 +47,51 @@ export type Database = {
       coupons: {
         Row: {
           active: boolean
+          can_stack: boolean
           code: string
           created_at: string
           expires_at: string | null
+          first_order_only: boolean
           id: string
           max_uses: number | null
+          max_uses_per_customer: number | null
           min_order: number
+          source: string
+          starts_at: string | null
           type: string
           used_count: number
           value: number
         }
         Insert: {
           active?: boolean
+          can_stack?: boolean
           code: string
           created_at?: string
           expires_at?: string | null
+          first_order_only?: boolean
           id?: string
           max_uses?: number | null
+          max_uses_per_customer?: number | null
           min_order?: number
+          source?: string
+          starts_at?: string | null
           type: string
           used_count?: number
           value: number
         }
         Update: {
           active?: boolean
+          can_stack?: boolean
           code?: string
           created_at?: string
           expires_at?: string | null
+          first_order_only?: boolean
           id?: string
           max_uses?: number | null
+          max_uses_per_customer?: number | null
           min_order?: number
+          source?: string
+          starts_at?: string | null
           type?: string
           used_count?: number
           value?: number

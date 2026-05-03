@@ -36,7 +36,7 @@ export function MobileBottomBar() {
       <Item to="/" icon={Home} label="الرئيسية" />
       <Item to="/shop" icon={Store} label="المتجر" />
       <Item to="/cart" icon={ShoppingBag} label="السلة" badge={count} />
-      <Item href={`https://wa.me/${brand.whatsapp}`} icon={MessageCircle} label="واتساب" />
+      {brand.whatsapp && <Item href={`https://wa.me/${brand.whatsapp}`} icon={MessageCircle} label="واتساب" />}
     </nav>
   );
 }

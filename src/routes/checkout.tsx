@@ -61,14 +61,25 @@ function CheckoutPage() {
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
-    const { data } = await supabase.from("coupons").select("*").eq("code", code).eq("active", true).maybeSingle();
-    if (!data) return toast.error("كود غير صحيح");
-    if (data.expires_at && new Date(data.expires_at) < new Date()) return toast.error("الكود منتهي الصلاحية");
-    if (Number(data.min_order) > subtotal) return toast.error(`الحد الأدنى للطلب ${formatEGP(Number(data.min_order))}`);
-    if (data.max_uses && data.used_count >= data.max_uses) return toast.error("الكود استُهلك بالكامل");
+    const { data } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle();
+    if (!data) return toast.error("هذا الكود غير صالح");
+    if (!data.active) return toast.error("هذا الكود غير مفعل");
+    const now = new Date();
+    if ((data as any).starts_at && new Date((data as any).starts_at) > now) return toast.error("هذا الكود غير مفعل");
+    if (data.expires_at && new Date(data.expires_at) < now) return toast.error("انتهت صلاحية هذا الكود");
+    if (data.max_uses && data.used_count >= data.max_uses) return toast.error("تم استخدام هذا الكود من قبل");
+    if (Number(data.min_order) > subtotal) return toast.error(`الحد الأدنى لاستخدام هذا الكود هو ${formatEGP(Number(data.min_order))}`);
+    // Per-customer + first-order tracking via localStorage (no auth)
+    const usedKey = `coupon_used_${code}`;
+    const usedCount = Number(localStorage.getItem(usedKey) ?? "0");
+    const maxPer = (data as any).max_uses_per_customer as number | null;
+    if (maxPer && usedCount >= maxPer) return toast.error("تم استخدام هذا الكود من قبل");
+    if ((data as any).first_order_only && localStorage.getItem("tgh_has_ordered") === "1") {
+      return toast.error("هذا الكود مخصص لأول طلب فقط");
+    }
     const d = data.type === "percent" ? (subtotal * Number(data.value)) / 100 : Number(data.value);
     setAppliedCoupon({ code: data.code, discount: Math.round(d) });
-    toast.success(`تم تطبيق خصم ${formatEGP(Math.round(d))}`);
+    toast.success("تم تطبيق الخصم بنجاح");
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -128,6 +139,11 @@ function CheckoutPage() {
     const waUrl = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(lines)}`;
     window.open(waUrl, "_blank");
 
+    if (appliedCoupon) {
+      const usedKey = `coupon_used_${appliedCoupon.code}`;
+      localStorage.setItem(usedKey, String(Number(localStorage.getItem(usedKey) ?? "0") + 1));
+    }
+    localStorage.setItem("tgh_has_ordered", "1");
     clear();
     navigate({ to: "/order-success", search: { order: data.order_number } });
   };
