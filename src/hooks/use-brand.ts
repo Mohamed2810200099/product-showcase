@@ -23,12 +23,14 @@ const FALLBACK: Brand = {
   contact_email: "thegirlhouseeg@yahoo.com",
 };
 
+const CACHE_TTL_MS = 5 * 60 * 1000;
 let cache: Brand | null = null;
+let cacheAt = 0;
 
 export function useBrand(): Brand {
   const [brand, setBrand] = useState<Brand>(cache ?? FALLBACK);
   useEffect(() => {
-    if (cache) return;
+    if (cache && Date.now() - cacheAt < CACHE_TTL_MS) return;
     supabase
       .from("settings")
       .select("value")
@@ -38,6 +40,7 @@ export function useBrand(): Brand {
         if (data?.value) {
           const merged = { ...FALLBACK, ...(data.value as Partial<Brand>) };
           cache = merged;
+          cacheAt = Date.now();
           setBrand(merged);
         }
       });
