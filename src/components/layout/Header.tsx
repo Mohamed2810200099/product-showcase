@@ -117,7 +117,6 @@ export function Header() {
           </Link>
         </div>
       </div>
-      </div>
       {isSearchOpen && (
         <div className="border-t border-white/60 bg-white/90 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200">
           <form onSubmit={submitSearch} className="container mx-auto px-4 py-3 flex items-center gap-2">
