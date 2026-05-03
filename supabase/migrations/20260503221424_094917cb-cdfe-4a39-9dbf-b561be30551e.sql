@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.has_used_coupon(text, text) FROM anon, authenticated, public;
