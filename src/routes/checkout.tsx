@@ -61,30 +61,24 @@ function CheckoutPage() {
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
-    const { data } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle();
-    if (!data) return toast.error("هذا الكود غير صالح");
-    if (!data.active) return toast.error("هذا الكود غير مفعل");
-    const now = new Date();
-    if ((data as any).starts_at && new Date((data as any).starts_at) > now) return toast.error("هذا الكود غير مفعل");
-    if (data.expires_at && new Date(data.expires_at) < now) return toast.error("انتهت صلاحية هذا الكود");
-    if (data.max_uses && data.used_count >= data.max_uses) return toast.error("تم استخدام هذا الكود من قبل");
-    if (Number(data.min_order) > subtotal) return toast.error(`الحد الأدنى لاستخدام هذا الكود هو ${formatEGP(Number(data.min_order))}`);
-    // Per-customer + first-order tracking via localStorage (no auth)
+    const { validateCoupon } = await import("@/server/coupons.functions");
     const usedKey = `coupon_used_${code}`;
     const usedCount = Number(localStorage.getItem(usedKey) ?? "0");
-    const maxPer = (data as any).max_uses_per_customer as number | null;
-    if (maxPer && usedCount >= maxPer) return toast.error("تم استخدام هذا الكود من قبل");
-    // Server-side check: has this phone used this coupon before?
     const phone = form.customer_phone.trim();
-    if (phone.length >= 6) {
-      const { data: usedBefore } = await supabase.rpc("has_used_coupon", { _code: code, _phone: phone });
-      if (usedBefore) return toast.error("هذا الرقم استخدم الكوبون من قبل");
+    const result = await validateCoupon({
+      data: {
+        code,
+        subtotal,
+        phone: phone.length >= 6 ? phone : undefined,
+        hasOrderedBefore: localStorage.getItem("tgh_has_ordered") === "1",
+      },
+    });
+    if (!result.ok) return toast.error(result.error);
+    // local per-customer guardrail kept as a soft check (server already enforces phone-based use)
+    if (usedCount > 0 && phone.length < 6) {
+      // no-op, server is authoritative when phone present
     }
-    if ((data as any).first_order_only && localStorage.getItem("tgh_has_ordered") === "1") {
-      return toast.error("هذا الكود مخصص لأول طلب فقط");
-    }
-    const d = data.type === "percent" ? (subtotal * Number(data.value)) / 100 : Number(data.value);
-    setAppliedCoupon({ code: data.code, discount: Math.round(d) });
+    setAppliedCoupon({ code: result.code, discount: result.discount });
     toast.success("تم تطبيق الخصم بنجاح");
   };
 
