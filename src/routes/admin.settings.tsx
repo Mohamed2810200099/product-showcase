@@ -25,16 +25,18 @@ type Brand = {
   announcement: string;
   shipping_fee: number;
   free_shipping_threshold: number;
+  contact_email: string;
 };
 
 const DEFAULTS: Brand = {
-  whatsapp: "201554087371",
-  instagram: "https://www.instagram.com/thegirlhouse_eg",
-  tiktok: "https://www.tiktok.com/@thegirlhouse_eg",
-  facebook: "https://www.facebook.com/share/18hzaYDPkr/",
+  whatsapp: "",
+  instagram: "",
+  tiktok: "",
+  facebook: "",
   announcement: "",
   shipping_fee: 60,
   free_shipping_threshold: 1500,
+  contact_email: "thegirlhouseeg@yahoo.com",
 };
 
 function SettingsPage() {
