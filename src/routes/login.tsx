@@ -35,11 +35,12 @@ function LoginPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
+        const SITE_URL = "https://thegirlhouseegdm.lovable.app";
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}${search.redirect ?? "/"}`,
+            emailRedirectTo: `${SITE_URL}${search.redirect ?? "/"}`,
             data: { full_name: name },
           },
         });
