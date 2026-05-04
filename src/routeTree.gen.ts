@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
@@ -36,6 +37,11 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
   '/shop': typeof ShopRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/order-success'
     | '/orders'
     | '/shop'
+    | '/unsubscribe'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/order-success'
     | '/orders'
     | '/shop'
+    | '/unsubscribe'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/order-success'
     | '/orders'
     | '/shop'
+    | '/unsubscribe'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -350,6 +362,7 @@ export interface RootRouteChildren {
   OrderSuccessRoute: typeof OrderSuccessRoute
   OrdersRoute: typeof OrdersRoute
   ShopRoute: typeof ShopRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -373,6 +386,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
@@ -566,6 +586,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrderSuccessRoute: OrderSuccessRoute,
   OrdersRoute: OrdersRoute,
   ShopRoute: ShopRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminLoginRoute: AdminLoginRoute,
