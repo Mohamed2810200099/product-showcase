@@ -83,6 +83,21 @@ function SettingsPage() {
           <Field label="حد الشحن المجاني (ج.م)" type="number" value={String(brand.free_shipping_threshold)} onChange={(v) => setBrand({ ...brand, free_shipping_threshold: Number(v) })} />
         </div>
 
+        <div className="border-t border-border pt-4">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <div>
+              <div className="font-semibold text-sm">إظهار قسم "Share the Glow" في الصفحة الرئيسية</div>
+              <div className="text-xs text-muted-foreground mt-0.5">قسم دعوة الصديقات للحصول على خصم</div>
+            </div>
+            <input
+              type="checkbox"
+              checked={brand.show_referral_section}
+              onChange={(e) => setBrand({ ...brand, show_referral_section: e.target.checked })}
+              className="h-5 w-5 accent-primary"
+            />
+          </label>
+        </div>
+
         <button onClick={save} disabled={saving} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full inline-flex items-center gap-2 font-medium shadow-elegant disabled:opacity-50">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} حفظ الإعدادات
         </button>
