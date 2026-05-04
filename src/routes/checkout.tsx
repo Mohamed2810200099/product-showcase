@@ -105,30 +105,37 @@ function CheckoutPage() {
   }
 
   const shipping = subtotal >= brand.free_shipping_threshold ? 0 : brand.shipping_fee;
-  const discount = appliedCoupon?.discount ?? 0;
-  const total = Math.max(0, subtotal - discount + shipping);
+  const couponDiscount = appliedCoupon?.discount ?? 0;
+  const referralDiscount = appliedReferral?.discount ?? 0;
+  const discount = couponDiscount + referralDiscount;
+  const maxWalletByOrder = glowSettings ? Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100) : 0;
+  const walletApplied = useWallet
+    ? Math.min(walletBalance, Math.max(0, subtotal - discount), maxWalletByOrder)
+    : 0;
+  const total = Math.max(0, subtotal - discount - walletApplied + shipping);
 
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
     const { validateCoupon } = await import("@/server/coupons.functions");
-    const usedKey = `coupon_used_${code}`;
-    const usedCount = Number(localStorage.getItem(usedKey) ?? "0");
     const phone = form.customer_phone.trim();
     const result = await validateCoupon({
-      data: {
-        code,
-        subtotal,
-        phone: phone.length >= 6 ? phone : undefined,
-      },
+      data: { code, subtotal, phone: phone.length >= 6 ? phone : undefined },
     });
     if (!result.ok) return toast.error(result.error);
-    // local per-customer guardrail kept as a soft check (server already enforces phone-based use)
-    if (usedCount > 0 && phone.length < 6) {
-      // no-op, server is authoritative when phone present
-    }
     setAppliedCoupon({ code: result.code, discount: result.discount });
+    setAppliedReferral(null); // mutually exclusive
     toast.success("تم تطبيق الخصم بنجاح");
+  };
+
+  const applyReferral = () => {
+    const code = referralInput.trim().toUpperCase();
+    if (!code) return;
+    if (!glowSettings) return toast.error("جاري التحميل…");
+    const d = Math.round((subtotal * glowSettings.friend_discount_pct) / 100);
+    setAppliedReferral({ code, discount: d });
+    setAppliedCoupon(null);
+    toast.success(`تم تطبيق كود صديقتك — خصم ${glowSettings.friend_discount_pct}٪`);
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -145,6 +152,9 @@ function CheckoutPage() {
         customer_email: parsed.data.customer_email || "",
         items: items.map((it) => ({ product_id: it.id, qty: it.qty })),
         coupon_code: appliedCoupon?.code ?? null,
+        referral_code: appliedReferral?.code ?? null,
+        use_wallet: useWallet,
+        customer_user_id: user?.id ?? null,
       },
     });
 
