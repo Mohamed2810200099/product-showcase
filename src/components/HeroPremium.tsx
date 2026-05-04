@@ -256,7 +256,7 @@ export function HeroPremium() {
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
               <MagneticButton
-                to="/shop"
+                to="/offers"
                 className="inline-flex items-center gap-2 rounded-full bg-white/75 backdrop-blur border border-white text-[#3A2430] px-7 py-3.5 font-medium hover:bg-white transition shadow-[0_8px_24px_-12px_rgba(58,36,48,0.25)]"
               >
                 <Tag className="h-4 w-4" /> View Offers
