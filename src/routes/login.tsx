@@ -23,6 +23,32 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const SITE_URL = "https://thegirlhouse.life";
+
+  const resendConfirmation = async () => {
+    if (!email) {
+      toast.error("اكتبي البريد الإلكتروني الأول");
+      return;
+    }
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${SITE_URL}${search.redirect ?? "/"}` },
+      });
+      if (error) throw error;
+      toast.success("بعتنالك الإيميل تاني، شوفي الـ Inbox أو الـ Spam 💌");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "حصل خطأ";
+      toast.error(msg);
+    } finally {
+      setResending(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
