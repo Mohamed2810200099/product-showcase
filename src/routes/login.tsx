@@ -23,6 +23,32 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const SITE_URL = "https://thegirlhouse.life";
+
+  const resendConfirmation = async () => {
+    if (!email) {
+      toast.error("اكتبي البريد الإلكتروني الأول");
+      return;
+    }
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${SITE_URL}${search.redirect ?? "/"}` },
+      });
+      if (error) throw error;
+      toast.success("بعتنالك الإيميل تاني، شوفي الـ Inbox أو الـ Spam 💌");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "حصل خطأ";
+      toast.error(msg);
+    } finally {
+      setResending(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -33,9 +59,9 @@ function LoginPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setNeedsConfirm(false);
     try {
       if (mode === "signup") {
-        const SITE_URL = "https://thegirlhouseegdm.lovable.app";
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -45,6 +71,7 @@ function LoginPage() {
           },
         });
         if (error) throw error;
+        setNeedsConfirm(true);
         toast.success("تم إنشاء الحساب! افتحي البريد لتأكيد الإيميل.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -56,7 +83,10 @@ function LoginPage() {
       const msg = err instanceof Error ? err.message : "حصل خطأ";
       if (msg.includes("Invalid login")) toast.error("البريد أو كلمة السر غلط");
       else if (msg.includes("already registered")) toast.error("الحساب موجود بالفعل، سجلي دخول");
-      else if (msg.includes("Email not confirmed")) toast.error("افتحي بريدك وأكدي الإيميل أولاً");
+      else if (msg.includes("Email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+        setNeedsConfirm(true);
+        toast.error("افتحي بريدك وأكدي الإيميل أولاً");
+      }
       else toast.error(msg);
     } finally {
       setLoading(false);
@@ -104,6 +134,26 @@ function LoginPage() {
               {mode === "login" ? "دخول" : "إنشاء حساب"}
             </button>
           </form>
+
+          {needsConfirm && (
+            <div className="mt-5 p-4 rounded-xl bg-secondary/60 border border-border text-center space-y-2">
+              <p className="text-sm text-foreground font-medium">
+                بعتنالك إيميل تأكيد على <span className="font-bold">{email}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                لو الإيميل ما وصلش، شوفي مجلد <span className="font-semibold">Spam / غير مرغوب فيه</span> أو اضغطي إعادة إرسال.
+              </p>
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resending}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {resending && <Loader2 className="h-4 w-4 animate-spin" />}
+                إعادة إرسال إيميل التأكيد
+              </button>
+            </div>
+          )}
 
           <p className="text-xs text-center text-muted-foreground mt-6">
             <Link to="/" className="hover:text-primary">العودة للرئيسية</Link>
