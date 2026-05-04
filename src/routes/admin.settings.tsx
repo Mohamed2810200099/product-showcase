@@ -26,6 +26,7 @@ type Brand = {
   shipping_fee: number;
   free_shipping_threshold: number;
   contact_email: string;
+  show_referral_section: boolean;
 };
 
 const DEFAULTS: Brand = {
@@ -37,6 +38,7 @@ const DEFAULTS: Brand = {
   shipping_fee: 60,
   free_shipping_threshold: 1500,
   contact_email: "thegirlhouseeg@yahoo.com",
+  show_referral_section: false,
 };
 
 function SettingsPage() {
