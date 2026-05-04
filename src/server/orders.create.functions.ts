@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { getGlowSettings } from "./referral.functions";
+import { getGlowSettings } from "./referral.server";
 
 const itemSchema = z.object({
   product_id: z.string().uuid(),
