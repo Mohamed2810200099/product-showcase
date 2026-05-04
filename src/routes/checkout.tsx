@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
-import { CreditCard, MessageCircle, Tag } from "lucide-react";
+import { CreditCard, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "إتمام الطلب — The Girl House" }] }),
