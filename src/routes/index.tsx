@@ -8,6 +8,7 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
 import { BeautyAssistant } from "@/components/BeautyAssistant";
+import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
 
@@ -30,7 +31,7 @@ const trustBadges = [
 ];
 
 function HomePage() {
-  
+  const brand = useBrand();
 
   const { data: featured = [] } = useQuery({
     queryKey: ["featured-products"],
@@ -77,7 +78,7 @@ function HomePage() {
   return (
     <PublicLayout>
       <HeroPremium />
-      <ReferralSection />
+      {brand.show_referral_section && <ReferralSection />}
 
       {/* TRUST BADGES */}
       <section className="border-y border-border bg-secondary/40">

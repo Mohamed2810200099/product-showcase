@@ -10,6 +10,7 @@ type Brand = {
   shipping_fee: number;
   free_shipping_threshold: number;
   contact_email: string;
+  show_referral_section: boolean;
 };
 
 const FALLBACK: Brand = {
@@ -21,6 +22,7 @@ const FALLBACK: Brand = {
   shipping_fee: 60,
   free_shipping_threshold: 1500,
   contact_email: "thegirlhouseeg@yahoo.com",
+  show_referral_section: false,
 };
 
 const CACHE_TTL_MS = 5 * 60 * 1000;

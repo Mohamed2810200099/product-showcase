@@ -26,6 +26,7 @@ type Brand = {
   shipping_fee: number;
   free_shipping_threshold: number;
   contact_email: string;
+  show_referral_section: boolean;
 };
 
 const DEFAULTS: Brand = {
@@ -37,6 +38,7 @@ const DEFAULTS: Brand = {
   shipping_fee: 60,
   free_shipping_threshold: 1500,
   contact_email: "thegirlhouseeg@yahoo.com",
+  show_referral_section: false,
 };
 
 function SettingsPage() {
@@ -79,6 +81,21 @@ function SettingsPage() {
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="رسوم الشحن (ج.م)" type="number" value={String(brand.shipping_fee)} onChange={(v) => setBrand({ ...brand, shipping_fee: Number(v) })} />
           <Field label="حد الشحن المجاني (ج.م)" type="number" value={String(brand.free_shipping_threshold)} onChange={(v) => setBrand({ ...brand, free_shipping_threshold: Number(v) })} />
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <div>
+              <div className="font-semibold text-sm">إظهار قسم "Share the Glow" في الصفحة الرئيسية</div>
+              <div className="text-xs text-muted-foreground mt-0.5">قسم دعوة الصديقات للحصول على خصم</div>
+            </div>
+            <input
+              type="checkbox"
+              checked={brand.show_referral_section}
+              onChange={(e) => setBrand({ ...brand, show_referral_section: e.target.checked })}
+              className="h-5 w-5 accent-primary"
+            />
+          </label>
         </div>
 
         <button onClick={save} disabled={saving} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full inline-flex items-center gap-2 font-medium shadow-elegant disabled:opacity-50">

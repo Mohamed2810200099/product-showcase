@@ -131,5 +131,23 @@ export const createOrder = createServerFn({ method: "POST" })
       .single();
 
     if (iErr || !inserted) return { ok: false, error: "تعذر إنشاء الطلب" };
+
+    // increment coupon usage and auto-deactivate when usage limit reached
+    if (couponCode) {
+      const { data: cRow } = await supabaseAdmin
+        .from("coupons")
+        .select("id, used_count, max_uses")
+        .eq("code", couponCode)
+        .maybeSingle();
+      if (cRow) {
+        const newUsed = (cRow.used_count ?? 0) + 1;
+        const shouldDeactivate = cRow.max_uses != null && newUsed >= cRow.max_uses;
+        await supabaseAdmin
+          .from("coupons")
+          .update({ used_count: newUsed, ...(shouldDeactivate ? { active: false } : {}) })
+          .eq("id", cRow.id);
+      }
+    }
+
     return { ok: true, id: inserted.id, order_number: inserted.order_number };
   });
