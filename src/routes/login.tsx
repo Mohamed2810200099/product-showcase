@@ -135,6 +135,26 @@ function LoginPage() {
             </button>
           </form>
 
+          {needsConfirm && (
+            <div className="mt-5 p-4 rounded-xl bg-secondary/60 border border-border text-center space-y-2">
+              <p className="text-sm text-foreground font-medium">
+                بعتنالك إيميل تأكيد على <span className="font-bold">{email}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                لو الإيميل ما وصلش، شوفي مجلد <span className="font-semibold">Spam / غير مرغوب فيه</span> أو اضغطي إعادة إرسال.
+              </p>
+              <button
+                type="button"
+                onClick={resendConfirmation}
+                disabled={resending}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              >
+                {resending && <Loader2 className="h-4 w-4 animate-spin" />}
+                إعادة إرسال إيميل التأكيد
+              </button>
+            </div>
+          )}
+
           <p className="text-xs text-center text-muted-foreground mt-6">
             <Link to="/" className="hover:text-primary">العودة للرئيسية</Link>
           </p>
