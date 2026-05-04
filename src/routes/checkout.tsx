@@ -183,8 +183,8 @@ function CheckoutPage() {
             <section className="bg-card border border-border rounded-2xl p-6">
               <h2 className="font-display text-xl font-semibold mb-4">بيانات التوصيل</h2>
               <div className="grid sm:grid-cols-2 gap-3">
-                <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} />
-                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} />
+                <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
+                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
@@ -196,8 +196,8 @@ function CheckoutPage() {
                     {governorates.map((g) => <option key={g}>{g}</option>)}
                   </select>
                 </div>
-                <Field label="المدينة / المنطقة *" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
-                <Field label="العنوان بالتفصيل *" value={form.address} onChange={(v) => setForm({ ...form, address: v })} className="sm:col-span-2" />
+                <Field label="المدينة / المنطقة *" value={form.city} onChange={(v) => setForm({ ...form, city: v })} invalidMessage="من فضلك أدخلي مدينتك" />
+                <Field label="العنوان بالتفصيل *" value={form.address} onChange={(v) => setForm({ ...form, address: v })} className="sm:col-span-2" invalidMessage="من فضلك أدخلي عنوانك بالتفصيل" />
                 <div className="sm:col-span-2">
                   <label className="text-xs text-muted-foreground block mb-1">ملاحظات (اختياري)</label>
                   <textarea
