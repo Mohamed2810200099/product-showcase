@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
-import { CreditCard, MessageCircle, Tag } from "lucide-react";
+import { CreditCard, Tag } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "إتمام الطلب — The Girl House" }] }),
@@ -114,7 +114,8 @@ function CheckoutPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const payload = { ...form, customer_email: user?.email ?? "" };
+    const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 
     setSubmitting(true);
@@ -135,29 +136,6 @@ function CheckoutPage() {
     }
     const data = { order_number: result.order_number };
 
-    // WhatsApp notification (client-side wa.me to brand)
-    const lines = [
-      `🛍️ *طلب جديد ${data.order_number}*`,
-      ``,
-      `👤 ${form.customer_name}`,
-      `📞 ${form.customer_phone}`,
-      `📍 ${form.governorate} - ${form.city}`,
-      `🏠 ${form.address}`,
-      ``,
-      `*المنتجات:*`,
-      ...items.map((it) => `• ${it.name} × ${it.qty} = ${formatEGP(it.price * it.qty)}`),
-      ``,
-      `المجموع: ${formatEGP(subtotal)}`,
-      discount ? `خصم (${appliedCoupon?.code}): -${formatEGP(discount)}` : "",
-      `الشحن: ${shipping === 0 ? "مجاناً" : formatEGP(shipping)}`,
-      `*الإجمالي: ${formatEGP(total)}*`,
-      ``,
-      form.notes ? `📝 ${form.notes}` : "",
-    ].filter(Boolean).join("\n");
-
-    const waUrl = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(lines)}`;
-    window.open(waUrl, "_blank");
-
     if (appliedCoupon) {
       const usedKey = `coupon_used_${appliedCoupon.code}`;
       localStorage.setItem(usedKey, String(Number(localStorage.getItem(usedKey) ?? "0") + 1));
@@ -165,12 +143,13 @@ function CheckoutPage() {
     localStorage.setItem("tgh_has_ordered", "1");
 
     // Send branded order confirmation email (best-effort, non-blocking)
-    if (form.customer_email) {
+    const emailToUse = user?.email ?? "";
+    if (emailToUse) {
       try {
         const { sendTransactionalEmail } = await import("@/lib/email/send");
         await sendTransactionalEmail({
           templateName: "order-confirmation",
-          recipientEmail: form.customer_email,
+          recipientEmail: emailToUse,
           idempotencyKey: `order-${data.order_number}`,
           templateData: {
             customerName: form.customer_name,
@@ -206,7 +185,7 @@ function CheckoutPage() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} />
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} />
-                <Field label="البريد الإلكتروني" type="email" value={form.customer_email} onChange={(v) => setForm({ ...form, customer_email: v })} />
+                
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
                   <select
@@ -283,10 +262,10 @@ function CheckoutPage() {
             </dl>
 
             <button type="submit" disabled={submitting} className="mt-5 w-full bg-primary text-primary-foreground py-3 rounded-full font-medium shadow-elegant hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
-              <MessageCircle className="h-4 w-4" /> {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
+              {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
             </button>
             <p className="text-xs text-muted-foreground text-center mt-3">
-              عند التأكيد سيتم إرسال طلبك للإدارة عبر واتساب
+              هنبعتلك تأكيد الطلب على إيميلك فوراً ✨
             </p>
           </aside>
         </form>
