@@ -267,7 +267,7 @@ function ProductPage() {
         </div>
 
         {/* DETAILS SECTIONS */}
-        <div className="mt-14 grid md:grid-cols-2 gap-6">
+        <div className="mt-14 grid md:grid-cols-2 gap-6 items-start auto-rows-min">
           {benefits.length > 0 && (
             <Section icon={Sparkles} title="الفوائد الرئيسية">
               <ul className="space-y-2">
