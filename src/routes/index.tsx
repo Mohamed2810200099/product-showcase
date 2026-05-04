@@ -8,6 +8,7 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
 import { BeautyAssistant } from "@/components/BeautyAssistant";
+import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
 
