@@ -229,8 +229,8 @@ function CheckoutPage() {
             <h2 className="font-display text-xl font-bold mb-4">طلبك ({items.length})</h2>
             <ul className="space-y-2 text-sm max-h-60 overflow-auto">
               {items.map((it) => (
-                <li key={it.id} className="flex justify-between gap-2">
-                  <span className="line-clamp-1">{it.name} × {it.qty}</span>
+                <li key={it.id} className="flex justify-between gap-2 items-start">
+                  <span className="line-clamp-2 leading-snug" title={it.name}>{it.name} × {it.qty}</span>
                   <span className="font-semibold whitespace-nowrap">{formatEGP(it.price * it.qty)}</span>
                 </li>
               ))}
