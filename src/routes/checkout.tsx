@@ -40,10 +40,29 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [referralInput, setReferralInput] = useState("");
+  const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
+  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [useWallet, setUseWallet] = useState(false);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
   });
+
+  // Load glow profile when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const { getMyGlowProfile } = await import("@/server/referral.functions");
+        const res = await getMyGlowProfile();
+        const r = res as { profile: { wallet_balance: number } | null; settings: { friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } };
+        setWalletBalance(Number(r.profile?.wallet_balance ?? 0));
+        setGlowSettings(r.settings);
+      } catch (e) { console.warn(e); }
+    })();
+  }, [isAuthenticated]);
 
   if (authLoading) {
     return (
