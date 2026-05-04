@@ -20,6 +20,12 @@ export function ReferralSection() {
   const [copied, setCopied] = useState(false);
   const brand = useBrand();
 
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-referral-modal", handler);
+    return () => window.removeEventListener("open-referral-modal", handler);
+  }, []);
+
   const generate = async () => {
     if (name.trim().length < 2) return toast.error("اكتبي اسمك");
     if (contact.trim().length < 6) return toast.error("اكتبي رقمك أو إيميلك");
