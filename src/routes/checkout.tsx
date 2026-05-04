@@ -274,7 +274,8 @@ function CheckoutPage() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", className = "" }: { label: string; value: string; onChange: (v: string) => void; type?: string; className?: string }) {
+function Field({ label, value, onChange, type = "text", className = "", invalidMessage }: { label: string; value: string; onChange: (v: string) => void; type?: string; className?: string; invalidMessage?: string }) {
+  const msg = invalidMessage ?? "من فضلك أدخلي هذا الحقل";
   return (
     <div className={className}>
       <label className="text-xs text-muted-foreground block mb-1">{label}</label>
@@ -282,6 +283,8 @@ function Field({ label, value, onChange, type = "text", className = "" }: { labe
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         required={label.includes("*")}
+        onInvalid={(e) => e.currentTarget.setCustomValidity(msg)}
+        onInput={(e) => e.currentTarget.setCustomValidity("")}
       />
     </div>
   );
