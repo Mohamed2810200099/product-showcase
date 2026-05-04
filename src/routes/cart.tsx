@@ -36,7 +36,16 @@ function CartPage() {
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-10">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold mb-8">سلة التسوق</h1>
+        <h1 className="font-display text-3xl sm:text-4xl font-bold mb-4">سلة التسوق</h1>
+        {shipping > 0 ? (
+          <div className="bg-primary/5 border border-primary/20 text-primary text-sm rounded-xl px-4 py-2.5 mb-6 inline-flex items-center gap-2">
+            🚚 <span>أضيفي منتجات بقيمة {formatEGP(brand.free_shipping_threshold - subtotal)} للحصول على شحن مجاني</span>
+          </div>
+        ) : (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-2.5 mb-6 inline-flex items-center gap-2">
+            🎉 <span>مبروك! أهلتي للشحن المجاني</span>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-[1fr_360px] gap-8">
           <ul className="space-y-3">
