@@ -114,7 +114,8 @@ function CheckoutPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const payload = { ...form, customer_email: user?.email ?? "" };
+    const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 
     setSubmitting(true);
@@ -135,29 +136,6 @@ function CheckoutPage() {
     }
     const data = { order_number: result.order_number };
 
-    // WhatsApp notification (client-side wa.me to brand)
-    const lines = [
-      `🛍️ *طلب جديد ${data.order_number}*`,
-      ``,
-      `👤 ${form.customer_name}`,
-      `📞 ${form.customer_phone}`,
-      `📍 ${form.governorate} - ${form.city}`,
-      `🏠 ${form.address}`,
-      ``,
-      `*المنتجات:*`,
-      ...items.map((it) => `• ${it.name} × ${it.qty} = ${formatEGP(it.price * it.qty)}`),
-      ``,
-      `المجموع: ${formatEGP(subtotal)}`,
-      discount ? `خصم (${appliedCoupon?.code}): -${formatEGP(discount)}` : "",
-      `الشحن: ${shipping === 0 ? "مجاناً" : formatEGP(shipping)}`,
-      `*الإجمالي: ${formatEGP(total)}*`,
-      ``,
-      form.notes ? `📝 ${form.notes}` : "",
-    ].filter(Boolean).join("\n");
-
-    const waUrl = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(lines)}`;
-    window.open(waUrl, "_blank");
-
     if (appliedCoupon) {
       const usedKey = `coupon_used_${appliedCoupon.code}`;
       localStorage.setItem(usedKey, String(Number(localStorage.getItem(usedKey) ?? "0") + 1));
@@ -165,12 +143,13 @@ function CheckoutPage() {
     localStorage.setItem("tgh_has_ordered", "1");
 
     // Send branded order confirmation email (best-effort, non-blocking)
-    if (form.customer_email) {
+    const emailToUse = user?.email ?? "";
+    if (emailToUse) {
       try {
         const { sendTransactionalEmail } = await import("@/lib/email/send");
         await sendTransactionalEmail({
           templateName: "order-confirmation",
-          recipientEmail: form.customer_email,
+          recipientEmail: emailToUse,
           idempotencyKey: `order-${data.order_number}`,
           templateData: {
             customerName: form.customer_name,
