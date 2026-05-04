@@ -29,11 +29,13 @@ function LoginPage() {
   const [resending, setResending] = useState(false);
   const authNoticeShown = useRef(false);
 
-  const safeRedirect = (value?: string) => (value?.startsWith("/") && !value.startsWith("//") ? value : "/");
+  const safeRedirect = (value?: string) =>
+    value?.startsWith("/") && !value.startsWith("//") ? value : "/";
   const redirectTarget = safeRedirect(search.redirect);
 
   const getEmailRedirectUrl = () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://thegirlhouse.life";
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://thegirlhouse.life";
     const url = new URL("/login", origin);
     url.searchParams.set("confirmed", "1");
     if (redirectTarget !== "/") url.searchParams.set("redirect", redirectTarget);
@@ -54,7 +56,9 @@ function LoginPage() {
         options: { emailRedirectTo: getEmailRedirectUrl() },
       });
       if (error) throw error;
-      setConfirmMessage("بعتنالك لينك جديد. مهم تفتحي آخر إيميل وصلِك فقط لأن أي لينك قديم ممكن يبقى منتهي.");
+      setConfirmMessage(
+        "بعتنالك لينك جديد. مهم تفتحي آخر إيميل وصلِك فقط لأن أي لينك قديم ممكن يبقى منتهي.",
+      );
       toast.success("بعتنالك الإيميل تاني، شوفي الـ Inbox أو الـ Spam 💌");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "حصل خطأ";
@@ -82,7 +86,9 @@ function LoginPage() {
     if (linkError) {
       setMode("login");
       setNeedsConfirm(true);
-      setConfirmMessage("لينك التأكيد ده قديم أو اتفتح قبل كده. اضغطي إعادة إرسال وافتحي آخر إيميل يوصلِك.");
+      setConfirmMessage(
+        "لينك التأكيد ده قديم أو اتفتح قبل كده. اضغطي إعادة إرسال وافتحي آخر إيميل يوصلِك.",
+      );
       toast.error("لينك التأكيد غير صالح، ابعتي لينك جديد وافتحي آخر إيميل");
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
       return;
@@ -113,7 +119,9 @@ function LoginPage() {
         if (error) throw error;
         if (typeof window !== "undefined") localStorage.setItem("tgh_pending_confirm_email", email);
         setNeedsConfirm(true);
-        setConfirmMessage("بعتنالك إيميل تأكيد. بعد ما تضغطي تأكيد، هترجعي هنا تسجلي دخولك وتكملي عادي.");
+        setConfirmMessage(
+          "بعتنالك إيميل تأكيد. بعد ما تضغطي تأكيد، هترجعي هنا تسجلي دخولك وتكملي عادي.",
+        );
         toast.success("تم إنشاء الحساب! افتحي البريد لتأكيد الإيميل.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -127,11 +135,12 @@ function LoginPage() {
       else if (msg.includes("already registered")) toast.error("الحساب موجود بالفعل، سجلي دخول");
       else if (msg.includes("Email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
         setNeedsConfirm(true);
-        setConfirmMessage("الإيميل لسه مش متأكد. لو كنتي ضغطتي على لينك قديم، ابعتي لينك جديد وافتحي آخر إيميل وصلِك.");
+        setConfirmMessage(
+          "الإيميل لسه مش متأكد. لو كنتي ضغطتي على لينك قديم، ابعتي لينك جديد وافتحي آخر إيميل وصلِك.",
+        );
         if (typeof window !== "undefined") localStorage.setItem("tgh_pending_confirm_email", email);
         toast.error("افتحي بريدك وأكدي الإيميل أولاً");
-      }
-      else toast.error(msg);
+      } else toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -146,34 +155,68 @@ function LoginPage() {
               {mode === "login" ? "تسجيل الدخول" : "حساب جديد"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {mode === "login" ? "ادخلي على حسابك علشان تكملي الطلب" : "اعملي حساب علشان تتابعي طلباتك ومكافآتك"}
+              {mode === "login"
+                ? "ادخلي على حسابك علشان تكملي الطلب"
+                : "اعملي حساب علشان تتابعي طلباتك ومكافآتك"}
             </p>
           </div>
 
           <div className="flex bg-secondary rounded-full p-1 mb-6 text-sm">
-            <button type="button" onClick={() => setMode("login")} className={`flex-1 py-2 rounded-full transition ${mode === "login" ? "bg-card shadow-soft font-semibold" : "text-muted-foreground"}`}>تسجيل دخول</button>
-            <button type="button" onClick={() => setMode("signup")} className={`flex-1 py-2 rounded-full transition ${mode === "signup" ? "bg-card shadow-soft font-semibold" : "text-muted-foreground"}`}>حساب جديد</button>
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className={`flex-1 py-2 rounded-full transition ${mode === "login" ? "bg-card shadow-soft font-semibold" : "text-muted-foreground"}`}
+            >
+              تسجيل دخول
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`flex-1 py-2 rounded-full transition ${mode === "signup" ? "bg-card shadow-soft font-semibold" : "text-muted-foreground"}`}
+            >
+              حساب جديد
+            </button>
           </div>
 
           <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
               <div>
                 <label className="text-xs text-muted-foreground block mb-1">الاسم</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} required minLength={2}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  minLength={2}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
             )}
             <div>
               <label className="text-xs text-muted-foreground block mb-1">البريد الإلكتروني</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">كلمة السر</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
-            <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground py-2.5 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary text-primary-foreground py-2.5 rounded-full font-medium hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "login" ? "دخول" : "إنشاء حساب"}
             </button>
@@ -185,7 +228,8 @@ function LoginPage() {
                 بعتنالك إيميل تأكيد على <span className="font-bold">{email}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                {confirmMessage ?? "لو الإيميل ما وصلش، شوفي مجلد Spam / غير مرغوب فيه أو اضغطي إعادة إرسال."}
+                {confirmMessage ??
+                  "لو الإيميل ما وصلش، شوفي مجلد Spam / غير مرغوب فيه أو اضغطي إعادة إرسال."}
               </p>
               <button
                 type="button"
@@ -200,7 +244,9 @@ function LoginPage() {
           )}
 
           <p className="text-xs text-center text-muted-foreground mt-6">
-            <Link to="/" className="hover:text-primary">العودة للرئيسية</Link>
+            <Link to="/" className="hover:text-primary">
+              العودة للرئيسية
+            </Link>
           </p>
         </div>
       </div>
