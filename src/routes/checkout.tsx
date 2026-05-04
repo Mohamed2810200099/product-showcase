@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -40,10 +40,29 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [referralInput, setReferralInput] = useState("");
+  const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
+  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [useWallet, setUseWallet] = useState(false);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
   });
+
+  // Load glow profile when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const { getMyGlowProfile } = await import("@/server/referral.functions");
+        const res = await getMyGlowProfile();
+        const r = res as { profile: { wallet_balance: number } | null; settings: { friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } };
+        setWalletBalance(Number(r.profile?.wallet_balance ?? 0));
+        setGlowSettings(r.settings);
+      } catch (e) { console.warn(e); }
+    })();
+  }, [isAuthenticated]);
 
   if (authLoading) {
     return (
@@ -86,30 +105,37 @@ function CheckoutPage() {
   }
 
   const shipping = subtotal >= brand.free_shipping_threshold ? 0 : brand.shipping_fee;
-  const discount = appliedCoupon?.discount ?? 0;
-  const total = Math.max(0, subtotal - discount + shipping);
+  const couponDiscount = appliedCoupon?.discount ?? 0;
+  const referralDiscount = appliedReferral?.discount ?? 0;
+  const discount = couponDiscount + referralDiscount;
+  const maxWalletByOrder = glowSettings ? Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100) : 0;
+  const walletApplied = useWallet
+    ? Math.min(walletBalance, Math.max(0, subtotal - discount), maxWalletByOrder)
+    : 0;
+  const total = Math.max(0, subtotal - discount - walletApplied + shipping);
 
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
     const { validateCoupon } = await import("@/server/coupons.functions");
-    const usedKey = `coupon_used_${code}`;
-    const usedCount = Number(localStorage.getItem(usedKey) ?? "0");
     const phone = form.customer_phone.trim();
     const result = await validateCoupon({
-      data: {
-        code,
-        subtotal,
-        phone: phone.length >= 6 ? phone : undefined,
-      },
+      data: { code, subtotal, phone: phone.length >= 6 ? phone : undefined },
     });
     if (!result.ok) return toast.error(result.error);
-    // local per-customer guardrail kept as a soft check (server already enforces phone-based use)
-    if (usedCount > 0 && phone.length < 6) {
-      // no-op, server is authoritative when phone present
-    }
     setAppliedCoupon({ code: result.code, discount: result.discount });
+    setAppliedReferral(null); // mutually exclusive
     toast.success("تم تطبيق الخصم بنجاح");
+  };
+
+  const applyReferral = () => {
+    const code = referralInput.trim().toUpperCase();
+    if (!code) return;
+    if (!glowSettings) return toast.error("جاري التحميل…");
+    const d = Math.round((subtotal * glowSettings.friend_discount_pct) / 100);
+    setAppliedReferral({ code, discount: d });
+    setAppliedCoupon(null);
+    toast.success(`تم تطبيق كود صديقتك — خصم ${glowSettings.friend_discount_pct}٪`);
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -126,6 +152,9 @@ function CheckoutPage() {
         customer_email: parsed.data.customer_email || "",
         items: items.map((it) => ({ product_id: it.id, qty: it.qty })),
         coupon_code: appliedCoupon?.code ?? null,
+        referral_code: appliedReferral?.code ?? null,
+        use_wallet: useWallet,
+        customer_user_id: user?.id ?? null,
       },
     });
 
@@ -238,7 +267,7 @@ function CheckoutPage() {
 
             <div className="border-t border-border my-4" />
 
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-2">
               <input
                 placeholder="كود الخصم"
                 value={coupon}
@@ -250,10 +279,37 @@ function CheckoutPage() {
               </button>
             </div>
 
+            <div className="flex gap-2 mb-3">
+              <input
+                placeholder="كود صديقتك (Share the Glow)"
+                value={referralInput}
+                onChange={(e) => setReferralInput(e.target.value)}
+                className="flex-1 bg-background border border-border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button type="button" onClick={applyReferral} className="bg-[#FCE6EE] text-[#C95588] px-4 rounded-full text-sm font-medium hover:bg-[#FAD5E1] inline-flex items-center gap-1">
+                ✨ تطبيق
+              </button>
+            </div>
+
+            {isAuthenticated && walletBalance > 0 && (
+              <label className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9] cursor-pointer">
+                <span className="text-sm">
+                  استخدمي رصيد محفظتك ({formatEGP(walletBalance)})
+                </span>
+                <input type="checkbox" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} className="h-4 w-4 accent-primary" />
+              </label>
+            )}
+
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between"><dt>المجموع</dt><dd>{formatEGP(subtotal)}</dd></div>
-              {discount > 0 && (
-                <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(discount)}</dd></div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(couponDiscount)}</dd></div>
+              )}
+              {referralDiscount > 0 && (
+                <div className="flex justify-between text-primary"><dt>خصم صديقتك ({appliedReferral?.code})</dt><dd>-{formatEGP(referralDiscount)}</dd></div>
+              )}
+              {walletApplied > 0 && (
+                <div className="flex justify-between text-emerald-600"><dt>من المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
               )}
               <div className="flex justify-between"><dt>الشحن</dt><dd>{shipping === 0 ? "مجاناً" : formatEGP(shipping)}</dd></div>
               <div className="border-t border-border pt-2 flex justify-between font-bold text-base">

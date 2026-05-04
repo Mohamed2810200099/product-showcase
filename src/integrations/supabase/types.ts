@@ -98,6 +98,48 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_profiles: {
+        Row: {
+          created_at: string
+          current_month_credits: number
+          current_month_key: string | null
+          display_name: string | null
+          id: string
+          lifetime_credits_earned: number
+          personal_code: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          wallet_balance: number
+        }
+        Insert: {
+          created_at?: string
+          current_month_credits?: number
+          current_month_key?: string | null
+          display_name?: string | null
+          id?: string
+          lifetime_credits_earned?: number
+          personal_code: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_balance?: number
+        }
+        Update: {
+          created_at?: string
+          current_month_credits?: number
+          current_month_key?: string | null
+          display_name?: string | null
+          id?: string
+          lifetime_credits_earned?: number
+          personal_code?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_balance?: number
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -194,6 +236,7 @@ export type Database = {
           customer_email: string | null
           customer_name: string
           customer_phone: string
+          customer_user_id: string | null
           discount: number
           governorate: string
           id: string
@@ -201,11 +244,15 @@ export type Database = {
           notes: string | null
           order_number: string
           payment_method: string
+          referral_code_used: string | null
+          referrer_credit_amount: number
+          referrer_credit_status: string
           shipping: number
           status: string
           subtotal: number
           total: number
           updated_at: string
+          wallet_redeemed: number
           whatsapp_sent: boolean
         }
         Insert: {
@@ -216,6 +263,7 @@ export type Database = {
           customer_email?: string | null
           customer_name: string
           customer_phone: string
+          customer_user_id?: string | null
           discount?: number
           governorate: string
           id?: string
@@ -223,11 +271,15 @@ export type Database = {
           notes?: string | null
           order_number?: string
           payment_method?: string
+          referral_code_used?: string | null
+          referrer_credit_amount?: number
+          referrer_credit_status?: string
           shipping?: number
           status?: string
           subtotal?: number
           total?: number
           updated_at?: string
+          wallet_redeemed?: number
           whatsapp_sent?: boolean
         }
         Update: {
@@ -238,6 +290,7 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string
+          customer_user_id?: string | null
           discount?: number
           governorate?: string
           id?: string
@@ -245,11 +298,15 @@ export type Database = {
           notes?: string | null
           order_number?: string
           payment_method?: string
+          referral_code_used?: string | null
+          referrer_credit_amount?: number
+          referrer_credit_status?: string
           shipping?: number
           status?: string
           subtotal?: number
           total?: number
           updated_at?: string
+          wallet_redeemed?: number
           whatsapp_sent?: boolean
         }
         Relationships: []
@@ -372,6 +429,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referral_uses: {
+        Row: {
+          code: string
+          created_at: string
+          discount_amount: number
+          friend_phone: string | null
+          friend_user_id: string | null
+          id: string
+          order_id: string | null
+          referrer_user_id: string | null
+          reward_amount: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_amount?: number
+          friend_phone?: string | null
+          friend_user_id?: string | null
+          id?: string
+          order_id?: string | null
+          referrer_user_id?: string | null
+          reward_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_amount?: number
+          friend_phone?: string | null
+          friend_user_id?: string | null
+          id?: string
+          order_id?: string | null
+          referrer_user_id?: string | null
+          reward_amount?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -552,6 +651,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          order_id: string | null
+          related_order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          order_id?: string | null
+          related_order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          order_id?: string | null
+          related_order_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       coupons_public: {
@@ -591,6 +723,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_personal_code: { Args: { _seed: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -602,6 +735,7 @@ export type Database = {
         Args: { _code: string; _phone: string }
         Returns: boolean
       }
+      lookup_referral_owner: { Args: { _code: string }; Returns: string }
       move_to_dlq: {
         Args: {
           dlq_name: string
