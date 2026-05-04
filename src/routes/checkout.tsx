@@ -262,10 +262,10 @@ function CheckoutPage() {
             </dl>
 
             <button type="submit" disabled={submitting} className="mt-5 w-full bg-primary text-primary-foreground py-3 rounded-full font-medium shadow-elegant hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
-              <MessageCircle className="h-4 w-4" /> {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
+              {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
             </button>
             <p className="text-xs text-muted-foreground text-center mt-3">
-              عند التأكيد سيتم إرسال طلبك للإدارة عبر واتساب
+              هنبعتلك تأكيد الطلب على إيميلك فوراً ✨
             </p>
           </aside>
         </form>
