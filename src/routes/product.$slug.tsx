@@ -204,6 +204,21 @@ function ProductPage() {
             )}
 
             {(() => {
+              const remaining = brand.free_shipping_threshold - subtotal;
+              return remaining > 0 ? (
+                <div className="bg-primary/5 border border-primary/20 text-primary text-sm rounded-xl px-4 py-2.5 flex items-center gap-2">
+                  <Truck className="h-4 w-4 shrink-0" />
+                  <span>أضيفي منتجات بقيمة {formatEGP(remaining)} للحصول على شحن مجاني 🚚</span>
+                </div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-2.5 flex items-center gap-2">
+                  <Truck className="h-4 w-4 shrink-0" />
+                  <span>مبروك! أهلتي للشحن المجاني 🎉</span>
+                </div>
+              );
+            })()}
+
+            {(() => {
               const status = (product as any).availability_status ?? "available";
               const tracking = (product as any).stock_tracking_enabled === true;
               const isOut = status === "out_of_stock" || (tracking && product.stock === 0);
