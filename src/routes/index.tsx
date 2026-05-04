@@ -31,7 +31,7 @@ const trustBadges = [
 ];
 
 function HomePage() {
-  
+  const brand = useBrand();
 
   const { data: featured = [] } = useQuery({
     queryKey: ["featured-products"],
