@@ -181,7 +181,7 @@ export const reverseReferralForOrder = createServerFn({ method: "POST" })
     // Reverse referrer credit if granted
     if (order.referrer_credit_status === "granted" && Number(order.referrer_credit_amount) > 0) {
       const { data: refOwner } = await supabaseAdmin.rpc("lookup_referral_owner", {
-        _code: order.referral_code_used,
+        _code: order.referral_code_used ?? "",
       });
       const referrerId = refOwner as unknown as string | null;
       if (referrerId) {
