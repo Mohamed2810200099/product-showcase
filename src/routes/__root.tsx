@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/context/CartContext";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
@@ -11,23 +12,25 @@ const queryClient = new QueryClient({
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 font-body">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-display font-bold text-primary">٤٠٤</h1>
-        <h2 className="mt-4 text-xl font-semibold">الصفحة غير موجودة</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          الصفحة اللي بتدوّري عليها مش موجودة أو اتنقلت.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-soft transition hover:opacity-90"
-          >
-            العودة للرئيسية
-          </Link>
+    <PublicLayout>
+      <div className="flex min-h-[60vh] items-center justify-center bg-background px-4 font-body">
+        <div className="max-w-md text-center">
+          <h1 className="text-7xl font-display font-bold text-primary">٤٠٤</h1>
+          <h2 className="mt-4 text-xl font-semibold">الصفحة غير موجودة</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            الصفحة اللي بتدوّري عليها مش موجودة أو اتنقلت.
+          </p>
+          <div className="mt-6">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-soft transition hover:opacity-90"
+            >
+              العودة للرئيسية
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </PublicLayout>
   );
 }
 

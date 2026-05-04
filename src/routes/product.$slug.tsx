@@ -25,7 +25,7 @@ export const Route = createFileRoute("/product/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { add } = useCart();
+  const { add, subtotal } = useCart();
   const brand = useBrand();
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
@@ -204,6 +204,21 @@ function ProductPage() {
             )}
 
             {(() => {
+              const remaining = brand.free_shipping_threshold - subtotal;
+              return remaining > 0 ? (
+                <div className="bg-primary/5 border border-primary/20 text-primary text-sm rounded-xl px-4 py-2.5 flex items-center gap-2">
+                  <Truck className="h-4 w-4 shrink-0" />
+                  <span>أضيفي منتجات بقيمة {formatEGP(remaining)} للحصول على شحن مجاني 🚚</span>
+                </div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-2.5 flex items-center gap-2">
+                  <Truck className="h-4 w-4 shrink-0" />
+                  <span>مبروك! أهلتي للشحن المجاني 🎉</span>
+                </div>
+              );
+            })()}
+
+            {(() => {
               const status = (product as any).availability_status ?? "available";
               const tracking = (product as any).stock_tracking_enabled === true;
               const isOut = status === "out_of_stock" || (tracking && product.stock === 0);
@@ -267,7 +282,7 @@ function ProductPage() {
         </div>
 
         {/* DETAILS SECTIONS */}
-        <div className="mt-14 grid md:grid-cols-2 gap-6">
+        <div className="mt-14 grid md:grid-cols-2 gap-6 items-start auto-rows-min">
           {benefits.length > 0 && (
             <Section icon={Sparkles} title="الفوائد الرئيسية">
               <ul className="space-y-2">

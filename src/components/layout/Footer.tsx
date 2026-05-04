@@ -13,8 +13,8 @@ export function Footer() {
 
   return (
     <footer className="bg-secondary mt-20 border-t border-border">
-      <div className="container mx-auto px-4 py-12 grid gap-10 md:grid-cols-4">
-        <div>
+      <div className="container mx-auto px-4 py-12 grid gap-10 md:grid-cols-5">
+        <div className="md:col-span-2">
           <h3 className="font-display text-2xl text-primary font-semibold mb-3">The Girl House</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
             وجهتك الأولى لمنتجات DM الألمانية الأصلية في مصر — أصلية ١٠٠٪، أسعار صديقة، توصيل لكل المحافظات.
@@ -46,7 +46,17 @@ export function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/" className="text-muted-foreground hover:text-primary">الرئيسية</Link></li>
             <li><Link to="/shop" className="text-muted-foreground hover:text-primary">المتجر</Link></li>
+            <li><Link to="/offers" className="text-muted-foreground hover:text-primary">العروض</Link></li>
+            <li><Link to="/about" className="text-muted-foreground hover:text-primary">من نحن</Link></li>
             <li><Link to="/cart" className="text-muted-foreground hover:text-primary">سلة التسوق</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-display text-lg mb-3">سياسات المتجر</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link to="/return-policy" className="text-muted-foreground hover:text-primary">سياسة الإرجاع والاستبدال</Link></li>
+            <li><Link to="/privacy-policy" className="text-muted-foreground hover:text-primary">سياسة الخصوصية</Link></li>
           </ul>
         </div>
 
@@ -73,16 +83,6 @@ export function Footer() {
             <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> <a href={`mailto:${brand.contact_email}`} className="hover:text-primary">{brand.contact_email}</a></li>
             <li className="flex items-center gap-2 text-muted-foreground"><MapPin className="h-4 w-4" /> القاهرة، مصر</li>
           </ul>
-        </div>
-
-        <div>
-          <h4 className="font-display text-lg mb-3">عرضنا</h4>
-          <p className="text-sm text-muted-foreground mb-3">
-            استخدمي كود <span className="font-bold text-primary">WELCOME10</span> واحصلي على خصم ١٠٪ على أول طلب فوق ٥٠٠ ج.م
-          </p>
-          <Link to="/shop" className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:opacity-90 transition shadow-soft">
-            تسوقي الآن
-          </Link>
         </div>
       </div>
 

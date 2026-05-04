@@ -263,12 +263,13 @@ export function HeroPremium() {
               </MagneticButton>
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
-              <Link
-                to="/shop"
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("open-referral-modal"))}
                 className="inline-flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium text-[#3A2430]/80 hover:text-[#D96C9D] transition"
               >
-                <Gift className="h-4 w-4" /> Invite a Friend
-              </Link>
+                <Gift className="h-4 w-4" /> ادعي صديقتك
+              </button>
             </motion.div>
           </motion.div>
 

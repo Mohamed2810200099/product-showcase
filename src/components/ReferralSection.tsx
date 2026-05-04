@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Share2, Sparkles, Copy, X, MessageCircle, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,12 @@ export function ReferralSection() {
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const brand = useBrand();
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-referral-modal", handler);
+    return () => window.removeEventListener("open-referral-modal", handler);
+  }, []);
 
   const generate = async () => {
     if (name.trim().length < 2) return toast.error("اكتبي اسمك");
@@ -100,10 +106,10 @@ export function ReferralSection() {
                 <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] flex items-center justify-center text-white shadow-[0_10px_24px_-8px_rgba(217,108,157,0.6)] mb-4">
                   <Gift className="h-7 w-7" />
                 </div>
-                <div className="font-display text-2xl font-bold text-[#3A2430]">Give 10%</div>
-                <div className="text-xs uppercase tracking-[0.3em] text-[#D96C9D] my-1">·  Get 10% ·</div>
-                <p className="text-xs text-[#3A2430]/70 mt-2">
-                  Both you and your friend save on your next order.
+                <div dir="rtl" className="font-display text-2xl font-bold text-[#3A2430]">ادي ١٠٪</div>
+                <div dir="rtl" className="text-xs tracking-[0.3em] text-[#D96C9D] my-1">·  واحصلي ١٠٪ ·</div>
+                <p dir="rtl" className="text-xs text-[#3A2430]/70 mt-2">
+                  انتِ وصديقتك بتوفروا على طلبكم الجاي.
                 </p>
               </motion.div>
             </div>

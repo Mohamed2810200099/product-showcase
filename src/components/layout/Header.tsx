@@ -8,11 +8,11 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import logo from "@/assets/logo.png";
 
 const navItems = [
-  { to: "/", label: "Home" },
-  { to: "/shop", label: "Shop" },
-  { to: "/shop", label: "Hair Care", search: { category: "hair-care" } },
-  { to: "/shop", label: "Skincare", search: { category: "skincare" } },
-  { to: "/shop", label: "Offers" },
+  { to: "/", label: "الرئيسية" },
+  { to: "/shop", label: "المتجر" },
+  { to: "/shop", label: "العناية بالشعر", search: { category: "hair-care" } },
+  { to: "/shop", label: "العناية بالبشرة", search: { category: "skincare" } },
+  { to: "/about", label: "من نحن" },
 ] as const;
 
 export function Header() {

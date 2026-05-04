@@ -183,8 +183,8 @@ function CheckoutPage() {
             <section className="bg-card border border-border rounded-2xl p-6">
               <h2 className="font-display text-xl font-semibold mb-4">بيانات التوصيل</h2>
               <div className="grid sm:grid-cols-2 gap-3">
-                <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} />
-                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} />
+                <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
+                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
@@ -196,8 +196,8 @@ function CheckoutPage() {
                     {governorates.map((g) => <option key={g}>{g}</option>)}
                   </select>
                 </div>
-                <Field label="المدينة / المنطقة *" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
-                <Field label="العنوان بالتفصيل *" value={form.address} onChange={(v) => setForm({ ...form, address: v })} className="sm:col-span-2" />
+                <Field label="المدينة / المنطقة *" value={form.city} onChange={(v) => setForm({ ...form, city: v })} invalidMessage="من فضلك أدخلي مدينتك" />
+                <Field label="العنوان بالتفصيل *" value={form.address} onChange={(v) => setForm({ ...form, address: v })} className="sm:col-span-2" invalidMessage="من فضلك أدخلي عنوانك بالتفصيل" />
                 <div className="sm:col-span-2">
                   <label className="text-xs text-muted-foreground block mb-1">ملاحظات (اختياري)</label>
                   <textarea
@@ -229,8 +229,8 @@ function CheckoutPage() {
             <h2 className="font-display text-xl font-bold mb-4">طلبك ({items.length})</h2>
             <ul className="space-y-2 text-sm max-h-60 overflow-auto">
               {items.map((it) => (
-                <li key={it.id} className="flex justify-between gap-2">
-                  <span className="line-clamp-1">{it.name} × {it.qty}</span>
+                <li key={it.id} className="flex justify-between gap-2 items-start">
+                  <span className="line-clamp-2 leading-snug" title={it.name}>{it.name} × {it.qty}</span>
                   <span className="font-semibold whitespace-nowrap">{formatEGP(it.price * it.qty)}</span>
                 </li>
               ))}
@@ -274,7 +274,8 @@ function CheckoutPage() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", className = "" }: { label: string; value: string; onChange: (v: string) => void; type?: string; className?: string }) {
+function Field({ label, value, onChange, type = "text", className = "", invalidMessage }: { label: string; value: string; onChange: (v: string) => void; type?: string; className?: string; invalidMessage?: string }) {
+  const msg = invalidMessage ?? "من فضلك أدخلي هذا الحقل";
   return (
     <div className={className}>
       <label className="text-xs text-muted-foreground block mb-1">{label}</label>
@@ -282,6 +283,8 @@ function Field({ label, value, onChange, type = "text", className = "" }: { labe
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
         required={label.includes("*")}
+        onInvalid={(e) => e.currentTarget.setCustomValidity(msg)}
+        onInput={(e) => e.currentTarget.setCustomValidity("")}
       />
     </div>
   );

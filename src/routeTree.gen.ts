@@ -11,11 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as ReturnPolicyRouteImport } from './routes/return-policy'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OrderSuccessRouteImport } from './routes/order-success'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -47,6 +51,16 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReturnPolicyRoute = ReturnPolicyRouteImport.update({
+  id: '/return-policy',
+  path: '/return-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersRoute = OrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -55,6 +69,11 @@ const OrdersRoute = OrdersRouteImport.update({
 const OrderSuccessRoute = OrderSuccessRouteImport.update({
   id: '/order-success',
   path: '/order-success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -70,6 +89,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -178,11 +202,15 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/offers': typeof OffersRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -207,11 +235,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/offers': typeof OffersRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -237,11 +269,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
+  '/offers': typeof OffersRoute
   '/order-success': typeof OrderSuccessRoute
   '/orders': typeof OrdersRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -268,11 +304,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/cart'
     | '/checkout'
     | '/login'
+    | '/offers'
     | '/order-success'
     | '/orders'
+    | '/privacy-policy'
+    | '/return-policy'
     | '/shop'
     | '/unsubscribe'
     | '/admin/categories'
@@ -297,11 +337,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/cart'
     | '/checkout'
     | '/login'
+    | '/offers'
     | '/order-success'
     | '/orders'
+    | '/privacy-policy'
+    | '/return-policy'
     | '/shop'
     | '/unsubscribe'
     | '/admin/categories'
@@ -326,11 +370,15 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/cart'
     | '/checkout'
     | '/login'
+    | '/offers'
     | '/order-success'
     | '/orders'
+    | '/privacy-policy'
+    | '/return-policy'
     | '/shop'
     | '/unsubscribe'
     | '/admin/categories'
@@ -356,11 +404,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
+  OffersRoute: typeof OffersRoute
   OrderSuccessRoute: typeof OrderSuccessRoute
   OrdersRoute: typeof OrdersRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  ReturnPolicyRoute: typeof ReturnPolicyRoute
   ShopRoute: typeof ShopRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
@@ -400,6 +452,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/return-policy': {
+      id: '/return-policy'
+      path: '/return-policy'
+      fullPath: '/return-policy'
+      preLoaderRoute: typeof ReturnPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/orders': {
       id: '/orders'
       path: '/orders'
@@ -412,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/order-success'
       fullPath: '/order-success'
       preLoaderRoute: typeof OrderSuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -433,6 +506,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -580,11 +660,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
+  OffersRoute: OffersRoute,
   OrderSuccessRoute: OrderSuccessRoute,
   OrdersRoute: OrdersRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  ReturnPolicyRoute: ReturnPolicyRoute,
   ShopRoute: ShopRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
@@ -610,3 +694,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
