@@ -163,6 +163,34 @@ function CheckoutPage() {
       localStorage.setItem(usedKey, String(Number(localStorage.getItem(usedKey) ?? "0") + 1));
     }
     localStorage.setItem("tgh_has_ordered", "1");
+
+    // Send branded order confirmation email (best-effort, non-blocking)
+    if (form.customer_email) {
+      try {
+        const { sendTransactionalEmail } = await import("@/lib/email/send");
+        await sendTransactionalEmail({
+          templateName: "order-confirmation",
+          recipientEmail: form.customer_email,
+          idempotencyKey: `order-${data.order_number}`,
+          templateData: {
+            customerName: form.customer_name,
+            orderNumber: data.order_number,
+            items: items.map((it) => ({ name: it.name, qty: it.qty, price: it.price })),
+            subtotal,
+            discount,
+            shipping,
+            total,
+            address: form.address,
+            governorate: form.governorate,
+            city: form.city,
+            phone: form.customer_phone,
+          },
+        });
+      } catch (err) {
+        console.warn("Order email failed", err);
+      }
+    }
+
     clear();
     navigate({ to: "/order-success", search: { order: data.order_number } });
   };
