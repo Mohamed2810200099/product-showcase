@@ -185,7 +185,7 @@ function CheckoutPage() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} />
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} />
-                <Field label="البريد الإلكتروني" type="email" value={form.customer_email} onChange={(v) => setForm({ ...form, customer_email: v })} />
+                
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
                   <select
