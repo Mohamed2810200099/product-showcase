@@ -37,8 +37,9 @@ function ShopPage() {
     queryFn: async () => (await supabase.from("categories").select("*").order("sort_order")).data ?? [],
   });
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading, isFetching } = useQuery({
     queryKey: ["shop-products", search.category, search.sort, activeQuery],
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       // Resolve category inside queryFn so we don't depend on outer query state
       let categoryId: string | null = null;
