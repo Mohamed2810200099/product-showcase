@@ -59,9 +59,9 @@ function LoginPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setNeedsConfirm(false);
     try {
       if (mode === "signup") {
-        const SITE_URL = "https://thegirlhouseegdm.lovable.app";
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -71,6 +71,7 @@ function LoginPage() {
           },
         });
         if (error) throw error;
+        setNeedsConfirm(true);
         toast.success("تم إنشاء الحساب! افتحي البريد لتأكيد الإيميل.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -82,7 +83,10 @@ function LoginPage() {
       const msg = err instanceof Error ? err.message : "حصل خطأ";
       if (msg.includes("Invalid login")) toast.error("البريد أو كلمة السر غلط");
       else if (msg.includes("already registered")) toast.error("الحساب موجود بالفعل، سجلي دخول");
-      else if (msg.includes("Email not confirmed")) toast.error("افتحي بريدك وأكدي الإيميل أولاً");
+      else if (msg.includes("Email not confirmed") || msg.toLowerCase().includes("not confirmed")) {
+        setNeedsConfirm(true);
+        toast.error("افتحي بريدك وأكدي الإيميل أولاً");
+      }
       else toast.error(msg);
     } finally {
       setLoading(false);
