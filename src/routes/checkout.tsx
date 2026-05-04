@@ -267,7 +267,7 @@ function CheckoutPage() {
 
             <div className="border-t border-border my-4" />
 
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-2">
               <input
                 placeholder="كود الخصم"
                 value={coupon}
@@ -279,10 +279,37 @@ function CheckoutPage() {
               </button>
             </div>
 
+            <div className="flex gap-2 mb-3">
+              <input
+                placeholder="كود صديقتك (Share the Glow)"
+                value={referralInput}
+                onChange={(e) => setReferralInput(e.target.value)}
+                className="flex-1 bg-background border border-border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button type="button" onClick={applyReferral} className="bg-[#FCE6EE] text-[#C95588] px-4 rounded-full text-sm font-medium hover:bg-[#FAD5E1] inline-flex items-center gap-1">
+                ✨ تطبيق
+              </button>
+            </div>
+
+            {isAuthenticated && walletBalance > 0 && (
+              <label className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9] cursor-pointer">
+                <span className="text-sm">
+                  استخدمي رصيد محفظتك ({formatEGP(walletBalance)})
+                </span>
+                <input type="checkbox" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} className="h-4 w-4 accent-primary" />
+              </label>
+            )}
+
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between"><dt>المجموع</dt><dd>{formatEGP(subtotal)}</dd></div>
-              {discount > 0 && (
-                <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(discount)}</dd></div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(couponDiscount)}</dd></div>
+              )}
+              {referralDiscount > 0 && (
+                <div className="flex justify-between text-primary"><dt>خصم صديقتك ({appliedReferral?.code})</dt><dd>-{formatEGP(referralDiscount)}</dd></div>
+              )}
+              {walletApplied > 0 && (
+                <div className="flex justify-between text-emerald-600"><dt>من المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
               )}
               <div className="flex justify-between"><dt>الشحن</dt><dd>{shipping === 0 ? "مجاناً" : formatEGP(shipping)}</dd></div>
               <div className="border-t border-border pt-2 flex justify-between font-bold text-base">
