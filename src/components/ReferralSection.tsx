@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Share2, Sparkles, Copy, X, MessageCircle, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
