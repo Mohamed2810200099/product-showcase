@@ -69,6 +69,17 @@ function OrdersPage() {
       action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
     });
     if (selected?.id === id) setSelected({ ...selected, status });
+    try {
+      if (status === "delivered" && previousStatus !== "delivered") {
+        const { awardReferralForOrder } = await import("@/server/referral.functions");
+        await awardReferralForOrder({ data: { order_id: id } });
+      } else if (status === "cancelled" && previousStatus !== "cancelled") {
+        const { reverseReferralForOrder } = await import("@/server/referral.functions");
+        await reverseReferralForOrder({ data: { order_id: id } });
+      }
+    } catch (e) {
+      console.warn("Referral hook failed", e);
+    }
     load();
   };
 
