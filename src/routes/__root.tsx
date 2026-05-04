@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/context/CartContext";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
