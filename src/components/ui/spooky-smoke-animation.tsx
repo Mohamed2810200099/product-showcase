@@ -5,7 +5,7 @@ precision highp float;
 in vec4 position;
 void main(){gl_Position=position;}`;
 
-// Pink + white smoke. Bold, clearly visible, no black.
+// Sharper, more defined pink + white smoke. Light pink, no blur.
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 out vec4 O;
@@ -15,23 +15,23 @@ uniform vec3 u_color;
 
 #define FC gl_FragCoord.xy
 #define R resolution
-#define T (time*1.2+660.)
+#define T (time*1.0+660.)
 
 float rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(rnd(i),rnd(i+vec2(1,0)),u.x),mix(rnd(i+vec2(0,1)),rnd(i+1.),u.x),u.y);}
-float fbm(vec2 p){float t=.0,a=1.;for(int i=0;i<6;i++){t+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=.5;}return t;}
+float fbm(vec2 p){float t=.0,a=1.;for(int i=0;i<7;i++){t+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p;a*=.55;}return t;}
 
 void main(){
   vec2 uv=(FC-.5*R)/R.y;
 
-  float n1 = fbm(uv*1.2 + vec2(T*0.10, T*0.06));
-  float n2 = fbm(uv*2.0 - vec2(T*0.14, -T*0.09) + n1);
-  float n  = fbm(uv*0.9 + vec2(n2*1.0, -n2*0.8) + T*0.05);
+  float n1 = fbm(uv*2.0 + vec2(T*0.10, T*0.06));
+  float n2 = fbm(uv*3.2 - vec2(T*0.14, -T*0.09) + n1*1.2);
+  float n  = fbm(uv*1.6 + vec2(n2*1.2, -n2*0.9) + T*0.05);
 
-  float density = smoothstep(0.05, 0.85, n*0.7 + n2*0.6);
+  // Tighter smoothstep = sharper, more defined wisps (less blur)
+  float density = smoothstep(0.30, 0.70, n*0.7 + n2*0.6);
 
-  // Deep pink for clouds, soft pink-white base — strong contrast, fully visible.
-  vec3 base = vec3(1.0, 0.94, 0.97);
+  vec3 base = vec3(1.0, 0.97, 0.985);
   vec3 col = mix(base, u_color, density);
 
   col = mix(base, col, min(time*0.4, 1.0));

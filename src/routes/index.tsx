@@ -81,7 +81,7 @@ function HomePage() {
       {brand.show_referral_section && <ReferralSection />}
 
       {/* TRUST BADGES */}
-      <section className="border-y border-border bg-secondary/40">
+      <section className="border-y border-white/40 bg-white/30 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6 flex flex-wrap items-center justify-around gap-4">
           {trustBadges.map((b, i) => (
             <div key={i} className="flex items-center gap-2 text-sm">
@@ -176,7 +176,7 @@ function HomePage() {
 
       {/* TESTIMONIALS */}
       {testimonials.length > 0 && (
-        <section className="bg-secondary/40 py-16">
+        <section className="bg-white/30 backdrop-blur-sm py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl font-bold">آراء عميلاتنا</h2>
@@ -184,7 +184,7 @@ function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.slice(0, 6).map((t: any) => (
-                <div key={t.id} className="bg-background rounded-2xl p-6 border border-border shadow-soft">
+                <div key={t.id} className="bg-white/70 backdrop-blur rounded-2xl p-6 border border-white/60 shadow-soft">
                   <div className="flex gap-0.5 mb-3">
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-gold text-gold" />

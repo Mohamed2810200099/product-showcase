@@ -96,7 +96,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <div aria-hidden className="fixed inset-0 -z-10 pointer-events-none">
-          <SmokeBackground smokeColor="#E85A8C" />
+          <SmokeBackground smokeColor="#F5A8C4" />
         </div>
         <Outlet />
         <Toaster position="top-center" richColors closeButton dir="rtl" />
