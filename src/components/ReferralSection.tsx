@@ -65,9 +65,6 @@ export function ReferralSection() {
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br from-[#FFF8F4] via-[#F9EEF3] to-[#F8DCE5] p-8 sm:p-12 shadow-[0_30px_60px_-30px_rgba(217,108,157,0.35)]"
       >
-        <div className="absolute inset-0 opacity-40 mix-blend-multiply pointer-events-none">
-          <SmokeBackground smokeColor="#D96C9D" />
-        </div>
         <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-[#E7A8BF]/30 blur-3xl" />
         <div className="absolute -bottom-20 -right-10 h-60 w-60 rounded-full bg-[#EDE7F6]/60 blur-3xl" />
 
