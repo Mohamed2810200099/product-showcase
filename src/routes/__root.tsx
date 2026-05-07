@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/context/CartContext";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
@@ -94,6 +95,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
+        <div aria-hidden className="fixed inset-0 -z-10 pointer-events-none">
+          <SmokeBackground smokeColor="#F0A8C0" />
+        </div>
         <Outlet />
         <Toaster position="top-center" richColors closeButton dir="rtl" />
       </CartProvider>
