@@ -152,10 +152,6 @@ export function HeroPremium() {
       dir="ltr"
       onMouseMove={onSectionMove}
       className="relative overflow-hidden min-h-[94vh] flex items-center"
-      style={{
-        background:
-          "radial-gradient(120% 80% at 20% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
-      }}
     >
       {/* Cursor spotlight */}
       {!reduce && (
