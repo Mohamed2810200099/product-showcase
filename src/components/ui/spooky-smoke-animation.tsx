@@ -5,7 +5,7 @@ precision highp float;
 in vec4 position;
 void main(){gl_Position=position;}`;
 
-// Pink + white smoke. No black: we mix between white base and the pink tint.
+// Pink + white smoke. Bold, clearly visible, no black.
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 out vec4 O;
@@ -15,7 +15,7 @@ uniform vec3 u_color;
 
 #define FC gl_FragCoord.xy
 #define R resolution
-#define T (time*0.6+660.)
+#define T (time*1.2+660.)
 
 float rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(rnd(i),rnd(i+vec2(1,0)),u.x),mix(rnd(i+vec2(0,1)),rnd(i+1.),u.x),u.y);}
@@ -24,20 +24,17 @@ float fbm(vec2 p){float t=.0,a=1.;for(int i=0;i<6;i++){t+=a*noise(p);p=mat2(1.6,
 void main(){
   vec2 uv=(FC-.5*R)/R.y;
 
-  // Two layers of moving fbm — one slow drift, one faster swirl.
-  float n1 = fbm(uv*1.4 + vec2(T*0.05, T*0.03));
-  float n2 = fbm(uv*2.2 - vec2(T*0.08, -T*0.04) + n1);
-  float n  = fbm(uv*1.0 + vec2(n2*0.8, -n2*0.6) + T*0.02);
+  float n1 = fbm(uv*1.2 + vec2(T*0.10, T*0.06));
+  float n2 = fbm(uv*2.0 - vec2(T*0.14, -T*0.09) + n1);
+  float n  = fbm(uv*0.9 + vec2(n2*1.0, -n2*0.8) + T*0.05);
 
-  // density 0..1 — bright clouds
-  float density = smoothstep(0.15, 0.95, n*0.6 + n2*0.5);
+  float density = smoothstep(0.05, 0.85, n*0.7 + n2*0.6);
 
-  // Mix between near-white and the pink tint. No dark colors.
-  vec3 white = vec3(1.0, 0.985, 0.99);
-  vec3 col = mix(white, u_color, density * 0.85);
+  // Deep pink for clouds, soft pink-white base — strong contrast, fully visible.
+  vec3 base = vec3(1.0, 0.94, 0.97);
+  vec3 col = mix(base, u_color, density);
 
-  // soft fade-in
-  col = mix(white, col, min(time*0.25, 1.0));
+  col = mix(base, col, min(time*0.4, 1.0));
   O = vec4(col, 1.0);
 }`;
 
