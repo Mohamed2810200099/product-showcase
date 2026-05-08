@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Check, Trash2, Star } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/reviews")({
   head: () => ({ meta: [{ title: "التقييمات — لوحة الإدارة" }] }),
