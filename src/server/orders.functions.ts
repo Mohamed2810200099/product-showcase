@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { getUserFromAccessToken } from "./auth-helpers";
+import { getUserFromAccessToken } from "./auth-helpers.server";
 
 const lookupSchema = z.object({
   phone: z.string().trim().min(6).max(20),

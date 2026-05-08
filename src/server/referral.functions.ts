@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { getUserFromAccessToken } from "./auth-helpers";
+import { getUserFromAccessToken } from "./auth-helpers.server";
 import { getGlowSettings } from "./referral.server";
 
 const authInputSchema = z.object({
