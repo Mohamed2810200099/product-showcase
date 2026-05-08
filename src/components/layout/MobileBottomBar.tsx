@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Home, Store, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
+import { trackEvent } from "@/lib/analytics";
 
 export function MobileBottomBar() {
   const { pathname } = useLocation();
@@ -26,7 +27,7 @@ export function MobileBottomBar() {
       </>
     );
     return href ? (
-      <a href={href} target="_blank" rel="noreferrer" className={cls}>{content}</a>
+      <a href={href} target="_blank" rel="noreferrer" className={cls} onClick={() => trackEvent("whatsapp_clicked", { source: "mobile_bottom_bar" })}>{content}</a>
     ) : (
       <Link to={to!} className={cls}>{content}</Link>
     );

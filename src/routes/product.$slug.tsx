@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Minus, Plus, Star, ShoppingBag, MessageCircle, ShieldCheck, Truck, Heart, ArrowLeft, Zap, Check, AlertTriangle, Sparkles, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
@@ -10,6 +10,7 @@ import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
 import placeholderImg from "@/assets/product-placeholder.jpg";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
@@ -78,6 +79,17 @@ function ProductPage() {
     },
   });
 
+  useEffect(() => {
+    if (product?.id) {
+      trackEvent("product_view", {
+        product_id: product.id,
+        product_name: product.name,
+        price: Number(product.price),
+        slug: product.slug,
+      });
+    }
+  }, [product?.id, product?.name, product?.price, product?.slug]);
+
   if (isLoading) return <PublicLayout><div className="container mx-auto py-20 text-center">جاري التحميل…</div></PublicLayout>;
   if (!product) throw notFound();
 
@@ -96,6 +108,13 @@ function ProductPage() {
       { id: product.id, name: product.name, slug: product.slug, price: Number(product.price), image: images[0] },
       qty,
     );
+    trackEvent("add_to_cart", {
+      product_id: product.id,
+      product_name: product.name,
+      price: Number(product.price),
+      qty,
+      source: "product_page",
+    });
     toast.success("تمت الإضافة للسلة 🛍️");
   };
 
@@ -256,6 +275,7 @@ function ProductPage() {
                         href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => trackEvent("whatsapp_clicked", { source: "product_page", product_id: product.id, product_name: product.name })}
                         className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
                       >
                         <MessageCircle className="h-4 w-4" /> واتساب

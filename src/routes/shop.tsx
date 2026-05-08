@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
 import { Filter, SlidersHorizontal, X } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 const searchSchema = z.object({
   category: z.string().optional(),
@@ -254,6 +255,7 @@ function ShopPage() {
             onSubmit={(e) => {
               e.preventDefault();
               const v = searchInput.trim();
+              if (v) trackEvent("search_submitted", { query: v, source: "shop" });
               navigate({ search: (s: any) => ({ ...s, search: v || undefined, q: undefined }) });
             }}
             className="mt-4 flex gap-2 max-w-xl"

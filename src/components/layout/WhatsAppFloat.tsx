@@ -1,5 +1,6 @@
 import { useBrand } from "@/hooks/use-brand";
 import { MessageCircle } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export function WhatsAppFloat() {
   const brand = useBrand();
@@ -12,6 +13,7 @@ export function WhatsAppFloat() {
       rel="noopener noreferrer"
       onClick={(e) => {
         e.preventDefault();
+        trackEvent("whatsapp_clicked", { source: "float" });
         window.open(url, "_blank", "noopener,noreferrer");
       }}
       className="hidden md:flex fixed bottom-6 left-6 z-30 h-14 w-14 rounded-full bg-[#25D366] text-white items-center justify-center shadow-elegant hover:scale-110 transition-transform animate-float-soft"

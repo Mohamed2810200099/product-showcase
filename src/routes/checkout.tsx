@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { CreditCard, Tag, Wallet } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "إتمام الطلب — The Girl House" }] }),
@@ -83,6 +84,18 @@ function CheckoutPage() {
     return () => { cancelled = true; };
   }, [isAuthenticated, user]);
 
+  // Fire checkout_started once when entering with a non-empty cart
+  useEffect(() => {
+    if (items.length > 0) {
+      trackEvent("checkout_started", {
+        cart_total: subtotal,
+        items_count: items.reduce((s, i) => s + i.qty, 0),
+        product_ids: items.map((i) => i.id),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (authLoading) {
     return (
       <PublicLayout>
@@ -128,6 +141,7 @@ function CheckoutPage() {
     if (!result.ok) return toast.error(result.error);
     setAppliedCoupon({ code: result.code, discount: result.discount });
     setAppliedReferral(null); // mutually exclusive
+    trackEvent("coupon_applied", { code: result.code, discount: result.discount, cart_total: subtotal });
     toast.success("تم تطبيق الخصم بنجاح");
   };
 
@@ -148,6 +162,7 @@ function CheckoutPage() {
     const d = Math.round((subtotal * glowSettings.friend_discount_pct) / 100);
     setAppliedReferral({ code, discount: d });
     setAppliedCoupon(null);
+    trackEvent("referral_applied", { code, discount: d, cart_total: subtotal });
     toast.success(`تم تطبيق كود صديقتك — خصم ${glowSettings.friend_discount_pct}٪`);
   };
 
@@ -215,6 +230,17 @@ function CheckoutPage() {
     }
 
     clear();
+    trackEvent("order_created", {
+      order_number: data.order_number,
+      cart_total: subtotal,
+      total,
+      discount,
+      shipping,
+      wallet_applied: walletApplied,
+      coupon_code: appliedCoupon?.code ?? null,
+      referral_code: appliedReferral?.code ?? null,
+      items_count: items.reduce((s, i) => s + i.qty, 0),
+    });
     navigate({ to: "/order-success", search: { order: data.order_number } });
   };
 
