@@ -248,7 +248,7 @@ function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.slice(0, 6).map((t: any) => (
-                <div key={t.id} className="bg-background rounded-2xl p-6 border border-border shadow-soft">
+                <div key={t.id} className="bg-white/50 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-soft">
                   <div className="flex gap-0.5 mb-3">
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-gold text-gold" />
