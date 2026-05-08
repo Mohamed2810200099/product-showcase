@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, Package, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { getItemQty, type OrderItemLike } from "@/lib/order-items";
 
 export const Route = createFileRoute("/orders")({
   head: () => ({
