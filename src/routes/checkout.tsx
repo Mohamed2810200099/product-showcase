@@ -117,15 +117,28 @@ function CheckoutPage() {
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
-    const { validateCoupon } = await import("@/server/coupons.functions");
     const phone = form.customer_phone.trim();
+    if (phone.length < 10 || !/^[0-9+\-\s]+$/.test(phone)) {
+      return toast.error("اكتبي رقم الموبايل الأول عشان نتأكد إن الكود صالح ليكي.");
+    }
+    const { validateCoupon } = await import("@/server/coupons.functions");
     const result = await validateCoupon({
-      data: { code, subtotal, phone: phone.length >= 6 ? phone : undefined },
+      data: { code, subtotal, phone },
     });
     if (!result.ok) return toast.error(result.error);
     setAppliedCoupon({ code: result.code, discount: result.discount });
     setAppliedReferral(null); // mutually exclusive
     toast.success("تم تطبيق الخصم بنجاح");
+  };
+
+  const setPhone = (v: string) => {
+    setForm((prev) => {
+      if (prev.customer_phone !== v && appliedCoupon) {
+        setAppliedCoupon(null);
+        toast.info("غيّرتي رقم الموبايل، من فضلك طبّقي كود الخصم تاني.");
+      }
+      return { ...prev, customer_phone: v };
+    });
   };
 
   const applyReferral = () => {
@@ -215,7 +228,7 @@ function CheckoutPage() {
               <h2 className="font-display text-xl font-semibold mb-4">بيانات التوصيل</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
-                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
+                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={setPhone} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 {!isAuthenticated && (
                   <Field
                     label="البريد الإلكتروني (اختياري)"
