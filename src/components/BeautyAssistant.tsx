@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Sparkles, X, ShoppingBag, ArrowRight, RotateCcw } from "lucide-react";
+import { Sparkles, X, ShoppingBag, ArrowRight, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
@@ -306,9 +306,9 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
         whileHover={{ y: -4, scale: 1.06 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 280, damping: 18 }}
-        className="hidden md:flex fixed bottom-6 left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] items-center justify-center motion-reduce:transform-none"
+        className="hidden md:inline-flex fixed bottom-6 left-6 z-40 items-center gap-2 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] text-white shadow-[0_15px_40px_-10px_rgba(217,108,157,0.7)] px-5 h-14 font-semibold motion-reduce:transform-none"
       >
-        <MessageCircle className="h-6 w-6" />
+        <Sparkles className="h-5 w-5" /> Beauty Assistant
       </motion.button>
 
       <AnimatePresence>

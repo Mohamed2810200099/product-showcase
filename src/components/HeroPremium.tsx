@@ -6,10 +6,9 @@ import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
 
 import groupImg from "@/assets/products/group.png";
-import langhaarImg from "@/assets/products/langhaar.png";
-import keratinImg from "@/assets/products/keratin.png";
-import plexMaskImg from "@/assets/products/plex-haarmaske.png";
-import plexSpuelungImg from "@/assets/products/plex-spuelung.png";
+import keratinImg from "@/assets/products/cutout-keratin-overnight.png";
+import scalpImg from "@/assets/products/cutout-scalp-booster.png";
+import plexOilImg from "@/assets/products/cutout-plex-oil.png";
 
 type FloatProduct = {
   src: string;
@@ -26,44 +25,32 @@ type FloatProduct = {
 const products: FloatProduct[] = [
   {
     src: keratinImg,
-    label: "علاج الكيراتين",
+    label: "Keratin Repair",
     glow: "from-[#F8C8D8] via-[#EFA7C3]/40 to-transparent",
-    // hidden on small screens to keep mobile clean
-    className: "hidden sm:block top-[2%] left-[4%] w-[28%] sm:w-[22%]",
+    className: "hidden sm:block top-[4%] left-[2%] w-[26%] sm:w-[22%]",
     delay: 0.7,
-    parallax: -20,
+    parallax: -18,
     to: "/shop",
     search: { search: "keratin" },
   },
   {
-    src: langhaarImg,
-    label: "العناية بفروة الرأس",
+    src: scalpImg,
+    label: "Scalp Booster",
     glow: "from-[#FADCE7] via-[#F8C8D8]/60 to-transparent",
-    className: "top-[6%] right-[3%] w-[26%] sm:w-[20%]",
+    className: "top-[6%] right-[2%] w-[28%] sm:w-[22%]",
     delay: 0.9,
-    parallax: 22,
+    parallax: 20,
     to: "/shop",
     search: { category: "hair-care" },
   },
   {
-    src: plexMaskImg,
-    label: "ماسك بليكس",
+    src: plexOilImg,
+    label: "Plex Care Oil",
     glow: "from-[#EDE7F6] via-[#F9EEF3]/70 to-transparent",
-    className: "bottom-[8%] left-[1%] w-[32%] sm:w-[24%]",
+    className: "bottom-[6%] right-[8%] w-[24%] sm:w-[20%]",
     delay: 1.1,
-    parallax: -16,
+    parallax: -14,
     accent: true,
-    to: "/shop",
-    search: { search: "plex" },
-  },
-  {
-    src: plexSpuelungImg,
-    label: "بلسم بليكس",
-    glow: "from-[#F9EEF3] via-[#FADCE7]/60 to-transparent",
-    // hidden on small screens to keep mobile clean
-    className: "hidden sm:block bottom-[12%] right-[2%] w-[26%] sm:w-[20%]",
-    delay: 1.3,
-    parallax: 18,
     to: "/shop",
     search: { search: "plex" },
   },
