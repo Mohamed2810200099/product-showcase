@@ -57,14 +57,25 @@ function AccountPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated) { setData(null); return; }
+    if (!isAuthenticated || !user) { setData(null); return; }
     let cancelled = false;
     setFetching(true);
     (async () => {
       try {
-        const { getMyAccount } = await import("@/server/orders.functions");
-        const res = await getMyAccount();
-        if (!cancelled) setData(res as AccountData);
+        const [{ data: profile }, { data: orders }] = await Promise.all([
+          supabase
+            .from("customer_profiles")
+            .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("orders")
+            .select("id, order_number, status, created_at, total, items")
+            .eq("customer_user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(50),
+        ]);
+        if (!cancelled) setData({ profile: (profile as any) ?? null, orders: (orders as any) ?? [] });
       } catch (e) {
         console.warn("Account load failed", e);
       } finally {
@@ -72,7 +83,7 @@ function AccountPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading, user]);
 
   const code = data?.profile?.personal_code ?? "";
   const balance = Number(data?.profile?.wallet_balance ?? 0);
