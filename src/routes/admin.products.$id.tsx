@@ -107,6 +107,8 @@ function ProductForm() {
               is_active: !!data.is_active,
               is_featured: !!data.is_featured,
               is_limited: !!data.is_limited,
+              stock_tracking_enabled: !!(data as any).stock_tracking_enabled,
+              availability_status: ((data as any).availability_status ?? "available") as "available" | "out_of_stock" | "coming_soon",
             });
           }
           setLoading(false);
