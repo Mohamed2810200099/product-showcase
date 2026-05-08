@@ -81,6 +81,7 @@ export function ProductCard({ product }: { product: Product }) {
             onClick={() => {
               if (isOut) return;
               add({ id: product.id, name: product.name, slug: product.slug, price: product.price, image: img });
+              trackEvent("add_to_cart", { product_id: product.id, product_name: product.name, price: product.price, qty: 1, source: "product_card" });
               toast.success("تمت الإضافة للسلة 🛍️");
             }}
             disabled={isOut}
