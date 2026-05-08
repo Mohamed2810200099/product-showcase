@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/products/")({
   head: () => ({ meta: [{ title: "المنتجات — لوحة الإدارة" }] }),
@@ -48,17 +49,18 @@ function ProductsList() {
     load();
   }, []);
 
+  // SECURITY: writes are gated by RLS policy "Admins manage products" via has_role(auth.uid(),'admin').
   const remove = async (id: string, name: string) => {
     if (!confirm(`حذف "${name}" نهائياً؟`)) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error("فشل الحذف");
+    if (handleAdminError(error, "فشل الحذف")) return;
     toast.success("تم الحذف");
     load();
   };
 
   const toggleActive = async (id: string, current: boolean) => {
     const { error } = await supabase.from("products").update({ is_active: !current }).eq("id", id);
-    if (error) return toast.error("فشل التحديث");
+    if (handleAdminError(error, "فشل التحديث")) return;
     load();
   };
 

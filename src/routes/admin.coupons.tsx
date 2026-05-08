@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Plus, Trash2, Save, Play, Pause } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/coupons")({
   head: () => ({ meta: [{ title: "كوبونات الخصم — لوحة الإدارة" }] }),
@@ -84,10 +85,11 @@ function CouponsPage() {
       can_stack: false,
       source: "admin",
     };
+    // SECURITY: gated by RLS "Admins manage coupons" via has_role(auth.uid(),'admin').
     const { error } = editing.id
       ? await supabase.from("coupons").update(payload).eq("id", editing.id)
       : await supabase.from("coupons").insert(payload);
-    if (error) return toast.error(error.message);
+    if (handleAdminError(error, "فشل الحفظ")) return;
     toast.success("تم الحفظ — اضغطي تفعيل عشان يبدأ");
     setEditing(null);
     load();
@@ -104,19 +106,21 @@ function CouponsPage() {
       max_uses: maxUses > 0 ? maxUses : null,
     };
     const { error } = await supabase.from("coupons").update(update).eq("id", c.id);
-    if (error) return toast.error(error.message);
+    if (handleAdminError(error, "فشل التفعيل")) return;
     toast.success("تم تفعيل الكوبون 🎉");
     load();
   };
 
   const deactivate = async (c: Coupon) => {
-    await supabase.from("coupons").update({ active: false }).eq("id", c.id);
+    const { error } = await supabase.from("coupons").update({ active: false }).eq("id", c.id);
+    if (handleAdminError(error, "فشل الإيقاف")) return;
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("حذف هذا الكوبون؟")) return;
-    await supabase.from("coupons").delete().eq("id", id);
+    const { error } = await supabase.from("coupons").delete().eq("id", id);
+    if (handleAdminError(error, "فشل الحذف")) return;
     load();
   };
 

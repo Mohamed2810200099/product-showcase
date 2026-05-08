@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Switch } from "@/components/ui/switch";
 import { Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "الإعدادات — لوحة الإدارة" }] }),
@@ -62,6 +63,7 @@ function SettingsPage() {
     })();
   }, []);
 
+  // SECURITY: gated by RLS "Admins manage settings" via has_role(auth.uid(),'admin').
   const save = async () => {
     setSaving(true);
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
@@ -73,7 +75,7 @@ function SettingsPage() {
     ]);
     setSaving(false);
     const error = e1 ?? e2;
-    if (error) return toast.error(error.message);
+    if (handleAdminError(error, "فشل الحفظ")) return;
     toast.success("تم الحفظ — حدّثي الصفحة لرؤية التغييرات");
   };
 

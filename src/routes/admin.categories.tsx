@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/categories")({
   head: () => ({ meta: [{ title: "الفئات — لوحة الإدارة" }] }),
@@ -43,6 +44,7 @@ function CategoriesPage() {
   };
   useEffect(() => { load(); }, []);
 
+  // SECURITY: gated by RLS "Admins manage categories" via has_role(auth.uid(),'admin').
   const save = async () => {
     if (!editing?.name) return toast.error("الاسم مطلوب");
     const payload = {
@@ -55,7 +57,7 @@ function CategoriesPage() {
     const { error } = editing.id
       ? await supabase.from("categories").update(payload).eq("id", editing.id)
       : await supabase.from("categories").insert(payload);
-    if (error) return toast.error(error.message);
+    if (handleAdminError(error, "فشل الحفظ")) return;
     toast.success("تم الحفظ");
     setEditing(null);
     load();
@@ -64,7 +66,7 @@ function CategoriesPage() {
   const remove = async (id: string) => {
     if (!confirm("حذف هذه الفئة؟")) return;
     const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) return toast.error("فشل الحذف");
+    if (handleAdminError(error, "فشل الحذف")) return;
     load();
   };
 

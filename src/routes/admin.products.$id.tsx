@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { ArrowRight, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/products/$id")({
   head: () => ({ meta: [{ title: "تعديل منتج — لوحة الإدارة" }] }),
@@ -148,6 +149,7 @@ function ProductForm() {
       is_limited: form.is_limited,
     } as any;
 
+    // SECURITY: write gated by RLS "Admins manage products" via has_role(auth.uid(),'admin').
     const { error } = isNew
       ? await supabase.from("products").insert(payload)
       : await supabase.from("products").update(payload).eq("id", id);
@@ -155,7 +157,8 @@ function ProductForm() {
     setSaving(false);
     if (error) {
       console.error(error);
-      return toast.error(error.message.includes("duplicate") ? "الـ slug مستخدم بالفعل" : "فشل الحفظ");
+      if (error.message?.includes("duplicate")) return toast.error("الـ slug مستخدم بالفعل");
+      if (handleAdminError(error, "فشل الحفظ")) return;
     }
     toast.success(isNew ? "تم إضافة المنتج" : "تم حفظ التعديلات");
     navigate({ to: "/admin/products" });

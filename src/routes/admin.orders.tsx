@@ -9,6 +9,7 @@ import { useBrand } from "@/hooks/use-brand";
 import { normalizePhone } from "@/lib/phone";
 import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 import { formatPhoneDisplay } from "@/lib/phone";
 
 export const Route = createFileRoute("/admin/orders")({
@@ -99,10 +100,12 @@ function OrdersPage() {
     load();
   };
 
+  // SECURITY: orders writes are gated by RLS "Admins delete/update orders" via has_role(auth.uid(),'admin').
+  // Status changes go through a server function (updateOrderStatus) that re-verifies the bearer token.
   const remove = async (id: string) => {
     if (!confirm("حذف هذا الطلب نهائياً؟")) return;
     const { error } = await supabase.from("orders").delete().eq("id", id);
-    if (error) return toast.error("فشل الحذف");
+    if (handleAdminError(error, "فشل الحذف")) return;
     toast.success("تم الحذف");
     setSelected(null);
     load();
@@ -110,7 +113,7 @@ function OrdersPage() {
 
   const toggleWhatsapp = async (id: string, value: boolean) => {
     const { error } = await supabase.from("orders").update({ whatsapp_sent: value }).eq("id", id);
-    if (error) return toast.error("فشل التحديث");
+    if (handleAdminError(error, "فشل التحديث")) return;
     toast.success(value ? "تم وضع علامة: تم التواصل عبر واتساب" : "تم إلغاء علامة واتساب");
     if (selected?.id === id) setSelected({ ...selected, whatsapp_sent: value });
     load();
