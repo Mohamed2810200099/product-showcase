@@ -89,24 +89,29 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
   const recommended = useMemo(() => {
     if (!goal || !size) return [] as any[];
 
-    // Try tag-based matching first
-    const keywords = GOAL_TAGS[goal].map((k) => k.toLowerCase());
-    const tagMatched = products.filter((p: any) => {
-      const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
-      return tags.some((t: string) => keywords.some((k) => t.includes(k) || k.includes(t)));
-    });
+    const tagKeys = GOAL_TAGS[goal].map((k) => k.toLowerCase());
+    const suitableKeys = GOAL_SUITABLE[goal].map((k) => k.toLowerCase());
+    const typeKeys = GOAL_TYPES[goal].map((k) => k.toLowerCase());
 
-    let pool: any[] = tagMatched;
-    if (pool.length === 0) {
-      // Fallback to order_index logic
-      const indexes = RECS[goal];
-      pool = indexes
-        .map((idx) => products.find((p: any) => p.order_index === idx))
-        .filter(Boolean);
-    }
+    // Score each product by metadata match (concerns > suitable_for > product_type)
+    const scored = products
+      .map((p: any) => {
+        const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
+        const suitable = String(p.suitable_for ?? "").toLowerCase();
+        const ptype = String(p.product_type ?? "").toLowerCase();
 
-    const limit = size === "single" ? 1 : size === "duo" ? 2 : pool.length;
-    return pool.slice(0, limit);
+        let score = 0;
+        if (tags.some((t: string) => tagKeys.some((k) => t.includes(k) || k.includes(t)))) score += 10;
+        if (suitableKeys.some((k) => suitable.includes(k))) score += 5;
+        if (typeKeys.some((k) => ptype.includes(k))) score += 2;
+        return { p, score };
+      })
+      .filter((x: any) => x.score > 0)
+      .sort((a: any, b: any) => b.score - a.score)
+      .map((x: any) => x.p);
+
+    const limit = size === "single" ? 1 : size === "duo" ? 2 : scored.length;
+    return scored.slice(0, limit);
   }, [goal, size, products]);
 
   const total = recommended.reduce((s: number, p: any) => s + Number(p.price ?? 0), 0);
