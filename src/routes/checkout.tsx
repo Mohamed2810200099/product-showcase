@@ -130,10 +130,11 @@ function CheckoutPage() {
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
-    const phone = form.customer_phone.trim();
-    if (phone.length < 10 || !/^[0-9+\-\s]+$/.test(phone)) {
-      return toast.error("اكتبي رقم الموبايل الأول عشان نتأكد إن الكود صالح ليكي.");
+    const { normalizePhone, isValidEgyptPhone } = await import("@/lib/phone");
+    if (!isValidEgyptPhone(form.customer_phone)) {
+      return toast.error("اكتبي رقم موبايل مصري صحيح الأول عشان نتأكد إن الكود صالح ليكي.");
     }
+    const phone = normalizePhone(form.customer_phone);
     const { validateCoupon } = await import("@/server/coupons.functions");
     const result = await validateCoupon({
       data: { code, subtotal, phone },
@@ -169,7 +170,12 @@ function CheckoutPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const emailToUse = (user?.email ?? form.customer_email ?? "").trim();
-    const payload = { ...form, customer_email: emailToUse };
+    const { normalizePhone, isValidEgyptPhone } = await import("@/lib/phone");
+    if (!isValidEgyptPhone(form.customer_phone)) {
+      return toast.error("من فضلك اكتبي رقم موبايل مصري صحيح.");
+    }
+    const normalizedPhone = normalizePhone(form.customer_phone);
+    const payload = { ...form, customer_phone: normalizedPhone, customer_email: emailToUse };
     const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 

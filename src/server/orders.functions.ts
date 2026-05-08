@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getUserFromAccessToken } from "./auth-helpers.server";
+import { normalizePhone } from "@/lib/phone";
 
 const ALLOWED_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
 
@@ -92,7 +93,7 @@ const lookupSchema = z.object({
   order_number: z.string().trim().min(4).max(40),
 });
 
-const normalizePhone = (p: string) => p.replace(/[\s\-+]/g, "").trim();
+
 
 export const lookupOrderByPhoneAndNumber = createServerFn({ method: "POST" })
   .inputValidator((data) => lookupSchema.parse(data))

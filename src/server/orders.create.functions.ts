@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getUserFromAccessToken } from "./auth-helpers.server";
 import { getGlowSettings } from "./referral.server";
+import { normalizePhone, isValidEgyptPhone } from "@/lib/phone";
 
 const itemSchema = z.object({
   product_id: z.string().uuid(),
@@ -11,7 +12,7 @@ const itemSchema = z.object({
 
 const schema = z.object({
   customer_name: z.string().trim().min(2).max(100),
-  customer_phone: z.string().trim().min(6).max(20).regex(/^[0-9+\-\s]+$/),
+  customer_phone: z.string().trim().min(6).max(20).regex(/^[0-9+\-\s()]+$/),
   customer_email: z.string().trim().email().max(255).optional().or(z.literal("")),
   address: z.string().trim().min(3).max(500),
   city: z.string().trim().min(2).max(100),
@@ -31,6 +32,14 @@ export type CreateOrderResult =
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => schema.parse(data))
   .handler(async ({ data }): Promise<CreateOrderResult> => {
+    // Validate & normalize phone — single source of truth on the server.
+    if (!isValidEgyptPhone(data.customer_phone)) {
+      return { ok: false, error: "من فضلك اكتبي رقم موبايل مصري صحيح." };
+    }
+    const phoneNorm = normalizePhone(data.customer_phone);
+    const phoneRaw = data.customer_phone.trim();
+    const phoneCandidates = Array.from(new Set([phoneNorm, phoneRaw].filter(Boolean)));
+
     // SECURITY: derive user id from a validated token only — never from client payload.
     const authUser = await getUserFromAccessToken(data.access_token);
     const customerUserId = authUser?.userId ?? null;
@@ -101,11 +110,13 @@ export const createOrder = createServerFn({ method: "POST" })
       if (row.expires_at && new Date(row.expires_at) < now) return { ok: false, error: "انتهت صلاحية كود الخصم" };
       if (row.max_uses && row.used_count >= row.max_uses) return { ok: false, error: "تم استنفاد كود الخصم" };
       if (Number(row.min_order) > subtotal) return { ok: false, error: "لم يتحقق الحد الأدنى للكوبون" };
-      const { data: usedSame } = await supabaseAdmin.rpc("has_used_coupon", { _code: code, _phone: data.customer_phone });
-      if (usedSame) return { ok: false, error: "هذا الرقم استخدم الكوبون من قبل" };
+      for (const p of phoneCandidates) {
+        const { data: usedSame } = await supabaseAdmin.rpc("has_used_coupon", { _code: code, _phone: p });
+        if (usedSame) return { ok: false, error: "هذا الرقم استخدم الكوبون من قبل" };
+      }
       if (row.first_order_only) {
         const { count } = await supabaseAdmin.from("orders").select("id", { count: "exact", head: true })
-          .eq("customer_phone", data.customer_phone).neq("status", "cancelled");
+          .in("customer_phone", phoneCandidates).neq("status", "cancelled");
         if ((count ?? 0) > 0) return { ok: false, error: "هذا الكود مخصص لأول طلب فقط" };
       }
       discount = row.type === "percent" ? Math.round((subtotal * Number(row.value)) / 100) : Number(row.value);
@@ -133,7 +144,7 @@ export const createOrder = createServerFn({ method: "POST" })
         if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
       } else {
         const { count } = await supabaseAdmin.from("orders").select("id", { count: "exact", head: true })
-          .eq("customer_phone", data.customer_phone).neq("status", "cancelled");
+          .in("customer_phone", phoneCandidates).neq("status", "cancelled");
         if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
       }
       referralDiscount = Math.round((subtotal * glow.friend_discount_pct) / 100);
@@ -164,7 +175,7 @@ export const createOrder = createServerFn({ method: "POST" })
       .from("orders")
       .insert([{
         customer_name: data.customer_name,
-        customer_phone: data.customer_phone,
+        customer_phone: phoneNorm,
         customer_email: data.customer_email || null,
         address: data.address,
         city: data.city,
@@ -229,7 +240,7 @@ export const createOrder = createServerFn({ method: "POST" })
         code: referralCode,
         referrer_user_id: referrerUserId,
         friend_user_id: customerUserId ?? null,
-        friend_phone: data.customer_phone,
+        friend_phone: phoneNorm,
         order_id: inserted.id,
         discount_amount: referralDiscount,
         status: "pending",

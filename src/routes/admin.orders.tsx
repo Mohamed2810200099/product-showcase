@@ -7,6 +7,7 @@ import { formatEGP } from "@/lib/format";
 import { Eye, Phone, MapPin, Trash2, X } from "lucide-react";
 import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
+import { formatPhoneDisplay } from "@/lib/phone";
 
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({ meta: [{ title: "الطلبات — لوحة الإدارة" }] }),
@@ -143,7 +144,7 @@ function OrdersPage() {
                     <td className="p-3 font-mono text-xs" dir="ltr">{o.order_number}</td>
                     <td className="p-3">
                       <div className="font-medium">{o.customer_name}</div>
-                      <div className="text-xs text-muted-foreground" dir="ltr">{o.customer_phone}</div>
+                      <div className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(o.customer_phone)}</div>
                     </td>
                     <td className="p-3 text-xs">{o.governorate}</td>
                     <td className="p-3 font-semibold whitespace-nowrap">{formatEGP(Number(o.total))}</td>
@@ -188,7 +189,7 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
         </div>
         <div className="p-5 space-y-5">
           <div className="grid sm:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{order.customer_phone}</div></div></div>
+            <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div></div></div>
             <div className="flex items-start gap-2"><MapPin className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">العنوان</div><div>{order.governorate} - {order.city}</div><div className="text-xs text-muted-foreground">{order.address}</div></div></div>
           </div>
           {order.notes && <div className="bg-secondary/40 rounded-lg p-3 text-sm"><strong>ملاحظات: </strong>{order.notes}</div>}

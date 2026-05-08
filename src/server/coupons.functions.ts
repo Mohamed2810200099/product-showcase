@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { normalizePhone } from "@/lib/phone";
 
 const schema = z.object({
   code: z.string().trim().min(1).max(50).transform((s) => s.toUpperCase()),
@@ -32,19 +33,26 @@ export const validateCoupon = createServerFn({ method: "POST" })
       return { ok: false, error: `الحد الأدنى لاستخدام هذا الكود هو ${Number(row.min_order)} ج.م` };
     }
 
-    if (data.phone && data.phone.length >= 6) {
-      const { data: used } = await supabaseAdmin.rpc("has_used_coupon", {
-        _code: data.code,
-        _phone: data.phone,
-      });
-      if (used) return { ok: false, error: "هذا الرقم استخدم الكوبون من قبل" };
+    const phoneNorm = normalizePhone(data.phone ?? "");
+    const phoneRaw = (data.phone ?? "").trim();
+
+    if (phoneNorm.length >= 6) {
+      const candidates = Array.from(new Set([phoneNorm, phoneRaw].filter(Boolean)));
+      for (const p of candidates) {
+        const { data: used } = await supabaseAdmin.rpc("has_used_coupon", {
+          _code: data.code,
+          _phone: p,
+        });
+        if (used) return { ok: false, error: "هذا الرقم استخدم الكوبون من قبل" };
+      }
     }
 
-    if (row.first_order_only && data.phone && data.phone.length >= 6) {
+    if (row.first_order_only && phoneNorm.length >= 6) {
+      const candidates = Array.from(new Set([phoneNorm, phoneRaw].filter(Boolean)));
       const { count } = await supabaseAdmin
         .from("orders")
         .select("id", { count: "exact", head: true })
-        .eq("customer_phone", data.phone)
+        .in("customer_phone", candidates)
         .neq("status", "cancelled");
       if ((count ?? 0) > 0) return { ok: false, error: "هذا الكود مخصص لأول طلب فقط" };
     }
