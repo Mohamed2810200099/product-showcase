@@ -35,9 +35,9 @@ export const createOrder = createServerFn({ method: "POST" })
     const authUser = await getUserFromAccessToken(data.access_token);
     const customerUserId = authUser?.userId ?? null;
 
-    // If client supplied a token but it failed validation, and they're trying
-    // to use wallet, refuse instead of silently treating them as guest.
-    if (data.access_token && !customerUserId && data.use_wallet) {
+    // Wallet requests require a validated user. Missing/invalid tokens must
+    // not silently become guest orders with different totals.
+    if (data.use_wallet && !customerUserId) {
       return {
         ok: false,
         code: "invalid_wallet_session",
