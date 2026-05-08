@@ -240,7 +240,7 @@ export const createOrder = createServerFn({ method: "POST" })
         code: referralCode,
         referrer_user_id: referrerUserId,
         friend_user_id: customerUserId ?? null,
-        friend_phone: data.customer_phone,
+        friend_phone: phoneNorm,
         order_id: inserted.id,
         discount_amount: referralDiscount,
         status: "pending",
