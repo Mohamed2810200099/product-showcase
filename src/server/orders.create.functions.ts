@@ -144,7 +144,7 @@ export const createOrder = createServerFn({ method: "POST" })
         if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
       } else {
         const { count } = await supabaseAdmin.from("orders").select("id", { count: "exact", head: true })
-          .eq("customer_phone", data.customer_phone).neq("status", "cancelled");
+          .in("customer_phone", phoneCandidates).neq("status", "cancelled");
         if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
       }
       referralDiscount = Math.round((subtotal * glow.friend_discount_pct) / 100);
