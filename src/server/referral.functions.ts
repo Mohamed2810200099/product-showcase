@@ -8,12 +8,26 @@ import { getGlowSettings } from "./referral.server";
 export const getMyGlowProfile = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
-      const settings = await getGlowSettings();
+      const settings = await getGlowSettings().catch(() => null);
       const { getRequest } = await import("@tanstack/react-start/server");
       const req = getRequest();
       const authHeader = req?.headers?.get("authorization") ?? "";
       const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
       if (!token) {
+        return { profile: null, settings, transactions: [] as any[] };
+      }
+
+      // Decode JWT payload to get user id without an extra round-trip
+      let userId: string | undefined;
+      try {
+        const payload = JSON.parse(
+          Buffer.from(token.split(".")[1] ?? "", "base64").toString("utf8"),
+        );
+        userId = payload?.sub;
+      } catch {
+        userId = undefined;
+      }
+      if (!userId) {
         return { profile: null, settings, transactions: [] as any[] };
       }
 
@@ -23,11 +37,7 @@ export const getMyGlowProfile = createServerFn({ method: "GET" })
         process.env.SUPABASE_PUBLISHABLE_KEY!,
         { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } },
       );
-      const { data: claims } = await supabase.auth.getClaims(token);
-      const userId = claims?.claims?.sub;
-      if (!userId) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
+
 
       let { data: profile } = await supabase
         .from("customer_profiles")
