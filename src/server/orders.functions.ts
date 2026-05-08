@@ -34,10 +34,24 @@ export const getMyOrders = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
-export const getMyAccount = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId, claims } = context;
+const accountSchema = z.object({
+  access_token: z.string().min(10).max(4000),
+});
+
+export const getMyAccount = createServerFn({ method: "POST" })
+  .inputValidator((data) => accountSchema.parse(data))
+  .handler(async ({ data }) => {
+    // Validate the token server-side; never trust a client-supplied user id.
+    const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(data.access_token);
+    if (authError || !userData?.user) {
+      return { ok: false as const, error: "unauthorized", profile: null, orders: [] };
+    }
+    const user = userData.user;
+    const userId = user.id;
+    const claims = { user_metadata: user.user_metadata, email: user.email } as {
+      user_metadata?: { full_name?: string; name?: string };
+      email?: string;
+    };
 
     const loadProfile = () =>
       supabaseAdmin
@@ -59,14 +73,13 @@ export const getMyAccount = createServerFn({ method: "GET" })
     let profile = profileRes.data;
 
     if (!profile) {
-      const meta = (claims as { user_metadata?: { full_name?: string; name?: string } } | null)?.user_metadata ?? {};
-      const email = (claims as { email?: string } | null)?.email ?? "";
+      const meta = claims.user_metadata ?? {};
+      const email = claims.email ?? "";
       const seed = meta.full_name || meta.name || (email ? email.split("@")[0] : "Glow");
       const displayName = seed || "Glow";
 
       const { data: codeRpc } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
-      const personalCode =
-        codeRpc ?? `GLOW${Math.floor(10 + Math.random() * 90)}`;
+      const personalCode = codeRpc ?? `GLOW${Math.floor(10 + Math.random() * 90)}`;
 
       const { data: inserted, error: insertErr } = await supabaseAdmin
         .from("customer_profiles")
@@ -83,7 +96,6 @@ export const getMyAccount = createServerFn({ method: "GET" })
         .maybeSingle();
 
       if (insertErr) {
-        // race: another request created it — re-read
         const refetch = await loadProfile();
         profile = refetch.data;
       } else {
@@ -91,6 +103,12 @@ export const getMyAccount = createServerFn({ method: "GET" })
       }
     }
 
-    return { profile: profile ?? null, orders: ordersRes.data ?? [] };
+    return {
+      ok: true as const,
+      error: null,
+      profile: profile ?? null,
+      orders: ordersRes.data ?? [],
+    };
   });
+
 
