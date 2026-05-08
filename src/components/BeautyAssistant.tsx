@@ -39,6 +39,26 @@ const GOAL_TAGS: Record<Goal, string[]> = {
   skin_oily: ["skin_oily", "oily", "acne", "blackheads", "pores", "دهنية", "حبوب", "رؤوس-سوداء", "salicylic"],
 };
 
+// Suitable_for keywords (skin/hair type) per goal — secondary match
+const GOAL_SUITABLE: Record<Goal, string[]> = {
+  hair_growth: ["شعر"],
+  hair_repair: ["شعر تالف", "شعر مصبوغ", "شعر جاف", "شعر"],
+  hair_frizz: ["شعر جاف", "شعر هايش", "شعر"],
+  skin_glow: ["عادية", "مختلطة", "كل أنواع البشرة"],
+  skin_hydrate: ["جافة", "حساسة"],
+  skin_oily: ["دهنية", "مختلطة"],
+};
+
+// Product type keywords per goal — tertiary match
+const GOAL_TYPES: Record<Goal, string[]> = {
+  hair_growth: ["hair", "serum", "oil", "شعر", "سيروم", "زيت"],
+  hair_repair: ["hair", "mask", "conditioner", "شعر", "ماسك", "بلسم"],
+  hair_frizz: ["hair", "serum", "oil", "شعر", "سيروم"],
+  skin_glow: ["serum", "vitamin", "سيروم"],
+  skin_hydrate: ["moisturizer", "cream", "كريم", "مرطب"],
+  skin_oily: ["cleanser", "toner", "غسول", "تونر"],
+};
+
 const HAIR_DESC = ["جاف", "هايش", "متقصف", "مصبوغ أو معالج كيميائيًا", "ضعيف أو محتاج كثافة"];
 const SKIN_DESC = ["دهنية", "جافة", "مختلطة", "عادية", "حساسة", "فيها رؤوس سوداء أو حبوب"];
 
