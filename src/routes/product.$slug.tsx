@@ -555,6 +555,34 @@ function ProductPage() {
           </section>
         )}
       </div>
+
+      {/* Sticky mobile buy bar */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-10px_30px_-10px_rgba(58,36,48,0.18)] px-4 py-3"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] text-muted-foreground">السعر</span>
+            <span className="text-lg font-bold text-primary tabular-nums">{formatEGP(Number(product.price) * qty)}</span>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={notPurchasable}
+            aria-label="أضيفي للسلة"
+            className="h-12 w-12 shrink-0 rounded-full border-2 border-primary text-primary flex items-center justify-center active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ShoppingBag className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleBuyNow}
+            disabled={notPurchasable}
+            className="flex-1 h-12 rounded-full font-semibold text-sm bg-gradient-to-br from-primary to-[#C95588] text-primary-foreground shadow-[0_12px_28px_-10px_rgba(217,108,157,0.7)] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-muted disabled:bg-none disabled:text-muted-foreground disabled:shadow-none inline-flex items-center justify-center gap-2"
+          >
+            {notPurchasable ? (isComingSoonProduct ? "قريباً" : "نفد المخزون") : (<><Zap className="h-4 w-4" /> اشتري الآن</>)}
+          </button>
+        </div>
+      </div>
     </PublicLayout>
   );
 }
