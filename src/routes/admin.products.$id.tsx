@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { ArrowRight, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/products/$id")({
   head: () => ({ meta: [{ title: "تعديل منتج — لوحة الإدارة" }] }),
