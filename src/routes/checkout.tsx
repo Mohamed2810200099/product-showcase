@@ -268,12 +268,24 @@ function CheckoutPage() {
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={setPhone} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 {!isAuthenticated && (
                   <Field
-                    label="البريد الإلكتروني (اختياري)"
+                    label="البريد الإلكتروني (اختياري — لو حابة تستلمي تأكيد بالإيميل)"
                     type="email"
                     value={form.customer_email}
                     onChange={(v) => setForm({ ...form, customer_email: v })}
                     className="sm:col-span-2"
                   />
+                )}
+                {isAuthenticated && user?.email && (
+                  <div className="sm:col-span-2">
+                    <label className="text-xs text-muted-foreground block mb-1">البريد الإلكتروني (من حسابك)</label>
+                    <input
+                      type="email"
+                      value={user.email}
+                      readOnly
+                      dir="ltr"
+                      className="w-full bg-muted/40 border border-border rounded-lg px-3 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
+                    />
+                  </div>
                 )}
 
                 <div>
