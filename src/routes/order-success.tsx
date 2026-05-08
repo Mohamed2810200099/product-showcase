@@ -34,6 +34,7 @@ function OrderSuccessPage() {
             <a
               href={`https://wa.me/${brand.whatsapp}`}
               target="_blank" rel="noreferrer"
+              onClick={() => trackEvent("whatsapp_clicked", { source: "order_success", order_number: order })}
               className="bg-[#25D366] text-white py-2.5 rounded-full text-sm font-medium inline-flex items-center justify-center gap-2 hover:opacity-90"
             >
               <MessageCircle className="h-4 w-4" /> تواصلي معنا
