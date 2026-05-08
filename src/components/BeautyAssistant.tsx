@@ -29,17 +29,7 @@ const GOALS: { id: Goal; label: string; type: "hair" | "skin"; routineName: stri
   { id: "skin_oily", label: "البشرة الدهنية والرؤوس السوداء", type: "skin", routineName: "روتين تنقية البشرة الدهنية", intro: "منتجات لتقليل الدهون وتنظيف المسام بعمق." },
 ];
 
-// Map by product order_index (1-based per user spec) — fallback
-const RECS: Record<Goal, number[]> = {
-  hair_growth: [1, 14],
-  hair_repair: [2, 3, 4, 6, 15],
-  hair_frizz: [14, 16, 6],
-  skin_glow: [5, 8, 11],
-  skin_hydrate: [10, 12, 13],
-  skin_oily: [7, 9, 17, 18, 19],
-};
-
-// Tag keywords for matching products by tags array
+// Tag keywords for matching products by tags array (concerns metadata)
 const GOAL_TAGS: Record<Goal, string[]> = {
   hair_growth: ["hair_growth", "growth", "نمو", "كثافة", "تكثيف", "anti-hair-loss", "hair-loss"],
   hair_repair: ["hair_repair", "repair", "damaged", "إصلاح", "متضرر", "تالف", "keratin", "كيراتين"],
@@ -47,6 +37,26 @@ const GOAL_TAGS: Record<Goal, string[]> = {
   skin_glow: ["skin_glow", "glow", "brightening", "radiance", "نضارة", "إشراق", "vitamin-c", "فيتامين-سي"],
   skin_hydrate: ["skin_hydrate", "hydration", "hydrating", "moisturizing", "soothing", "ترطيب", "تهدئة", "hyaluronic"],
   skin_oily: ["skin_oily", "oily", "acne", "blackheads", "pores", "دهنية", "حبوب", "رؤوس-سوداء", "salicylic"],
+};
+
+// Suitable_for keywords (skin/hair type) per goal — secondary match
+const GOAL_SUITABLE: Record<Goal, string[]> = {
+  hair_growth: ["شعر"],
+  hair_repair: ["شعر تالف", "شعر مصبوغ", "شعر جاف", "شعر"],
+  hair_frizz: ["شعر جاف", "شعر هايش", "شعر"],
+  skin_glow: ["عادية", "مختلطة", "كل أنواع البشرة"],
+  skin_hydrate: ["جافة", "حساسة"],
+  skin_oily: ["دهنية", "مختلطة"],
+};
+
+// Product type keywords per goal — tertiary match
+const GOAL_TYPES: Record<Goal, string[]> = {
+  hair_growth: ["hair", "serum", "oil", "شعر", "سيروم", "زيت"],
+  hair_repair: ["hair", "mask", "conditioner", "شعر", "ماسك", "بلسم"],
+  hair_frizz: ["hair", "serum", "oil", "شعر", "سيروم"],
+  skin_glow: ["serum", "vitamin", "سيروم"],
+  skin_hydrate: ["moisturizer", "cream", "كريم", "مرطب"],
+  skin_oily: ["cleanser", "toner", "غسول", "تونر"],
 };
 
 const HAIR_DESC = ["جاف", "هايش", "متقصف", "مصبوغ أو معالج كيميائيًا", "ضعيف أو محتاج كثافة"];
@@ -69,9 +79,8 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,arabic_title,slug,price,images,order_index,tags")
-        .eq("is_active", true)
-        .order("order_index", { ascending: true });
+        .select("id,name,arabic_title,slug,price,images,tags,product_type,suitable_for")
+        .eq("is_active", true);
       return data ?? [];
     },
   });
@@ -79,24 +88,29 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
   const recommended = useMemo(() => {
     if (!goal || !size) return [] as any[];
 
-    // Try tag-based matching first
-    const keywords = GOAL_TAGS[goal].map((k) => k.toLowerCase());
-    const tagMatched = products.filter((p: any) => {
-      const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
-      return tags.some((t: string) => keywords.some((k) => t.includes(k) || k.includes(t)));
-    });
+    const tagKeys = GOAL_TAGS[goal].map((k) => k.toLowerCase());
+    const suitableKeys = GOAL_SUITABLE[goal].map((k) => k.toLowerCase());
+    const typeKeys = GOAL_TYPES[goal].map((k) => k.toLowerCase());
 
-    let pool: any[] = tagMatched;
-    if (pool.length === 0) {
-      // Fallback to order_index logic
-      const indexes = RECS[goal];
-      pool = indexes
-        .map((idx) => products.find((p: any) => p.order_index === idx))
-        .filter(Boolean);
-    }
+    // Score each product by metadata match (concerns > suitable_for > product_type)
+    const scored = products
+      .map((p: any) => {
+        const tags = (p.tags ?? []).map((t: string) => String(t).toLowerCase());
+        const suitable = String(p.suitable_for ?? "").toLowerCase();
+        const ptype = String(p.product_type ?? "").toLowerCase();
 
-    const limit = size === "single" ? 1 : size === "duo" ? 2 : pool.length;
-    return pool.slice(0, limit);
+        let score = 0;
+        if (tags.some((t: string) => tagKeys.some((k) => t.includes(k) || k.includes(t)))) score += 10;
+        if (suitableKeys.some((k) => suitable.includes(k))) score += 5;
+        if (typeKeys.some((k) => ptype.includes(k))) score += 2;
+        return { p, score };
+      })
+      .filter((x: any) => x.score > 0)
+      .sort((a: any, b: any) => b.score - a.score)
+      .map((x: any) => x.p);
+
+    const limit = size === "single" ? 1 : size === "duo" ? 2 : scored.length;
+    return scored.slice(0, limit);
   }, [goal, size, products]);
 
   const total = recommended.reduce((s: number, p: any) => s + Number(p.price ?? 0), 0);
@@ -252,6 +266,24 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
             <p className="text-[10px] text-[#3A2430]/55 mt-3 text-center leading-relaxed">
               هذه التوصيات للعناية التجميلية فقط وليست نصيحة طبية.
             </p>
+          </div>
+        )}
+
+        {step === "result" && goalDef && recommended.length === 0 && (
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-4 border border-white/80 shadow-soft mt-2 text-center">
+            <p className="text-sm text-[#3A2430] leading-relaxed">
+              مش لاقيين ترشيح مناسب حالياً، كلمينا على واتساب.
+            </p>
+            {brand.whatsapp && (
+              <a
+                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`مرحبًا، محتاجة مساعدة في اختيار روتين ${goalDef.label}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center gap-1 bg-[#25D366] text-white rounded-full px-4 py-2 text-xs font-medium"
+              >
+                اسألي على واتساب
+              </a>
+            )}
           </div>
         )}
       </div>
