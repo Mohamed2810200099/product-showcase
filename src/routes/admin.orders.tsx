@@ -41,6 +41,7 @@ type Order = {
   status: string;
   payment_method: string;
   created_at: string;
+  whatsapp_sent: boolean;
 };
 
 const STATUSES = [
