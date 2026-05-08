@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { fallback } from "@tanstack/zod-adapter";
+
 import { CheckCircle, MessageCircle, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { PublicLayout } from "@/components/layout/PublicLayout";
