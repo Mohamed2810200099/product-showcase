@@ -418,13 +418,14 @@ function FloatingProduct({
           to={p.to}
           search={p.search as any}
           aria-label={p.label}
-          className="block relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3 cursor-pointer hover:shadow-[0_30px_60px_-20px_rgba(217,108,157,0.55)] transition-shadow"
+          className="block relative cursor-pointer"
         >
           <img
             src={p.src}
             alt={p.label}
             loading="lazy"
-            className="relative w-full h-auto object-contain drop-shadow-[0_18px_30px_rgba(58,36,48,0.25)]"
+            className="relative w-full h-auto object-contain drop-shadow-[0_25px_40px_rgba(58,36,48,0.28)] transition-transform duration-500 hover:scale-105"
+            style={{ background: "transparent" }}
           />
         </Link>
         <motion.span
