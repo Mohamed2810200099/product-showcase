@@ -3,34 +3,25 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Gift, Share2, Sparkles, Copy, MessageCircle, Check, Wallet, ShoppingBag, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type ProfileData = {
-  profile: {
-    personal_code: string;
-    wallet_balance: number;
-    lifetime_credits_earned: number;
-  } | null;
-  settings: {
-    friend_discount_pct: number;
-    referrer_reward_pct: number;
-    monthly_cap: number;
-    min_redemption: number;
-  };
-  transactions: Array<{ id: string; amount: number; kind: string; note: string | null; created_at: string }>;
-} | null;
+type ProfileRow = {
+  personal_code: string | null;
+  wallet_balance: number | null;
+};
 
 export function ReferralSection() {
-  const { isAuthenticated, loading } = useAuth();
-  const [data, setData] = useState<ProfileData>(null);
+  const { isAuthenticated, loading, user } = useAuth();
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [copied, setCopied] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated) {
-      setData(null);
+    if (!isAuthenticated || !user) {
+      setProfile(null);
       setFetching(false);
       setFetchError(false);
       return;
@@ -40,9 +31,14 @@ export function ReferralSection() {
     setFetchError(false);
     (async () => {
       try {
-        const { getMyGlowProfile } = await import("@/server/referral.functions");
-        const res = await getMyGlowProfile();
-        if (!cancelled) setData(res as ProfileData);
+        const { data, error } = await supabase
+          .from("customer_profiles")
+          .select("personal_code, wallet_balance")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) { setFetchError(true); return; }
+        setProfile(data as ProfileRow | null);
       } catch (e) {
         console.warn("Glow profile failed", e);
         if (!cancelled) setFetchError(true);
@@ -51,12 +47,12 @@ export function ReferralSection() {
       }
     })();
     return () => { cancelled = true; };
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading, user]);
 
-  const code = data?.profile?.personal_code ?? "";
-  const balance = Number(data?.profile?.wallet_balance ?? 0);
-  const friendPct = data?.settings?.friend_discount_pct ?? 15;
-  const rewardPct = data?.settings?.referrer_reward_pct ?? 10;
+  const code = profile?.personal_code ?? "";
+  const balance = Number(profile?.wallet_balance ?? 0);
+  const friendPct = 15;
+  const rewardPct = 10;
 
   const copy = async () => {
     if (!code) return;
