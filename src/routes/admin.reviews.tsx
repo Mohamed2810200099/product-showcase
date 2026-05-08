@@ -44,15 +44,17 @@ function ReviewsPage() {
   };
   useEffect(() => { load(); }, [filter]);
 
+  // SECURITY: gated by RLS "Admins manage reviews" via has_role(auth.uid(),'admin').
   const approve = async (id: string) => {
     const { error } = await supabase.from("reviews").update({ approved: true }).eq("id", id);
-    if (error) return toast.error("فشل");
+    if (handleAdminError(error, "فشل")) return;
     toast.success("تم النشر");
     load();
   };
   const remove = async (id: string) => {
     if (!confirm("حذف التقييم؟")) return;
-    await supabase.from("reviews").delete().eq("id", id);
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (handleAdminError(error, "فشل الحذف")) return;
     load();
   };
 
