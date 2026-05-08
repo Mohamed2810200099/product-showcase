@@ -4,6 +4,9 @@ interface SmokeBackgroundProps {
   smokeColor?: string;
   className?: string;
   opacity?: number;
+  variant?: "subtle" | "hero" | "section";
+  speed?: number;
+  scale?: number;
 }
 
 const vertexSrc = `#version 300 es
@@ -38,16 +41,17 @@ float fbm(vec2 p){
   return v;
 }
 
+uniform float uSpeed;
+uniform float uScale;
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*iResolution.xy)/iResolution.y;
-  float t = iTime * 0.06;
-  vec2 q = uv * 1.4;
-  q += vec2(fbm(q + t), fbm(q - t)) * 0.6;
+  float t = iTime * uSpeed;
+  vec2 q = uv * uScale;
+  q += vec2(fbm(q + t), fbm(q - t)) * 0.65;
   float n = fbm(q + t*0.5);
-  // ivory base instead of dark
   vec3 base = vec3(1.0, 0.973, 0.957);
-  float smoke = smoothstep(0.35, 0.85, n);
-  vec3 col = mix(base, uSmoke, smoke * 0.85);
+  float smoke = smoothstep(0.30, 0.88, n);
+  vec3 col = mix(base, uSmoke, smoke);
   fragColor = vec4(col, 1.0);
 }
 `;
@@ -61,11 +65,25 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 export function SmokeBackground({
-  smokeColor = "#E7A8BF",
+  smokeColor,
   className,
-  opacity = 0.35,
+  opacity,
+  variant = "subtle",
+  speed,
+  scale,
 }: SmokeBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const presets = {
+    hero: { color: "#D96C9D", op: 0.7, sp: 0.11, sc: 1.7 },
+    section: { color: "#E7A8BF", op: 0.45, sp: 0.08, sc: 1.5 },
+    subtle: { color: "#E7A8BF", op: 0.32, sp: 0.06, sc: 1.4 },
+  } as const;
+  const p = presets[variant];
+  const finalColor = smokeColor ?? p.color;
+  const finalOpacity = opacity ?? p.op;
+  const finalSpeed = speed ?? p.sp;
+  const finalScale = scale ?? p.sc;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -114,8 +132,10 @@ export function SmokeBackground({
     const uRes = gl.getUniformLocation(program, "iResolution");
     const uTime = gl.getUniformLocation(program, "iTime");
     const uSmoke = gl.getUniformLocation(program, "uSmoke");
+    const uSpeed = gl.getUniformLocation(program, "uSpeed");
+    const uScale = gl.getUniformLocation(program, "uScale");
 
-    const rgb = hexToRgb(smokeColor);
+    const rgb = hexToRgb(finalColor);
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -137,6 +157,8 @@ export function SmokeBackground({
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, (performance.now() - start) / 1000);
       gl.uniform3f(uSmoke, rgb[0], rgb[1], rgb[2]);
+      gl.uniform1f(uSpeed, finalSpeed);
+      gl.uniform1f(uScale, finalScale);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(render);
     };
@@ -150,13 +172,13 @@ export function SmokeBackground({
       gl.deleteShader(fs);
       gl.deleteProgram(program);
     };
-  }, [smokeColor]);
+  }, [finalColor, finalSpeed, finalScale]);
 
   return (
     <canvas
       ref={canvasRef}
       className={className}
-      style={{ width: "100%", height: "100%", display: "block", opacity }}
+      style={{ width: "100%", height: "100%", display: "block", opacity: finalOpacity, pointerEvents: "none" }}
       aria-hidden
     />
   );
