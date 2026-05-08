@@ -103,7 +103,19 @@ function ProductPage() {
   const productUrl = typeof window !== "undefined" ? `${window.location.origin}/product/${product.slug}` : `/product/${product.slug}`;
   const waMsg = `مرحبًا، أريد طلب هذا المنتج من The Girl House:\nالمنتج: ${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالكمية: ${qty}\nالرابط: ${productUrl}`;
 
+  // Defensive purchasability check — must mirror server createOrder validation.
+  const availabilityStatus = (product as any).availability_status ?? "available";
+  const trackingEnabled = (product as any).stock_tracking_enabled === true;
+  const isComingSoonProduct = availabilityStatus === "coming_soon";
+  const isOutProduct =
+    availabilityStatus === "out_of_stock" || (trackingEnabled && Number(product.stock ?? 0) <= 0);
+  const notPurchasable = isComingSoonProduct || isOutProduct;
+
   const handleAdd = () => {
+    if (notPurchasable) {
+      toast.error(isComingSoonProduct ? "هذا المنتج غير متاح للطلب حالياً" : "نفد المخزون");
+      return;
+    }
     add(
       { id: product.id, name: product.name, slug: product.slug, price: Number(product.price), image: images[0] },
       qty,
@@ -119,6 +131,10 @@ function ProductPage() {
   };
 
   const handleBuyNow = () => {
+    if (notPurchasable) {
+      toast.error(isComingSoonProduct ? "هذا المنتج غير متاح للطلب حالياً" : "نفد المخزون");
+      return;
+    }
     handleAdd();
     navigate({ to: "/checkout" });
   };
