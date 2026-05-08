@@ -63,6 +63,7 @@ function SettingsPage() {
     })();
   }, []);
 
+  // SECURITY: gated by RLS "Admins manage settings" via has_role(auth.uid(),'admin').
   const save = async () => {
     setSaving(true);
     const [{ error: e1 }, { error: e2 }] = await Promise.all([
@@ -74,7 +75,7 @@ function SettingsPage() {
     ]);
     setSaving(false);
     const error = e1 ?? e2;
-    if (error) return toast.error(error.message);
+    if (handleAdminError(error, "فشل الحفظ")) return;
     toast.success("تم الحفظ — حدّثي الصفحة لرؤية التغييرات");
   };
 
