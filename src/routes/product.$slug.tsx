@@ -30,6 +30,7 @@ function ProductPage() {
   const { add, subtotal } = useCart();
   const brand = useBrand();
   const navigate = useNavigate();
+  const reduce = useReducedMotion();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [reviewName, setReviewName] = useState("");
