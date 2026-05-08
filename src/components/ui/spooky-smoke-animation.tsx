@@ -65,11 +65,25 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 export function SmokeBackground({
-  smokeColor = "#E7A8BF",
+  smokeColor,
   className,
-  opacity = 0.35,
+  opacity,
+  variant = "subtle",
+  speed,
+  scale,
 }: SmokeBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const presets = {
+    hero: { color: "#D96C9D", op: 0.7, sp: 0.11, sc: 1.7 },
+    section: { color: "#E7A8BF", op: 0.45, sp: 0.08, sc: 1.5 },
+    subtle: { color: "#E7A8BF", op: 0.32, sp: 0.06, sc: 1.4 },
+  } as const;
+  const p = presets[variant];
+  const finalColor = smokeColor ?? p.color;
+  const finalOpacity = opacity ?? p.op;
+  const finalSpeed = speed ?? p.sp;
+  const finalScale = scale ?? p.sc;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -118,8 +132,10 @@ export function SmokeBackground({
     const uRes = gl.getUniformLocation(program, "iResolution");
     const uTime = gl.getUniformLocation(program, "iTime");
     const uSmoke = gl.getUniformLocation(program, "uSmoke");
+    const uSpeed = gl.getUniformLocation(program, "uSpeed");
+    const uScale = gl.getUniformLocation(program, "uScale");
 
-    const rgb = hexToRgb(smokeColor);
+    const rgb = hexToRgb(finalColor);
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -141,6 +157,8 @@ export function SmokeBackground({
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, (performance.now() - start) / 1000);
       gl.uniform3f(uSmoke, rgb[0], rgb[1], rgb[2]);
+      gl.uniform1f(uSpeed, finalSpeed);
+      gl.uniform1f(uScale, finalScale);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(render);
     };
@@ -154,13 +172,13 @@ export function SmokeBackground({
       gl.deleteShader(fs);
       gl.deleteProgram(program);
     };
-  }, [smokeColor]);
+  }, [finalColor, finalSpeed, finalScale]);
 
   return (
     <canvas
       ref={canvasRef}
       className={className}
-      style={{ width: "100%", height: "100%", display: "block", opacity }}
+      style={{ width: "100%", height: "100%", display: "block", opacity: finalOpacity, pointerEvents: "none" }}
       aria-hidden
     />
   );
