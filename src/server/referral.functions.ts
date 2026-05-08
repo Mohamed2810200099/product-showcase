@@ -235,3 +235,67 @@ export const reverseReferralForOrder = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+const validateReferralSchema = z.object({
+  access_token: z.string().max(4000).optional().nullable(),
+  code: z.string().trim().min(1).max(30),
+  subtotal: z.number().nonnegative(),
+  phone: z.string().trim().max(40).optional().nullable(),
+});
+
+export type ValidateReferralResult =
+  | { ok: true; code: string; discount: number; discount_pct: number }
+  | { ok: false; error: string };
+
+/** Validate a referral code in checkout before applying its discount. */
+export const validateReferralCode = createServerFn({ method: "POST" })
+  .inputValidator((d) => validateReferralSchema.parse(d))
+  .handler(async ({ data }): Promise<ValidateReferralResult> => {
+    const settings = await getGlowSettings();
+    if (!settings.enabled) return { ok: false, error: "نظام الإحالة غير مفعل حالياً" };
+
+    const code = data.code.trim().toUpperCase();
+    const { data: ownerId } = await supabaseAdmin.rpc("lookup_referral_owner", { _code: code });
+    const owner = ownerId as unknown as string | null;
+    if (!owner) return { ok: false, error: "كود الإحالة غير موجود" };
+
+    const { data: ownerProfile } = await supabaseAdmin
+      .from("customer_profiles")
+      .select("user_id")
+      .eq("user_id", owner)
+      .maybeSingle();
+    if (!ownerProfile) return { ok: false, error: "صاحبة الكود غير موجودة" };
+
+    const authUser = await getUserFromAccessToken(data.access_token);
+    const customerUserId = authUser?.userId ?? null;
+    if (customerUserId && customerUserId === owner) {
+      return { ok: false, error: "ميصحش تستخدمي كودك بنفسك" };
+    }
+
+    // First-order rule (by userId, otherwise by normalized phone)
+    if (customerUserId) {
+      const { count } = await supabaseAdmin
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("customer_user_id", customerUserId)
+        .neq("status", "cancelled");
+      if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
+    } else if (data.phone) {
+      if (!isValidEgyptPhone(data.phone)) {
+        return { ok: false, error: "اكتبي رقم موبايل مصري صحيح الأول" };
+      }
+      const phoneNorm = normalizePhone(data.phone);
+      const phoneRaw = data.phone.trim();
+      const phoneCandidates = Array.from(new Set([phoneNorm, phoneRaw].filter(Boolean)));
+      const { count } = await supabaseAdmin
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .in("customer_phone", phoneCandidates)
+        .neq("status", "cancelled");
+      if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
+    }
+
+    const discount_pct = settings.friend_discount_pct;
+    const discount = Math.round((data.subtotal * discount_pct) / 100);
+    return { ok: true, code, discount, discount_pct };
+  });
