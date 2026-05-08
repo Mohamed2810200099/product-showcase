@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import heroMain from "@/assets/products/langhaar.png";
 
 function MagneticButton({
   children,
@@ -69,21 +68,6 @@ export function HeroPremium() {
       className="relative overflow-hidden min-h-[68vh] md:min-h-[74vh] flex items-center"
     >
       {/* Decorative glow blobs removed — global smoke handles ambient color */}
-
-      {/* Large background product — decorative only */}
-      <motion.img
-        aria-hidden
-        src={heroMain}
-        initial={{ opacity: 0, scale: 0.96, rotate: -4 }}
-        animate={reduce ? { opacity: 0.5, scale: 1, rotate: -4 } : { opacity: 0.56, scale: 1, rotate: -4, y: [0, -10, 0] }}
-        transition={reduce ? { duration: 1.1, ease: "easeOut" } : { opacity: { duration: 1.1, ease: "easeOut" }, scale: { duration: 1.1, ease: "easeOut" }, rotate: { duration: 1.1, ease: "easeOut" }, y: { duration: 7, repeat: Infinity, ease: "easeInOut" } }}
-        className="pointer-events-none absolute left-[-18%] top-[58%] z-[2] h-[72%] max-w-none -translate-y-1/2 object-contain select-none opacity-50 sm:left-[-10%] sm:h-[82%] md:left-[-4%] md:top-1/2 md:h-[105%] lg:left-[1%] lg:h-[110%]"
-        style={{
-          filter:
-            "drop-shadow(0 34px 46px rgba(58,36,48,0.2)) drop-shadow(0 10px 20px rgba(217,108,157,0.16))",
-        }}
-        draggable={false}
-      />
 
       {/* Cursor spotlight */}
       {!reduce && (
