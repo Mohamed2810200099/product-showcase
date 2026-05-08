@@ -202,8 +202,13 @@ function OrdersPage() {
   );
 }
 
-function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void }) {
+function OrderModal({ order, onClose, onDelete, onStatus, onToggleWhatsapp }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void; onToggleWhatsapp: (v: boolean) => void }) {
   const items: OrderItemLike[] = Array.isArray(order.items) ? (order.items as OrderItemLike[]) : [];
+  const brand = useBrand();
+  const needsConfirm = order.status === "pending";
+  const waNumber = normalizePhone(order.customer_phone).replace(/^0/, "20");
+  const waMessage = `مرحباً ${order.customer_name} 👋\nبخصوص طلبك رقم ${order.order_number} من The Girl House.\nالإجمالي: ${formatEGP(Number(order.total))}\nنرجو تأكيد الطلب والعنوان: ${order.governorate} - ${order.city}.\nشكراً لكِ 💕`;
+  const waLink = waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}` : null;
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-card max-w-2xl w-full rounded-2xl shadow-elegant max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
@@ -215,6 +220,42 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
           <button onClick={onClose} className="p-2 hover:bg-secondary rounded-full"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-5">
+          {needsConfirm && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-900 p-3 text-sm flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+              <div>
+                <div className="font-bold">يحتاج تأكيد</div>
+                <div>لا تشحني الطلب قبل التأكيد.</div>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-border bg-secondary/30 p-3 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div>
+                <div className="text-xs text-muted-foreground">رقم الطلب</div>
+                <div className="font-mono" dir="ltr">{order.order_number}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-muted-foreground">هاتف العميل</div>
+                <div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {waLink && (
+                <a href={waLink} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm px-4 py-2 rounded-full hover:bg-emerald-700">
+                  <MessageCircle className="h-4 w-4" /> تواصل عبر واتساب
+                </a>
+              )}
+              <button onClick={() => onToggleWhatsapp(!order.whatsapp_sent)}
+                className={`inline-flex items-center gap-2 text-sm px-4 py-2 rounded-full border ${order.whatsapp_sent ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-card border-border"}`}>
+                <CheckCircle2 className="h-4 w-4" />
+                {order.whatsapp_sent ? "تم التواصل عبر واتساب" : "ضع علامة: تم التواصل"}
+              </button>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-3 text-sm">
             <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div></div></div>
             <div className="flex items-start gap-2"><MapPin className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">العنوان</div><div>{order.governorate} - {order.city}</div><div className="text-xs text-muted-foreground">{order.address}</div></div></div>
