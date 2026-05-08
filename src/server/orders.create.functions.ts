@@ -35,6 +35,12 @@ export const createOrder = createServerFn({ method: "POST" })
     const authUser = await getUserFromAccessToken(data.access_token);
     const customerUserId = authUser?.userId ?? null;
 
+    // If client supplied a token but it failed validation, and they're trying
+    // to use wallet, refuse instead of silently treating them as guest.
+    if (data.access_token && !customerUserId && data.use_wallet) {
+      return { ok: false, error: "انتهت جلستك. سجّلي دخول مرة تانية لاستخدام رصيد المحفظة" };
+    }
+
 
     const ids = data.items.map((i) => i.product_id);
     const { data: products, error: pErr } = await supabaseAdmin
