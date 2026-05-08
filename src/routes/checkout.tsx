@@ -130,10 +130,11 @@ function CheckoutPage() {
   const applyCoupon = async () => {
     const code = coupon.trim().toUpperCase();
     if (!code) return;
-    const phone = form.customer_phone.trim();
-    if (phone.length < 10 || !/^[0-9+\-\s]+$/.test(phone)) {
-      return toast.error("اكتبي رقم الموبايل الأول عشان نتأكد إن الكود صالح ليكي.");
+    const { normalizePhone, isValidEgyptPhone } = await import("@/lib/phone");
+    if (!isValidEgyptPhone(form.customer_phone)) {
+      return toast.error("اكتبي رقم موبايل مصري صحيح الأول عشان نتأكد إن الكود صالح ليكي.");
     }
+    const phone = normalizePhone(form.customer_phone);
     const { validateCoupon } = await import("@/server/coupons.functions");
     const result = await validateCoupon({
       data: { code, subtotal, phone },
