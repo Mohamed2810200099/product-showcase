@@ -10,6 +10,43 @@ import langhaarImg from "@/assets/products/langhaar.png";
 import keratinImg from "@/assets/products/keratin.png";
 import plexMaskImg from "@/assets/products/plex-haarmaske.png";
 import plexSpuelungImg from "@/assets/products/plex-spuelung.png";
+import placeholderImg from "@/assets/product-placeholder.jpg";
+
+function SmartImage({
+  src,
+  alt,
+  className,
+  eager = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  eager?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && !errored && (
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#F9EEF3] via-[#FFF8F4] to-[#F8DCE5] animate-pulse"
+        />
+      )}
+      <img
+        src={errored ? placeholderImg : src}
+        alt={alt}
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={eager ? "high" : "auto"}
+        onLoad={() => setLoaded(true)}
+        onError={() => { setErrored(true); setLoaded(true); }}
+        className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </div>
+  );
+}
+
 
 type FloatProduct = {
   src: string;
