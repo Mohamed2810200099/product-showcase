@@ -44,8 +44,6 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/components": "^1.0.12",
-    "@splinetool/react-spline": "^4.1.0",
-    "@splinetool/runtime": "^1.12.92",
     "@supabase/supabase-js": "^2.105.1",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/query-core": "^5.100.9",
