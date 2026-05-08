@@ -14,6 +14,22 @@ const parseAuthInput = (data: unknown) => {
   return parsed.success ? parsed.data : { access_token: null };
 };
 
+const adminActionSchema = z.object({
+  order_id: z.string().uuid(),
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+async function isAdminAccess(accessToken?: string | null) {
+  const authUser = await getUserFromAccessToken(accessToken);
+  if (!authUser) return false;
+
+  const { data } = await supabaseAdmin.rpc("has_role", {
+    _user_id: authUser.userId,
+    _role: "admin",
+  });
+  return data === true;
+}
+
 /** Get the current customer's referral profile + wallet + recent transactions. */
 export const getMyGlowProfile = createServerFn({ method: "POST" })
   .inputValidator(parseAuthInput)
@@ -60,8 +76,10 @@ export const getMyGlowProfile = createServerFn({ method: "POST" })
 
 /** Award referrer credit when an order is marked delivered. Admin-only. */
 export const awardReferralForOrder = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => adminActionSchema.parse(d))
   .handler(async ({ data }) => {
+    if (!(await isAdminAccess(data.access_token))) return { ok: false, error: "Unauthorized" };
+
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("*")
@@ -136,8 +154,10 @@ export const awardReferralForOrder = createServerFn({ method: "POST" })
 
 /** Reverse referral credit if an order is cancelled after being granted. Admin-only. */
 export const reverseReferralForOrder = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => adminActionSchema.parse(d))
   .handler(async ({ data }) => {
+    if (!(await isAdminAccess(data.access_token))) return { ok: false, error: "Unauthorized" };
+
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("*")
