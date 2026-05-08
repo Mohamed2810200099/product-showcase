@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import heroMain from "@/assets/products/cutout-plex-mask.png";
+import heroMain from "@/assets/products/langhaar.png";
 
 function MagneticButton({
   children,
@@ -86,7 +86,7 @@ export function HeroPremium() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="relative md:col-span-7 text-center md:text-right space-y-5 sm:space-y-6"
+          className="relative md:col-span-7 md:col-start-6 md:row-start-1 text-center md:text-right space-y-5 sm:space-y-6"
         >
           <motion.span
             initial={{ opacity: 0, y: 8 }}
@@ -186,7 +186,7 @@ export function HeroPremium() {
           initial={{ opacity: 0, scale: 0.92, x: 30 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative md:col-span-5 flex items-center justify-center order-first md:order-none"
+          className="relative md:col-span-5 md:col-start-1 md:row-start-1 flex items-center justify-center order-first md:order-none"
         >
           <div
             aria-hidden
