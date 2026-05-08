@@ -173,26 +173,32 @@ function CheckoutPage() {
     const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 
-
     setSubmitting(true);
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData.session?.access_token ?? session?.access_token ?? null;
-    const { createOrder } = await import("@/server/orders.create.functions");
-    const result = await createOrder({
-      data: {
-        ...parsed.data,
-        customer_email: parsed.data.customer_email || "",
-        items: items.map((it) => ({ product_id: it.id, qty: it.qty })),
-        coupon_code: appliedCoupon?.code ?? null,
-        referral_code: appliedReferral?.code ?? null,
-        use_wallet: useWallet,
-        access_token: accessToken,
-      },
-    });
+    let result: Awaited<ReturnType<typeof import("@/server/orders.create.functions").createOrder>>;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token ?? null;
+      const { createOrder } = await import("@/server/orders.create.functions");
+      result = await createOrder({
+        data: {
+          ...parsed.data,
+          customer_email: parsed.data.customer_email || "",
+          items: items.map((it) => ({ product_id: it.id, qty: it.qty })),
+          coupon_code: appliedCoupon?.code ?? null,
+          referral_code: appliedReferral?.code ?? null,
+          use_wallet: useWallet,
+          access_token: accessToken,
+        },
+      });
+    } catch {
+      setSubmitting(false);
+      return toast.error("حصلت مشكلة أثناء تأكيد الطلب. حاولي تاني من فضلك.");
+    }
 
     setSubmitting(false);
 
     if (!result.ok) {
+      if (result.code === "invalid_wallet_session") setUseWallet(false);
       return toast.error(result.error);
     }
     const data = { order_number: result.order_number };
