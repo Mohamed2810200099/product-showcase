@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Plus, Trash2, Save, Play, Pause } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/coupons")({
   head: () => ({ meta: [{ title: "كوبونات الخصم — لوحة الإدارة" }] }),
