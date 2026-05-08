@@ -189,7 +189,7 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
         </div>
         <div className="p-5 space-y-5">
           <div className="grid sm:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{order.customer_phone}</div></div></div>
+            <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div></div></div>
             <div className="flex items-start gap-2"><MapPin className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">العنوان</div><div>{order.governorate} - {order.city}</div><div className="text-xs text-muted-foreground">{order.address}</div></div></div>
           </div>
           {order.notes && <div className="bg-secondary/40 rounded-lg p-3 text-sm"><strong>ملاحظات: </strong>{order.notes}</div>}
