@@ -39,7 +39,7 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const brand = useBrand();
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading, user } = useAuth();
+  const { isAuthenticated, loading: authLoading, user, session } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
@@ -175,6 +175,8 @@ function CheckoutPage() {
 
 
     setSubmitting(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token ?? session?.access_token ?? null;
     const { createOrder } = await import("@/server/orders.create.functions");
     const result = await createOrder({
       data: {
@@ -184,7 +186,7 @@ function CheckoutPage() {
         coupon_code: appliedCoupon?.code ?? null,
         referral_code: appliedReferral?.code ?? null,
         use_wallet: useWallet,
-        
+        access_token: accessToken,
       },
     });
 
