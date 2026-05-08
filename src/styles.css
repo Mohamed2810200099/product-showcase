@@ -154,12 +154,8 @@
     direction: rtl;
   }
 
-  html {
-    background-color: var(--color-background);
-  }
-
   body {
-    background-color: transparent;
+    background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;

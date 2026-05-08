@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Gift, Share2, Sparkles, Copy, MessageCircle, Check, Wallet, ShoppingBag, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 
 type ProfileData = {
   profile: {
