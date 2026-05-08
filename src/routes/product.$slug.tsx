@@ -79,6 +79,17 @@ function ProductPage() {
     },
   });
 
+  useEffect(() => {
+    if (product?.id) {
+      trackEvent("product_view", {
+        product_id: product.id,
+        product_name: product.name,
+        price: Number(product.price),
+        slug: product.slug,
+      });
+    }
+  }, [product?.id, product?.name, product?.price, product?.slug]);
+
   if (isLoading) return <PublicLayout><div className="container mx-auto py-20 text-center">جاري التحميل…</div></PublicLayout>;
   if (!product) throw notFound();
 
@@ -91,17 +102,6 @@ function ProductPage() {
 
   const productUrl = typeof window !== "undefined" ? `${window.location.origin}/product/${product.slug}` : `/product/${product.slug}`;
   const waMsg = `مرحبًا، أريد طلب هذا المنتج من The Girl House:\nالمنتج: ${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالكمية: ${qty}\nالرابط: ${productUrl}`;
-
-  useEffect(() => {
-    if (product?.id) {
-      trackEvent("product_view", {
-        product_id: product.id,
-        product_name: product.name,
-        price: Number(product.price),
-        slug: product.slug,
-      });
-    }
-  }, [product?.id, product?.name, product?.price, product?.slug]);
 
   const handleAdd = () => {
     add(
