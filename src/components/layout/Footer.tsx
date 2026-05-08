@@ -12,7 +12,7 @@ export function Footer() {
   ].filter((s) => s.url && /^https?:\/\//i.test(s.url.trim()));
 
   return (
-    <footer className="relative z-10 mt-20 border-t border-white/10 bg-[#3A2430] text-[#F8DCE5]">
+    <footer className="relative z-10 mt-20 border-t border-white/10 bg-[#5A3645] text-[#F8DCE5]">
       <div className="container mx-auto px-4 py-12 grid gap-10 md:grid-cols-5">
         <div className="md:col-span-2">
           <h3 className="font-display text-2xl text-white font-semibold mb-3">The Girl House</h3>
