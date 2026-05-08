@@ -112,6 +112,18 @@ function ProductPage() {
   const isOutProduct =
     availabilityStatus === "out_of_stock" || (trackingEnabled && Number(product.stock ?? 0) <= 0);
   const notPurchasable = isComingSoonProduct || isOutProduct;
+  const maxQty = trackingEnabled ? Math.max(0, Number(product.stock ?? 0)) : Infinity;
+
+  const incQty = () => {
+    setQty((q) => {
+      if (trackingEnabled && q + 1 > maxQty) {
+        toast.error("الكمية المطلوبة غير متاحة حالياً");
+        return q;
+      }
+      return q + 1;
+    });
+  };
+  const decQty = () => setQty((q) => Math.max(1, q - 1));
 
   const handleAdd = () => {
     if (notPurchasable) {
