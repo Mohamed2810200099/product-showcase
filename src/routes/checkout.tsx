@@ -174,7 +174,7 @@ function CheckoutPage() {
     localStorage.setItem("tgh_has_ordered", "1");
 
     // Send branded order confirmation email (best-effort, non-blocking)
-    const emailToUse = user?.email ?? "";
+
     if (emailToUse) {
       try {
         const { sendTransactionalEmail } = await import("@/lib/email/send");
