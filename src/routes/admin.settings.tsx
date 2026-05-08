@@ -68,7 +68,7 @@ function SettingsPage() {
       supabase.from("settings").upsert({ key: "brand", value: brand }),
       supabase.from("settings").upsert({
         key: "show_referral_section",
-        value: { show_referral_section: brand.show_referral_section },
+        value: brand.show_referral_section,
       }),
     ]);
     setSaving(false);
