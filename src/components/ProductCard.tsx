@@ -5,6 +5,7 @@ import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
 import placeholderImg from "@/assets/product-placeholder.jpg";
 import { Product3DCard } from "@/components/three-d/Product3DCard";
+import { trackEvent } from "@/lib/analytics";
 
 export type Product = {
   id: string;
