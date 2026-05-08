@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
+import { ShoppingBag, Tag, ShieldCheck, Truck, Package } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
 
 function MagneticButton({
