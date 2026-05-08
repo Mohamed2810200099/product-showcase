@@ -157,7 +157,7 @@ function OrdersPage() {
               <ul className="text-sm space-y-1 mb-3 text-[#3A2430]/80">
                 {(o.items ?? []).map((it, i) => (
                   <li key={i} className="flex justify-between gap-2">
-                    <span>{it.name ?? "منتج"} × {it.quantity ?? 1}</span>
+                    <span>{it.name ?? "منتج"} × {getItemQty(it)}</span>
                   </li>
                 ))}
               </ul>
