@@ -92,10 +92,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <Outlet />
+        {!isAdmin && <SiteAnimatedBackground />}
+        <div className="relative z-10">
+          <Outlet />
+        </div>
         <Toaster position="top-center" richColors closeButton dir="rtl" />
       </CartProvider>
     </QueryClientProvider>
