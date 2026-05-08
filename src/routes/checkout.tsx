@@ -8,7 +8,9 @@ import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
-import { CreditCard, Tag } from "lucide-react";
+import { CreditCard, Tag, Wallet } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "إتمام الطلب — The Girl House" }] }),
@@ -42,27 +44,44 @@ function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [referralInput, setReferralInput] = useState("");
   const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
-  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } | null>(null);
+  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number }>({ friend_discount_pct: 15, min_redemption: 0, max_wallet_per_order_pct: 50 });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [useWallet, setUseWallet] = useState(false);
+  const [useWallet, setUseWallet] = useState(true);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
   });
 
-  // Load glow profile when authenticated
+  // Load wallet balance directly from customer_profiles (RLS-protected)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) { setWalletBalance(0); return; }
+    let cancelled = false;
     (async () => {
-      try {
-        const { getMyGlowProfile } = await import("@/server/referral.functions");
-        const res = await getMyGlowProfile();
-        const r = res as { profile: { wallet_balance: number } | null; settings: { friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } };
-        setWalletBalance(Number(r.profile?.wallet_balance ?? 0));
-        setGlowSettings(r.settings);
-      } catch (e) { console.warn(e); }
+      const { data } = await supabase
+        .from("customer_profiles")
+        .select("wallet_balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setWalletBalance(Number(data?.wallet_balance ?? 0));
     })();
-  }, [isAuthenticated]);
+    // also load glow settings (best-effort)
+    (async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "share_the_glow")
+        .maybeSingle();
+      if (cancelled) return;
+      const v = data?.value as { friend_discount_pct?: number; min_redemption?: number; max_wallet_per_order_pct?: number } | null;
+      if (v) setGlowSettings({
+        friend_discount_pct: v.friend_discount_pct ?? 15,
+        min_redemption: v.min_redemption ?? 0,
+        max_wallet_per_order_pct: v.max_wallet_per_order_pct ?? 50,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, user]);
 
   if (authLoading) {
     return (
@@ -108,7 +127,7 @@ function CheckoutPage() {
   const couponDiscount = appliedCoupon?.discount ?? 0;
   const referralDiscount = appliedReferral?.discount ?? 0;
   const discount = couponDiscount + referralDiscount;
-  const maxWalletByOrder = glowSettings ? Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100) : 0;
+  const maxWalletByOrder = Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100);
   const walletApplied = useWallet
     ? Math.min(walletBalance, Math.max(0, subtotal - discount), maxWalletByOrder)
     : 0;
@@ -292,16 +311,22 @@ function CheckoutPage() {
             </div>
 
             {isAuthenticated && walletBalance > 0 && (
-              <label className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9] cursor-pointer">
-                <span className="text-sm">
-                  استخدمي رصيد محفظتك ({formatEGP(walletBalance)})
-                </span>
-                <input type="checkbox" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} className="h-4 w-4 accent-primary" />
-              </label>
+              <div className="mb-3 p-4 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-[#D96C9D]" />
+                    <div>
+                      <div className="text-sm font-semibold text-[#3A2430]">رصيد محفظتك: {formatEGP(walletBalance)}</div>
+                      <div className="text-[11px] text-[#3A2430]/65">هل تريدي استخدامه؟ (حد أقصى {glowSettings.max_wallet_per_order_pct}٪ من قيمة الطلب)</div>
+                    </div>
+                  </div>
+                  <Switch checked={useWallet} onCheckedChange={setUseWallet} />
+                </div>
+              </div>
             )}
 
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt>المجموع</dt><dd>{formatEGP(subtotal)}</dd></div>
+              <div className="flex justify-between"><dt>المجموع الفرعي</dt><dd>{formatEGP(subtotal)}</dd></div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(couponDiscount)}</dd></div>
               )}
@@ -309,7 +334,7 @@ function CheckoutPage() {
                 <div className="flex justify-between text-primary"><dt>خصم صديقتك ({appliedReferral?.code})</dt><dd>-{formatEGP(referralDiscount)}</dd></div>
               )}
               {walletApplied > 0 && (
-                <div className="flex justify-between text-emerald-600"><dt>من المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
+                <div className="flex justify-between text-red-600"><dt>خصم المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
               )}
               <div className="flex justify-between"><dt>الشحن</dt><dd>{shipping === 0 ? "مجاناً" : formatEGP(shipping)}</dd></div>
               <div className="border-t border-border pt-2 flex justify-between font-bold text-base">

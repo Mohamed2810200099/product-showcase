@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Gift, Share2, Sparkles, Copy, MessageCircle, Check, Wallet, ShoppingBag, LogIn } from "lucide-react";
+import { Gift, Sparkles, Copy, MessageCircle, Check, Wallet, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,35 +16,33 @@ export function ReferralSection() {
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [copied, setCopied] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+
+  // Cap auth loading skeleton at 3s
+  useEffect(() => {
+    if (!loading) { setAuthTimedOut(false); return; }
+    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, [loading]);
 
   useEffect(() => {
     if (loading) return;
     if (!isAuthenticated || !user) {
       setProfile(null);
       setFetching(false);
-      setFetchError(false);
       return;
     }
     let cancelled = false;
     setFetching(true);
-    setFetchError(false);
     (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("customer_profiles")
-          .select("personal_code, wallet_balance")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (cancelled) return;
-        if (error) { setFetchError(true); return; }
-        setProfile(data as ProfileRow | null);
-      } catch (e) {
-        console.warn("Glow profile failed", e);
-        if (!cancelled) setFetchError(true);
-      } finally {
-        if (!cancelled) setFetching(false);
-      }
+      const { data } = await supabase
+        .from("customer_profiles")
+        .select("personal_code, wallet_balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setProfile((data as ProfileRow | null) ?? null);
+      setFetching(false);
     })();
     return () => { cancelled = true; };
   }, [isAuthenticated, loading, user]);
@@ -65,6 +63,8 @@ export function ReferralSection() {
   const waText = code
     ? `مرحبًا 💗\nاستخدمي كودي على The Girl House واحصلي على خصم ${friendPct}% على أول طلب:\n${code}\n\nاطلبي من هنا: https://thegirlhouse.life`
     : "";
+
+  const showAuthSkeleton = loading && !authTimedOut;
 
   return (
     <section dir="rtl" className="container mx-auto px-4 py-16">
@@ -87,25 +87,35 @@ export function ReferralSection() {
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-[#3A2430] leading-tight mt-3">
               ادي صديقتك {friendPct}٪ — خدي رصيد {rewardPct}٪
             </h2>
-            <p className="text-[#3A2430]/75 max-w-xl mx-auto leading-relaxed text-sm sm:text-base mt-3">
-              شاركي كودك الشخصي مع صديقاتك. أول ما طلبها يكتمل، يدخلك رصيد في محفظتك تستخدميه على طلبك الجاي.
+          </div>
+
+          {/* How it works */}
+          <div className="mb-8">
+            <h3 className="text-center font-display text-xl sm:text-2xl font-bold text-[#3A2430] mb-5">
+              ازاي يشتغل البرنامج؟
+            </h3>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Step n={1} emoji="🎁" title="شاركي كودك" desc="ابعتي كودك لصديقتك على واتساب" />
+              <Step n={2} emoji="🛍" title="صديقتك تطلب" desc={`هي بتستخدم كودك وتاخد خصم ${friendPct}% على أول طلب`} />
+              <Step n={3} emoji="💰" title="يدخلك رصيد" desc={`${rewardPct}% من قيمة طلبها بيتحط في محفظتك تلقائياً`} />
+            </div>
+            <p className="text-[11px] text-[#3A2430]/60 text-center mt-4">
+              الرصيد بيدخل بعد تسليم الطلب — حد شهري 500 ج.م.
             </p>
           </div>
 
-          {/* 3 steps */}
-          <div className="grid sm:grid-cols-3 gap-4 mb-8">
-            <Step n={1} icon={<Share2 className="h-5 w-5" />} title="شاركي الكود" desc="ابعتي كودك الشخصي لصديقتك على واتساب" />
-            <Step n={2} icon={<ShoppingBag className="h-5 w-5" />} title="صديقتك تطلب" desc={`تستخدم كودك وتاخد خصم ${friendPct}٪ على أول طلب`} />
-            <Step n={3} icon={<Wallet className="h-5 w-5" />} title="يدخلك رصيد" desc={`${rewardPct}٪ يدخل محفظتك بعد ما طلبها يتسلم`} />
-          </div>
-
           {/* Code box / login CTA */}
-          {!isAuthenticated ? (
+          {showAuthSkeleton ? (
+            <div className="bg-white/60 rounded-2xl border border-white p-6 max-w-md mx-auto animate-pulse">
+              <div className="h-6 w-2/3 mx-auto bg-[#F0CCD9]/60 rounded mb-3" />
+              <div className="h-10 w-1/2 mx-auto bg-[#F0CCD9]/60 rounded" />
+            </div>
+          ) : !isAuthenticated ? (
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-white p-6 text-center max-w-md mx-auto">
               <div className="h-12 w-12 mx-auto mb-3 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] flex items-center justify-center text-white">
                 <LogIn className="h-6 w-6" />
               </div>
-              <p className="text-[#3A2430] font-medium mb-3">سجلي دخولك علشان نطلعلك كودك الشخصي</p>
+              <p className="text-[#3A2430] font-medium mb-3">سجلي دخولك لعرض كودك</p>
               <Link
                 to="/login"
                 className="inline-flex items-center gap-2 rounded-full bg-[#D96C9D] hover:bg-[#C95588] text-white px-6 py-3 font-medium shadow-[0_12px_30px_-10px_rgba(217,108,157,0.6)] transition"
@@ -113,15 +123,11 @@ export function ReferralSection() {
                 <LogIn className="h-4 w-4" /> دخول / إنشاء حساب
               </Link>
             </div>
-          ) : fetching && !code ? (
+          ) : !profile || !code ? (
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-white p-6 text-center max-w-md mx-auto">
               <div className="h-5 w-5 mx-auto rounded-full border-2 border-[#D96C9D] border-t-transparent animate-spin" />
-              <p className="text-sm text-[#3A2430]/70 mt-3">جاري تجهيز كودك…</p>
-            </div>
-          ) : !code ? (
-            <div className="bg-white/80 backdrop-blur rounded-2xl border border-white p-6 text-center max-w-md mx-auto">
-              <p className="text-sm text-[#3A2430]/70">
-                {fetchError ? "تعذّر تحميل كودك دلوقتي، حاولي تاني بعد لحظات." : "كودك لسه مش جاهز، جربي تعملي تحديث للصفحة."}
+              <p className="text-sm text-[#3A2430]/70 mt-3">
+                {fetching ? "جاري تحميل بياناتك…" : "جاري إنشاء كودك…"}
               </p>
             </div>
           ) : (
@@ -163,27 +169,21 @@ export function ReferralSection() {
               </div>
             </div>
           )}
-
-          <p className="text-[10px] text-[#3A2430]/55 text-center leading-relaxed mt-6 max-w-xl mx-auto">
-            الرصيد يدخل بعد تسليم طلب صديقتك. لا يُحتسب على الطلبات الملغية أو المرتجعة.
-          </p>
         </div>
       </motion.div>
     </section>
   );
 }
 
-function Step({ n, icon, title, desc }: { n: number; icon: React.ReactNode; title: string; desc: string }) {
+function Step({ n, emoji, title, desc }: { n: number; emoji: string; title: string; desc: string }) {
   return (
     <div className="relative bg-white/70 backdrop-blur rounded-2xl border border-white p-5 text-center">
       <div className="absolute -top-3 right-4 bg-[#D96C9D] text-white text-xs font-bold rounded-full h-7 w-7 flex items-center justify-center shadow-md">
         {n}
       </div>
-      <div className="h-10 w-10 mx-auto mb-2 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#E7A8BF] flex items-center justify-center text-white">
-        {icon}
-      </div>
+      <div className="text-3xl mb-2">{emoji}</div>
       <h3 className="font-semibold text-[#3A2430] text-sm">{title}</h3>
-      <p className="text-xs text-[#3A2430]/65 mt-1">{desc}</p>
+      <p className="text-xs text-[#3A2430]/65 mt-1 leading-relaxed">{desc}</p>
     </div>
   );
 }
