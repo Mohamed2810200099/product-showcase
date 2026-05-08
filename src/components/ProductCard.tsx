@@ -50,9 +50,9 @@ export function ProductCard({ product }: { product: Product }) {
             كمية محدودة
           </span>
         )}
-        {isOut && (
+        {(isOut || isComingSoon) && (
           <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-            <span className="font-display text-lg">نفد المخزون</span>
+            <span className="font-display text-lg">{isComingSoon ? "قريباً" : "نفد المخزون"}</span>
           </div>
         )}
       </Link>
