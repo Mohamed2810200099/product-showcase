@@ -1,45 +1,66 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getGlowSettings } from "./referral.server";
 
 /** Get the current customer's referral profile + wallet + recent transactions. */
 export const getMyGlowProfile = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const settings = await getGlowSettings();
+  .handler(async () => {
+    try {
+      const settings = await getGlowSettings();
+      const { getRequest } = await import("@tanstack/react-start/server");
+      const req = getRequest();
+      const authHeader = req?.headers?.get("authorization") ?? "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+      if (!token) {
+        return { profile: null, settings, transactions: [] as any[] };
+      }
 
-    let { data: profile } = await supabase
-      .from("customer_profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_PUBLISHABLE_KEY!,
+        { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } },
+      );
+      const { data: claims } = await supabase.auth.getClaims(token);
+      const userId = claims?.claims?.sub;
+      if (!userId) {
+        return { profile: null, settings, transactions: [] as any[] };
+      }
 
-    // Lazy-create if trigger missed (e.g. legacy users)
-    if (!profile) {
-      const { data: u } = await supabase.auth.getUser();
-      const seed =
-        (u.user?.user_metadata?.full_name as string | undefined) ??
-        u.user?.email?.split("@")[0] ??
-        "Glow";
-      const { data: code } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
-      const { data: created } = await supabaseAdmin
+      let { data: profile } = await supabase
         .from("customer_profiles")
-        .insert({ user_id: userId, display_name: seed, personal_code: code as unknown as string })
         .select("*")
-        .single();
-      profile = created;
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!profile) {
+        const { data: u } = await supabase.auth.getUser();
+        const seed =
+          (u.user?.user_metadata?.full_name as string | undefined) ??
+          u.user?.email?.split("@")[0] ??
+          "Glow";
+        const { data: code } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
+        const { data: created } = await supabaseAdmin
+          .from("customer_profiles")
+          .insert({ user_id: userId, display_name: seed, personal_code: code as unknown as string })
+          .select("*")
+          .maybeSingle();
+        profile = created ?? null;
+      }
+
+      const { data: tx } = await supabase
+        .from("wallet_transactions")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      return { profile, settings, transactions: tx ?? [] };
+    } catch (err) {
+      console.error("getMyGlowProfile failed:", err);
+      return { profile: null, settings: null, transactions: [] as any[], error: "unavailable" };
     }
-
-    const { data: tx } = await supabase
-      .from("wallet_transactions")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(10);
-
-    return { profile, settings, transactions: tx ?? [] };
   });
 
 /** Award referrer credit when an order is marked delivered. Admin-only. */
