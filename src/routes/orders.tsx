@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { lookupOrdersByPhone, getMyOrders } from "@/server/orders.functions";
+import { lookupOrdersByPhone } from "@/server/orders.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
