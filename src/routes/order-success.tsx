@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { CheckCircle, MessageCircle, Sparkles } from "lucide-react";
+import { CheckCircle, MessageCircle, Sparkles, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
 import { useAuth } from "@/hooks/use-auth";
