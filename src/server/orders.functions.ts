@@ -39,7 +39,10 @@ const accountSchema = z.object({
 });
 
 export const getMyAccount = createServerFn({ method: "POST" })
-  .inputValidator((data) => accountSchema.parse(data))
+  .inputValidator((data: unknown) => {
+    const parsed = accountSchema.safeParse(data ?? {});
+    return parsed.success ? parsed.data : { access_token: "" };
+  })
   .handler(async ({ data }) => {
     // Validate the token server-side; never trust a client-supplied user id.
     const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(data.access_token);
