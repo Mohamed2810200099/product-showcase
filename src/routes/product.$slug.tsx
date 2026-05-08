@@ -92,11 +92,29 @@ function ProductPage() {
   const productUrl = typeof window !== "undefined" ? `${window.location.origin}/product/${product.slug}` : `/product/${product.slug}`;
   const waMsg = `مرحبًا، أريد طلب هذا المنتج من The Girl House:\nالمنتج: ${product.name}\nالسعر: ${formatEGP(Number(product.price))}\nالكمية: ${qty}\nالرابط: ${productUrl}`;
 
+  useEffect(() => {
+    if (product?.id) {
+      trackEvent("product_view", {
+        product_id: product.id,
+        product_name: product.name,
+        price: Number(product.price),
+        slug: product.slug,
+      });
+    }
+  }, [product?.id, product?.name, product?.price, product?.slug]);
+
   const handleAdd = () => {
     add(
       { id: product.id, name: product.name, slug: product.slug, price: Number(product.price), image: images[0] },
       qty,
     );
+    trackEvent("add_to_cart", {
+      product_id: product.id,
+      product_name: product.name,
+      price: Number(product.price),
+      qty,
+      source: "product_page",
+    });
     toast.success("تمت الإضافة للسلة 🛍️");
   };
 
