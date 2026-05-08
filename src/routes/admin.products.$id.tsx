@@ -265,7 +265,7 @@ function ProductForm() {
                 const n = Number(v);
                 setForm((f) => {
                   const next = { ...f, stock: n };
-                  if (f.stock_tracking_enabled) {
+                  if (f.stock_tracking_enabled && f.availability_status !== "coming_soon") {
                     if (n <= 0 && f.availability_status !== "out_of_stock") {
                       next.availability_status = "out_of_stock";
                       toast.message("تم ضبط الحالة على: نفذ المخزون");
