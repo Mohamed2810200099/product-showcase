@@ -64,25 +64,34 @@ function OrdersPage() {
 
   const updateStatus = async (id: string, status: string) => {
     const previousStatus = orders.find((o) => o.id === id)?.status ?? "pending";
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    if (error) return toast.error("فشل التحديث");
-    toast.success("تم تحديث الحالة", {
-      action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
-    });
-    if (selected?.id === id) setSelected({ ...selected, status });
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token ?? null;
-      if (status === "delivered" && previousStatus !== "delivered") {
-        const { awardReferralForOrder } = await import("@/server/referral.functions");
-        await awardReferralForOrder({ data: { order_id: id, access_token: accessToken } });
-      } else if (status === "cancelled" && previousStatus !== "cancelled") {
-        const { reverseReferralForOrder } = await import("@/server/referral.functions");
-        await reverseReferralForOrder({ data: { order_id: id, access_token: accessToken } });
-      }
-    } catch (e) {
-      console.warn("Referral hook failed", e);
+    if (previousStatus === status) return;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token ?? null;
+    if (!accessToken) {
+      return toast.error("انتهت الجلسة، سجّلي دخول من جديد");
     }
+    const { updateOrderStatus } = await import("@/server/orders.functions");
+    let result: Awaited<ReturnType<typeof updateOrderStatus>>;
+    try {
+      result = await updateOrderStatus({
+        data: { order_id: id, status, access_token: accessToken },
+      });
+    } catch {
+      return toast.error("فشل تحديث الحالة");
+    }
+    if (!result.ok) {
+      return toast.error(result.error ?? "فشل تحديث الحالة");
+    }
+    if (result.referral.ran && !result.referral.ok) {
+      toast.warning("تم تحديث الحالة، لكن فشلت عملية المكافأة/الاسترجاع. راجعي السجلات.", {
+        action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
+      });
+    } else {
+      toast.success("تم تحديث الحالة", {
+        action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
+      });
+    }
+    if (selected?.id === id) setSelected({ ...selected, status });
     load();
   };
 
