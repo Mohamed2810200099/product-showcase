@@ -11,7 +11,6 @@ import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
 import placeholderImg from "@/assets/product-placeholder.jpg";
 import { trackEvent } from "@/lib/analytics";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
