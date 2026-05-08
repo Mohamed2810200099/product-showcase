@@ -150,12 +150,28 @@ function OrdersPage() {
             <tbody>
               {filtered.map((o) => {
                 const status = STATUSES.find((s) => s.value === o.status) ?? STATUSES[0];
+                const needsConfirm = o.status === "pending";
                 return (
-                  <tr key={o.id} className="border-t border-border hover:bg-secondary/30">
+                  <tr key={o.id} className={`border-t border-border hover:bg-secondary/30 ${needsConfirm ? "bg-amber-50/60" : ""}`}>
                     <td className="p-3 font-mono text-xs" dir="ltr">{o.order_number}</td>
                     <td className="p-3">
-                      <div className="font-medium">{o.customer_name}</div>
+                      <div className="font-medium flex items-center gap-2 flex-wrap">
+                        {o.customer_name}
+                        {needsConfirm && (
+                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                            <AlertTriangle className="h-3 w-3" /> يحتاج تأكيد
+                          </span>
+                        )}
+                        {o.whatsapp_sent && (
+                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                            <CheckCircle2 className="h-3 w-3" /> واتساب
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(o.customer_phone)}</div>
+                      {needsConfirm && (
+                        <div className="text-[11px] text-amber-700 mt-1">⚠ لا تشحني الطلب قبل التأكيد.</div>
+                      )}
                     </td>
                     <td className="p-3 text-xs">{o.governorate}</td>
                     <td className="p-3 font-semibold whitespace-nowrap">{formatEGP(Number(o.total))}</td>
@@ -181,7 +197,7 @@ function OrdersPage() {
         )}
       </div>
 
-      {selected && <OrderModal order={selected} onClose={() => setSelected(null)} onDelete={() => remove(selected.id)} onStatus={(s) => updateStatus(selected.id, s)} />}
+      {selected && <OrderModal order={selected} onClose={() => setSelected(null)} onDelete={() => remove(selected.id)} onStatus={(s) => updateStatus(selected.id, s)} onToggleWhatsapp={(v) => toggleWhatsapp(selected.id, v)} />}
     </div>
   );
 }
