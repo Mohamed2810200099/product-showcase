@@ -41,8 +41,37 @@ export function ReferralSection() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
-      setProfile((data as ProfileRow | null) ?? null);
-      setFetching(false);
+      if (data) {
+        setProfile(data as ProfileRow);
+        setFetching(false);
+      } else {
+        // User exists in auth but has no profile row — create it now
+        const newCode = await supabase.rpc("generate_personal_code", {
+          _seed: user.email ?? user.id,
+        });
+        const codeValue =
+          (newCode.data as string | null) ??
+          Math.random().toString(36).slice(2, 8).toUpperCase();
+
+        const { data: inserted } = await supabase
+          .from("customer_profiles")
+          .upsert(
+            {
+              user_id: user.id,
+              display_name: user.email?.split("@")[0] ?? "عميلة",
+              personal_code: codeValue,
+              wallet_balance: 0,
+            },
+            { onConflict: "user_id" }
+          )
+          .select("personal_code, wallet_balance")
+          .maybeSingle();
+
+        if (!cancelled) {
+          setProfile((inserted as ProfileRow | null) ?? null);
+          setFetching(false);
+        }
+      }
     })();
     return () => { cancelled = true; };
   }, [isAuthenticated, loading, user]);
