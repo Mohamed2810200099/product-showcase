@@ -240,7 +240,10 @@ function ProductPage() {
             {(() => {
               const status = (product as any).availability_status ?? "available";
               const tracking = (product as any).stock_tracking_enabled === true;
+              const isComingSoon = status === "coming_soon";
               const isOut = status === "out_of_stock" || (tracking && product.stock === 0);
+              const unavailable = isOut || isComingSoon;
+              const statusLabel = isComingSoon ? "قريباً" : isOut ? "نفد المخزون" : "متاح للطلب";
               return (
                 <>
                   <div className="flex items-center gap-4 py-3 border-y border-border">
@@ -250,22 +253,22 @@ function ProductPage() {
                       <span className="w-10 text-center font-semibold">{qty}</span>
                       <button onClick={() => setQty((q) => q + 1)} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
                     </div>
-                    <span className={`text-xs font-medium ${isOut ? "text-destructive" : "text-emerald-600"}`}>
-                      {isOut ? "نفد المخزون" : "متاح للطلب"}
+                    <span className={`text-xs font-medium ${unavailable ? (isComingSoon ? "text-amber-600" : "text-destructive") : "text-emerald-600"}`}>
+                      {statusLabel}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
                       onClick={handleAdd}
-                      disabled={isOut}
+                      disabled={unavailable}
                       className="bg-card border-2 border-primary text-primary py-3.5 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
                     </button>
                     <button
                       onClick={handleBuyNow}
-                      disabled={isOut}
+                      disabled={unavailable}
                       className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       <Zap className="h-4 w-4" /> اشتري الآن
