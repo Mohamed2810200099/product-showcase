@@ -90,6 +90,7 @@ function ProductForm() {
               brand: data.brand ?? "",
               category_id: data.category_id ?? "",
               sub_category: (data as any).sub_category ?? "",
+              product_type: (data as any).product_type ?? "",
               images: Array.isArray(data.images) ? (data.images as string[]) : [],
               tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
               order_index: Number((data as any).order_index ?? 0),
