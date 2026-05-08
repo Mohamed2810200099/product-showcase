@@ -71,12 +71,14 @@ function OrdersPage() {
     });
     if (selected?.id === id) setSelected({ ...selected, status });
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token ?? null;
       if (status === "delivered" && previousStatus !== "delivered") {
         const { awardReferralForOrder } = await import("@/server/referral.functions");
-        await awardReferralForOrder({ data: { order_id: id } });
+        await awardReferralForOrder({ data: { order_id: id, access_token: accessToken } });
       } else if (status === "cancelled" && previousStatus !== "cancelled") {
         const { reverseReferralForOrder } = await import("@/server/referral.functions");
-        await reverseReferralForOrder({ data: { order_id: id } });
+        await reverseReferralForOrder({ data: { order_id: id, access_token: accessToken } });
       }
     } catch (e) {
       console.warn("Referral hook failed", e);
