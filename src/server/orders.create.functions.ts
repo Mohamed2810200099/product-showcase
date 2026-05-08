@@ -1,9 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import type { Database } from "@/integrations/supabase/types";
+import { getUserFromAccessToken } from "./auth-helpers";
 import { getGlowSettings } from "./referral.server";
 
 const itemSchema = z.object({
@@ -23,43 +21,19 @@ const schema = z.object({
   coupon_code: z.string().trim().max(50).optional().nullable(),
   referral_code: z.string().trim().max(30).optional().nullable(),
   use_wallet: z.boolean().optional(),
+  access_token: z.string().max(4000).optional().nullable(),
 });
 
 export type CreateOrderResult =
   | { ok: true; order_number: string; id: string }
   | { ok: false; error: string };
 
-// Derive authenticated user id from the request's Bearer token (server-side only).
-// Returns null for guest checkout. Never trusts a client-supplied user id.
-async function getAuthUserId(): Promise<string | null> {
-  try {
-    const request = getRequest();
-    const authHeader = request?.headers?.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
-    const token = authHeader.slice("Bearer ".length).trim();
-    if (!token) return null;
-
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
-    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
-
-    const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-    });
-    const { data, error } = await client.auth.getClaims(token);
-    if (error || !data?.claims?.sub) return null;
-    return String(data.claims.sub);
-  } catch (err) {
-    console.warn("getAuthUserId failed", err instanceof Error ? err.message : "unknown");
-    return null;
-  }
-}
-
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => schema.parse(data))
   .handler(async ({ data }): Promise<CreateOrderResult> => {
-    // SECURITY: derive user id from the auth token only — never from client payload.
-    const customerUserId = await getAuthUserId();
+    // SECURITY: derive user id from a validated token only — never from client payload.
+    const authUser = await getUserFromAccessToken(data.access_token);
+    const customerUserId = authUser?.userId ?? null;
 
 
     const ids = data.items.map((i) => i.product_id);
