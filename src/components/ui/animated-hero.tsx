@@ -33,9 +33,11 @@ export function AnimatedHeroWords({ words, interval = 2000, className }: Props) 
           animate={reduce ? { opacity: 1 } : { y: 0, opacity: 1 }}
           exit={reduce ? { opacity: 0 } : { y: -35, opacity: 0 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex whitespace-nowrap rounded-2xl bg-[#FFF8F4]/65 px-3 py-1 text-center bg-gradient-to-r from-[#D96C9D] via-[#E7A8BF] to-[#C95588] bg-clip-text text-transparent shadow-[0_4px_18px_-8px_rgba(217,108,157,0.25)] ring-1 ring-white/60 backdrop-blur-sm sm:px-4"
+          className="inline-flex whitespace-nowrap rounded-2xl bg-[#FFF8F4]/65 px-3 py-1 text-center shadow-[0_4px_18px_-8px_rgba(217,108,157,0.25)] ring-1 ring-white/60 backdrop-blur-sm sm:px-4"
         >
-          {words[i]}
+          <span className="bg-gradient-to-r from-[#D96C9D] via-[#E7A8BF] to-[#C95588] bg-clip-text text-transparent">
+            {words[i]}
+          </span>
         </motion.span>
       </AnimatePresence>
     </motion.span>
