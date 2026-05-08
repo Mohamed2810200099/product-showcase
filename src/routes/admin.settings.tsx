@@ -100,18 +100,16 @@ function SettingsPage() {
         </div>
 
         <div className="border-t border-border pt-4">
-          <label className="flex items-center justify-between gap-3 cursor-pointer">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="font-semibold text-sm">إظهار قسم "Share the Glow" في الصفحة الرئيسية</div>
+              <div className="font-semibold text-sm">تفعيل قسم "Share the Glow" في الصفحة الرئيسية</div>
               <div className="text-xs text-muted-foreground mt-0.5">قسم دعوة الصديقات للحصول على خصم</div>
             </div>
-            <input
-              type="checkbox"
+            <Switch
               checked={brand.show_referral_section}
-              onChange={(e) => setBrand({ ...brand, show_referral_section: e.target.checked })}
-              className="h-5 w-5 accent-primary"
+              onCheckedChange={(v) => setBrand({ ...brand, show_referral_section: v })}
             />
-          </label>
+          </div>
         </div>
 
         <button onClick={save} disabled={saving} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full inline-flex items-center gap-2 font-medium shadow-elegant disabled:opacity-50">
