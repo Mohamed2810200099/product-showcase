@@ -154,12 +154,12 @@ export function HeroPremium() {
 
   return (
     <section
-      dir="ltr"
+      dir="rtl"
       onMouseMove={onSectionMove}
-      className="relative overflow-hidden min-h-[94vh] flex items-center"
+      className="relative overflow-hidden min-h-[88vh] md:min-h-[92vh] flex items-center"
       style={{
         background:
-          "radial-gradient(120% 80% at 20% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
+          "radial-gradient(120% 80% at 80% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
       }}
     >
       {/* Hero-local WebGL smoke (stronger) */}
@@ -167,26 +167,20 @@ export function HeroPremium() {
         <SmokeBackground variant="hero" className="absolute inset-0 h-full w-full" />
       </div>
 
-      {/* Animated CSS glow blobs */}
+      {/* Animated CSS glow blobs — lighter on mobile */}
       {!reduce && (
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block" style={{ zIndex: 1 }}>
           <motion.div
-            className="absolute -top-24 -left-24 h-[520px] w-[520px] rounded-full"
-            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.45 }}
-            animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
+            className="absolute -top-24 -right-24 h-[520px] w-[520px] rounded-full"
+            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.4 }}
+            animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute -bottom-32 -right-24 h-[560px] w-[560px] rounded-full"
-            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.55 }}
-            animate={{ scale: [1, 1.15, 1], x: [0, -30, 0] }}
+            className="absolute -bottom-32 -left-24 h-[560px] w-[560px] rounded-full"
+            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.5 }}
+            animate={{ scale: [1, 1.12, 1], x: [0, 30, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute top-1/3 left-1/3 h-[420px] w-[420px] rounded-full"
-            style={{ background: "radial-gradient(circle, #E7A8BF 0%, transparent 65%)", filter: "blur(60px)", opacity: 0.4 }}
-            animate={{ y: [0, -40, 0], x: [0, 20, 0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
       )}
@@ -195,73 +189,62 @@ export function HeroPremium() {
       {!reduce && (
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 mix-blend-soft-light"
+          className="pointer-events-none absolute inset-0 mix-blend-soft-light hidden md:block"
           style={{ background: spotlight }}
         />
       )}
 
       {/* Glass blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -right-20 h-[460px] w-[460px] rounded-full bg-[#E7A8BF]/30 blur-3xl" />
-        <div className="absolute top-1/3 -left-24 h-[380px] w-[380px] rounded-full bg-[#EDE7F6]/55 blur-3xl" />
-        <div className="absolute bottom-0 right-1/3 h-[340px] w-[340px] rounded-full bg-[#FFF8F4]/80 blur-3xl" />
-        {/* Satin grain veil */}
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(58,36,48,0.5) 1px, transparent 1px)",
-            backgroundSize: "3px 3px",
-          }}
-        />
+      <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block">
+        <div className="absolute -top-32 -left-20 h-[460px] w-[460px] rounded-full bg-[#E7A8BF]/25 blur-3xl" />
+        <div className="absolute top-1/3 -right-24 h-[380px] w-[380px] rounded-full bg-[#EDE7F6]/45 blur-3xl" />
       </div>
 
-      {/* Sparkles */}
+      {/* Sparkles — fewer, only on md+ */}
       {!reduce && (
-        <div className="pointer-events-none absolute inset-0">
-          {Array.from({ length: 16 }).map((_, i) => (
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
+          {Array.from({ length: 8 }).map((_, i) => (
             <motion.span
               key={i}
               className="absolute h-1 w-1 rounded-full bg-white/90 shadow-[0_0_10px_2px_rgba(255,255,255,0.8)]"
               style={{ top: `${(i * 53) % 100}%`, left: `${(i * 37) % 100}%` }}
-              animate={{ opacity: [0.15, 0.85, 0.15], y: [0, -8, 0] }}
-              transition={{ duration: 5 + (i % 4), repeat: Infinity, delay: i * 0.25 }}
+              animate={{ opacity: [0.15, 0.8, 0.15], y: [0, -8, 0] }}
+              transition={{ duration: 5 + (i % 4), repeat: Infinity, delay: i * 0.3 }}
             />
           ))}
         </div>
       )}
 
-      <div className="container relative z-10 mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 px-4 py-16 sm:py-20 items-center">
+      <div className="container relative z-10 mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 px-4 py-12 sm:py-16 md:py-20 items-center">
         {/* Text */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="text-center md:text-left space-y-6 order-2 md:order-1"
+          className="text-center md:text-right space-y-5 sm:space-y-6 order-2 md:order-1"
         >
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/55 backdrop-blur px-4 py-1.5 text-xs font-medium text-[#3A2430] shadow-[0_4px_18px_-6px_rgba(217,108,157,0.25)]"
+            className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/60 backdrop-blur px-4 py-1.5 text-xs font-medium text-[#3A2430] shadow-[0_4px_18px_-6px_rgba(217,108,157,0.25)]"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#D96C9D] animate-pulse" />
-            Curated German Beauty • Now in Egypt
+            منتجات ألمانية أصلية • وصلت مصر
           </motion.span>
 
           <motion.h1
             initial={{ opacity: 0, filter: "blur(10px)", y: 16 }}
             animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
             transition={{ duration: 1, delay: 0.25 }}
-            className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] text-[#3A2430] tracking-tight"
+            className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] text-[#3A2430] tracking-tight"
           >
-            Original German Beauty
+            جمالك يستحق الأصلي
             <br />
-            <span className="inline-flex flex-wrap items-baseline gap-x-3 justify-center md:justify-start">
-              <span className="text-[#3A2430]">for Your</span>
+            <span className="inline-flex flex-wrap items-baseline gap-x-3 justify-center md:justify-start" dir="ltr">
               <AnimatedHeroWords
-                words={["Everyday Glow", "Hair Repair", "Skin Glow", "Scalp Care", "Soft Hair"]}
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] min-w-[8ch]"
+                words={["Hair Repair", "Skin Glow", "Scalp Care", "Soft Hair", "Everyday Glow"]}
+                className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] min-w-[8ch]"
               />
             </span>
           </motion.h1>
@@ -272,7 +255,7 @@ export function HeroPremium() {
             transition={{ delay: 0.5 }}
             className="text-base sm:text-lg text-[#3A2430]/75 max-w-md mx-auto md:mx-0 leading-relaxed"
           >
-            Carefully selected German haircare and skincare — now available in Egypt at prices you'll love.
+            مستحضرات شعر وبشرة ألمانية مختارة بعناية — أصلية ١٠٠٪ وبسعر مناسب، مع التوصيل لباب بيتك في مصر.
           </motion.p>
 
           <motion.div
@@ -287,24 +270,24 @@ export function HeroPremium() {
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
               <MagneticButton
                 to="/shop"
-                className="group inline-flex items-center gap-2 rounded-full bg-[#D96C9D] hover:bg-[#C95588] text-white px-7 py-3.5 font-medium shadow-[0_14px_34px_-12px_rgba(217,108,157,0.7)] transition-colors"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#D96C9D] to-[#C95588] hover:from-[#C95588] hover:to-[#B8467A] text-white px-7 sm:px-8 py-3.5 text-base font-semibold shadow-[0_18px_38px_-12px_rgba(217,108,157,0.7)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8DCE5]"
               >
-                <ShoppingBag className="h-4 w-4" /> Shop Now
+                <ShoppingBag className="h-5 w-5" /> تسوقي الآن
               </MagneticButton>
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
               <MagneticButton
                 to="/offers"
-                className="inline-flex items-center gap-2 rounded-full bg-white/75 backdrop-blur border border-white text-[#3A2430] px-7 py-3.5 font-medium hover:bg-white transition shadow-[0_8px_24px_-12px_rgba(58,36,48,0.25)]"
+                className="inline-flex items-center gap-2 rounded-full bg-white/75 backdrop-blur border border-white text-[#3A2430] px-6 sm:px-7 py-3.5 font-medium hover:bg-white transition shadow-[0_8px_24px_-12px_rgba(58,36,48,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D96C9D] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8DCE5]"
               >
-                <Tag className="h-4 w-4" /> View Offers
+                <Tag className="h-4 w-4" /> شاهدي العروض
               </MagneticButton>
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("open-referral-modal"))}
-                className="inline-flex items-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium text-[#3A2430]/80 hover:text-[#D96C9D] transition"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-3.5 text-sm font-medium text-[#3A2430]/70 hover:text-[#D96C9D] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D96C9D]/50"
               >
                 <Gift className="h-4 w-4" /> ادعي صديقتك
               </button>
@@ -316,15 +299,15 @@ export function HeroPremium() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9 }}
-            className="flex flex-wrap items-center gap-x-6 gap-y-3 justify-center md:justify-start pt-4 text-xs sm:text-sm text-[#3A2430]/80"
+            className="flex flex-wrap items-center gap-x-5 gap-y-2.5 justify-center md:justify-start pt-3 sm:pt-4 text-xs sm:text-[13px] text-[#3A2430]/85"
           >
             {[
-              { icon: ShieldCheck, label: "Original Products" },
-              { icon: Package, label: "Limited Stock" },
-              { icon: Truck, label: "Delivery in Egypt" },
+              { icon: ShieldCheck, label: "منتجات أصلية من ألمانيا" },
+              { icon: Package, label: "الدفع عند الاستلام" },
+              { icon: Truck, label: "توصيل داخل مصر" },
             ].map((b) => (
               <div key={b.label} className="flex items-center gap-1.5">
-                <span className="h-7 w-7 rounded-full bg-white/75 backdrop-blur flex items-center justify-center text-[#D96C9D] shadow-[0_4px_14px_-4px_rgba(217,108,157,0.3)]">
+                <span className="h-7 w-7 rounded-full bg-white/80 backdrop-blur flex items-center justify-center text-[#D96C9D] shadow-[0_4px_14px_-4px_rgba(217,108,157,0.3)]">
                   <b.icon className="h-3.5 w-3.5" />
                 </span>
                 <span className="font-medium">{b.label}</span>
