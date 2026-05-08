@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import groupImg from "@/assets/products/hero-studio.png";
+import groupImg from "@/assets/products/hero-studio-cutout.png";
 
 function MagneticButton({
   children,
@@ -82,10 +82,10 @@ export function HeroPremium() {
         <img
           src={groupImg}
           alt=""
-          className="w-full h-full object-cover md:object-contain object-center select-none mix-blend-multiply"
+          className="w-full h-full object-contain object-center select-none"
           style={{
-            opacity: 0.4,
-            filter: "drop-shadow(0 40px 60px rgba(58,36,48,0.18))",
+            opacity: 0.55,
+            filter: "drop-shadow(0 30px 50px rgba(58,36,48,0.18))",
             background: "transparent",
           }}
         />

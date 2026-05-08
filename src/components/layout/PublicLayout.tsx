@@ -8,8 +8,8 @@ import { MobileBottomBar } from "./MobileBottomBar";
 export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
       <Header />
+      <AnnouncementBar />
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <Footer />
       <WhatsAppFloat />
