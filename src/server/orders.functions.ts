@@ -3,6 +3,90 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getUserFromAccessToken } from "./auth-helpers.server";
 
+const ALLOWED_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"] as const;
+
+async function isAdminAccess(accessToken?: string | null) {
+  const authUser = await getUserFromAccessToken(accessToken);
+  if (!authUser) return null;
+  const { data } = await supabaseAdmin.rpc("has_role", {
+    _user_id: authUser.userId,
+    _role: "admin",
+  });
+  return data === true ? authUser : null;
+}
+
+const updateOrderStatusSchema = z.object({
+  order_id: z.string().uuid(),
+  status: z.enum(ALLOWED_STATUSES),
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+export const updateOrderStatus = createServerFn({ method: "POST" })
+  .inputValidator((d) => updateOrderStatusSchema.parse(d))
+  .handler(async ({ data }) => {
+    const admin = await isAdminAccess(data.access_token);
+    if (!admin) {
+      return { ok: false as const, code: "unauthorized", error: "صلاحيات غير كافية" };
+    }
+
+    const { data: existing, error: loadErr } = await supabaseAdmin
+      .from("orders")
+      .select("id, status")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (loadErr || !existing) {
+      return { ok: false as const, code: "not_found", error: "الطلب غير موجود" };
+    }
+    const previousStatus = existing.status;
+
+    if (previousStatus === data.status) {
+      return { ok: true as const, previousStatus, status: data.status, referral: { ran: false as const } };
+    }
+
+    const { error: updErr } = await supabaseAdmin
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.order_id);
+    if (updErr) {
+      return { ok: false as const, code: "update_failed", error: "فشل تحديث حالة الطلب" };
+    }
+
+    let referral: {
+      ran: boolean;
+      kind?: "award" | "reverse";
+      ok?: boolean;
+      error?: string;
+    } = { ran: false };
+
+    try {
+      if (data.status === "delivered" && previousStatus !== "delivered") {
+        const { awardReferralForOrder } = await import("./referral.functions");
+        const r = await awardReferralForOrder({
+          data: { order_id: data.order_id, access_token: data.access_token ?? null },
+        });
+        referral = { ran: true, kind: "award", ok: !!r?.ok, error: r?.ok ? undefined : (r as { error?: string })?.error };
+      } else if (data.status === "cancelled" && previousStatus !== "cancelled") {
+        const { reverseReferralForOrder } = await import("./referral.functions");
+        const r = await reverseReferralForOrder({
+          data: { order_id: data.order_id, access_token: data.access_token ?? null },
+        });
+        referral = { ran: true, kind: "reverse", ok: !!r?.ok, error: r?.ok ? undefined : (r as { error?: string })?.error };
+      }
+    } catch (e) {
+      console.error("Referral hook failed", e);
+      referral = {
+        ran: true,
+        kind: data.status === "delivered" ? "award" : "reverse",
+        ok: false,
+        error: e instanceof Error ? e.message : "referral_failed",
+      };
+    }
+
+    return { ok: true as const, previousStatus, status: data.status, referral };
+  });
+
+
+
 const lookupSchema = z.object({
   phone: z.string().trim().min(6).max(20),
 });
