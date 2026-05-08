@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Package, Gift, Wallet, LogOut, Copy, Check, MessageCircle, LogIn, Sparkles, Mail, Phone } from "lucide-react";
+import { User, Package, Wallet, LogOut, Copy, Check, LogIn, Sparkles, Mail, Gift } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,42 +11,72 @@ export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
       { title: "حسابي — The Girl House" },
-      { name: "description", content: "إدارة حسابك على The Girl House: بياناتك، طلباتك، كود الإحالة، ورصيد محفظتك." },
+      { name: "description", content: "إدارة حسابك على The Girl House: بياناتك، طلباتك، رصيدك، وكودك الشخصي." },
     ],
   }),
   component: AccountPage,
 });
 
-type ProfileData = {
-  profile: { personal_code: string; wallet_balance: number; lifetime_credits_earned: number } | null;
-  settings: { friend_discount_pct: number; referrer_reward_pct: number; monthly_cap: number; min_redemption: number };
-  transactions: Array<{ id: string; amount: number; kind: string; note: string | null; created_at: string }>;
+type OrderRow = {
+  id: string;
+  order_number: string;
+  status: string;
+  created_at: string;
+  total: number;
+  items: Array<{ name?: string; quantity?: number; price?: number }> | null;
+};
+
+type AccountData = {
+  profile: {
+    display_name: string | null;
+    personal_code: string | null;
+    wallet_balance: number;
+    lifetime_credits_earned: number;
+    phone: string | null;
+  } | null;
+  orders: OrderRow[];
 } | null;
+
+function statusLabel(s: string) {
+  const m: Record<string, string> = {
+    pending: "قيد المراجعة",
+    confirmed: "تم التأكيد",
+    shipped: "تم الشحن",
+    delivered: "تم التوصيل",
+    cancelled: "ملغي",
+  };
+  return m[s] ?? s;
+}
 
 function AccountPage() {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState<ProfileData>(null);
+  const [data, setData] = useState<AccountData>(null);
+  const [fetching, setFetching] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (loading || !isAuthenticated) return;
+    if (loading) return;
+    if (!isAuthenticated) { setData(null); return; }
+    let cancelled = false;
+    setFetching(true);
     (async () => {
       try {
-        const { getMyGlowProfile } = await import("@/server/referral.functions");
-        const res = await getMyGlowProfile();
-        setData(res as ProfileData);
+        const { getMyAccount } = await import("@/server/orders.functions");
+        const res = await getMyAccount();
+        if (!cancelled) setData(res as AccountData);
       } catch (e) {
-        console.warn("Profile load failed", e);
+        console.warn("Account load failed", e);
+      } finally {
+        if (!cancelled) setFetching(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [isAuthenticated, loading]);
 
   const code = data?.profile?.personal_code ?? "";
   const balance = Number(data?.profile?.wallet_balance ?? 0);
-  const lifetime = Number(data?.profile?.lifetime_credits_earned ?? 0);
-  const friendPct = data?.settings?.friend_discount_pct ?? 15;
-  const rewardPct = data?.settings?.referrer_reward_pct ?? 10;
+  const orders = data?.orders ?? [];
 
   const copy = async () => {
     if (!code) return;
@@ -55,10 +85,6 @@ function AccountPage() {
     toast.success("تم نسخ الكود 💕");
     setTimeout(() => setCopied(false), 1500);
   };
-
-  const waText = code
-    ? `مرحبًا 💗\nاستخدمي كودي على The Girl House واحصلي على خصم ${friendPct}% على أول طلب:\n${code}\n\nاطلبي من هنا: https://thegirlhouse.life`
-    : "";
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -85,7 +111,7 @@ function AccountPage() {
               <LogIn className="h-7 w-7" />
             </div>
             <h1 className="font-display text-2xl font-bold text-[#3A2430]">سجلي دخولك</h1>
-            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">عشان تقدري تشوفي بياناتك وطلباتك ورصيدك.</p>
+            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">سجلي دخولك عشان تشوفي بياناتك وطلباتك.</p>
             <Link
               to="/login"
               className="inline-flex items-center gap-2 rounded-full bg-[#D96C9D] hover:bg-[#C95588] text-white px-6 py-3 font-medium shadow-[0_12px_30px_-10px_rgba(217,108,157,0.6)] transition"
@@ -98,12 +124,11 @@ function AccountPage() {
     );
   }
 
-  const displayName = (user?.user_metadata as any)?.full_name || (user?.user_metadata as any)?.name || user?.email?.split("@")[0] || "حبيبتي";
+  const displayName = data?.profile?.display_name || (user?.user_metadata as any)?.full_name || user?.email?.split("@")[0] || "حبيبتي";
 
   return (
     <PublicLayout>
       <section dir="rtl" className="container mx-auto px-4 py-10 sm:py-14">
-        {/* Header card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,7 +147,9 @@ function AccountPage() {
                   <Sparkles className="h-3 w-3 text-[#D96C9D]" /> حسابك
                 </span>
                 <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#3A2430] mt-1">أهلاً، {displayName} 💕</h1>
-                <p className="text-xs sm:text-sm text-[#3A2430]/65 mt-0.5">سعيدين إنك معانا في The Girl House</p>
+                <p className="text-xs sm:text-sm text-[#3A2430]/65 mt-0.5 flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5" /> <span dir="ltr">{user?.email}</span>
+                </p>
               </div>
             </div>
             <button
@@ -134,105 +161,81 @@ function AccountPage() {
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-5">
-          {/* Personal info */}
-          <div className="bg-white rounded-2xl border border-[#F0CCD9] p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-[#3A2430] font-semibold mb-3">
-              <User className="h-5 w-5 text-[#D96C9D]" /> بياناتك
-            </div>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex items-center gap-2 text-[#3A2430]/80">
-                <Mail className="h-4 w-4 text-[#D96C9D]/70" />
-                <span dir="ltr" className="break-all">{user?.email}</span>
-              </div>
-              {(user?.user_metadata as any)?.phone && (
-                <div className="flex items-center gap-2 text-[#3A2430]/80">
-                  <Phone className="h-4 w-4 text-[#D96C9D]/70" />
-                  <span dir="ltr">{(user?.user_metadata as any)?.phone}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
+        <div className="grid md:grid-cols-2 gap-5 mb-6">
           {/* Wallet */}
           <div className="bg-white rounded-2xl border border-[#F0CCD9] p-5 shadow-sm">
             <div className="flex items-center gap-2 text-[#3A2430] font-semibold">
-              <Wallet className="h-5 w-5 text-[#D96C9D]" /> رصيدك
+              <Wallet className="h-5 w-5 text-[#D96C9D]" /> رصيد المحفظة
             </div>
             <div className="font-display text-3xl font-bold text-[#3A2430] mt-2">
               {balance.toLocaleString("ar-EG")} <span className="text-base font-normal text-[#3A2430]/60">ج.م</span>
             </div>
             <p className="text-xs text-[#3A2430]/60 mt-1">يُصرف تلقائيًا في طلبك الجاي</p>
-            <p className="text-[11px] text-[#3A2430]/55 mt-2">إجمالي ما كسبتيه: {lifetime.toLocaleString("ar-EG")} ج.م</p>
           </div>
 
-          {/* Orders link */}
-          <div className="bg-white rounded-2xl border border-[#F0CCD9] p-5 shadow-sm flex flex-col">
+          {/* Personal code */}
+          <div className="bg-white rounded-2xl border-2 border-dashed border-[#D96C9D] p-5">
             <div className="flex items-center gap-2 text-[#3A2430] font-semibold mb-2">
-              <Package className="h-5 w-5 text-[#D96C9D]" /> طلباتك
+              <Gift className="h-5 w-5 text-[#D96C9D]" /> كودك الشخصي
             </div>
-            <p className="text-xs text-[#3A2430]/65 mb-3">تتبعي حالة طلباتك السابقة بسهولة.</p>
-            <Link
-              to="/orders"
-              className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#FFF4F8] border border-[#F0CCD9] hover:bg-[#FCE6EE] text-[#3A2430] px-4 py-2.5 text-sm font-medium transition"
-            >
-              <Package className="h-4 w-4" /> عرض الطلبات
-            </Link>
+            {fetching && !code ? (
+              <div className="h-5 w-5 rounded-full border-2 border-[#D96C9D] border-t-transparent animate-spin" />
+            ) : code ? (
+              <div className="flex items-center gap-3">
+                <div dir="ltr" className="font-display text-2xl sm:text-3xl font-bold text-[#D96C9D] tracking-wider bg-[#FFF4F8] rounded-xl px-4 py-2 border border-[#F0CCD9] flex-1 text-center">
+                  {code}
+                </div>
+                <button
+                  onClick={copy}
+                  aria-label="انسخي الكود"
+                  className="bg-[#FFF4F8] border border-[#F0CCD9] rounded-full p-2.5 hover:bg-[#FCE6EE] transition"
+                >
+                  {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4 text-[#D96C9D]" />}
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-[#3A2430]/70">كودك لسه مش جاهز.</p>
+            )}
           </div>
         </div>
 
-        {/* Referral */}
-        <div className="mt-5 bg-white rounded-2xl border-2 border-dashed border-[#D96C9D] p-6">
-          <div className="flex items-center gap-2 text-[#3A2430] font-semibold">
-            <Gift className="h-5 w-5 text-[#D96C9D]" /> كود الإحالة الخاص بيكي
+        {/* Orders */}
+        <div className="bg-white rounded-2xl border border-[#F0CCD9] p-5 sm:p-6 shadow-sm">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2 text-[#3A2430] font-semibold">
+              <Package className="h-5 w-5 text-[#D96C9D]" /> طلباتي
+            </div>
+            <Link to="/orders" className="text-xs text-[#D96C9D] hover:underline">عرض الكل</Link>
           </div>
-          <p className="text-xs text-[#3A2430]/65 mt-1 mb-3">
-            ادي صديقتك خصم {friendPct}٪ على أول طلب — وخدي رصيد {rewardPct}٪ في محفظتك.
-          </p>
-          {!code ? (
-            <div className="flex items-center gap-2 text-sm text-[#3A2430]/70">
-              <div className="h-4 w-4 rounded-full border-2 border-[#D96C9D] border-t-transparent animate-spin" />
-              جاري تجهيز كودك…
+
+          {fetching && orders.length === 0 ? (
+            <div className="py-10 text-center text-[#3A2430]/60 text-sm">جاري تحميل طلباتك…</div>
+          ) : orders.length === 0 ? (
+            <div className="py-10 text-center text-[#3A2430]/60">
+              <Package className="mx-auto h-10 w-10 mb-3 opacity-40" />
+              <p className="text-sm">لسه مفيش طلبات.</p>
+              <Link to="/shop" className="inline-block mt-3 text-sm text-[#D96C9D] hover:underline">ابدئي التسوق</Link>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-[auto_1fr] gap-4 items-center">
-              <div dir="ltr" className="font-display text-3xl sm:text-4xl font-bold text-[#D96C9D] tracking-wider text-center sm:text-right bg-[#FFF4F8] rounded-xl px-6 py-4 border border-[#F0CCD9]">
-                {code}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={copy}
-                  className="bg-[#FFF4F8] border border-[#F0CCD9] rounded-full py-2.5 text-sm font-medium inline-flex items-center justify-center gap-2 hover:bg-[#FCE6EE] transition"
-                >
-                  {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                  {copied ? "تم النسخ" : "انسخي الكود"}
-                </button>
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#25D366] text-white rounded-full py-2.5 text-sm font-medium inline-flex items-center justify-center gap-2 hover:opacity-90"
-                >
-                  <MessageCircle className="h-4 w-4" /> شاركي على واتساب
-                </a>
-              </div>
-            </div>
-          )}
-
-          {data?.transactions && data.transactions.length > 0 && (
-            <div className="mt-5">
-              <div className="text-xs font-semibold text-[#3A2430]/70 mb-2">آخر الحركات</div>
-              <ul className="space-y-1.5 text-xs text-[#3A2430]/75 max-h-40 overflow-auto">
-                {data.transactions.slice(0, 8).map((t) => (
-                  <li key={t.id} className="flex justify-between gap-2 border-b border-dashed border-[#F0CCD9] pb-1">
-                    <span className="line-clamp-1">{t.note ?? t.kind}</span>
-                    <span className={`font-semibold whitespace-nowrap ${Number(t.amount) > 0 ? "text-emerald-600" : "text-[#3A2430]"}`}>
-                      {Number(t.amount) > 0 ? "+" : ""}{Number(t.amount).toLocaleString("ar-EG")} ج
+            <ul className="space-y-3">
+              {orders.map((o) => (
+                <li key={o.id} className="rounded-xl border border-[#F0CCD9]/60 bg-[#FFF8F4]/40 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="font-mono text-sm font-semibold text-[#3A2430]" dir="ltr">{o.order_number}</div>
+                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-[#D96C9D]/10 text-[#D96C9D] font-medium">
+                      {statusLabel(o.status)}
                     </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  </div>
+                  <div className="text-[11px] text-[#3A2430]/55 mt-1">
+                    {new Date(o.created_at).toLocaleString("ar-EG")}
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-dashed border-[#F0CCD9] flex justify-between text-sm">
+                    <span className="text-[#3A2430]/70">الإجمالي</span>
+                    <span className="font-semibold text-[#3A2430]">{Number(o.total).toLocaleString("ar-EG")} ج.م</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </section>

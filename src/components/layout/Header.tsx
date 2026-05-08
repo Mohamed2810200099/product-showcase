@@ -105,7 +105,7 @@ export function Header() {
           </button>
           {isAuthenticated ? (
             <>
-              <Link to="/orders" aria-label="My Orders" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
+              <Link to="/account" aria-label="My Account" className="p-2 rounded-full hover:bg-[#F9EEF3] transition hidden sm:block">
                 <User className="h-5 w-5 text-[#3A2430]" />
               </Link>
               <button
