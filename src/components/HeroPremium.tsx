@@ -70,6 +70,21 @@ export function HeroPremium() {
     >
       {/* Decorative glow blobs removed — global smoke handles ambient color */}
 
+      {/* Large background product — decorative only */}
+      <motion.img
+        aria-hidden
+        src={heroMain}
+        initial={{ opacity: 0, scale: 0.96, rotate: -4 }}
+        animate={reduce ? { opacity: 0.5, scale: 1, rotate: -4 } : { opacity: 0.56, scale: 1, rotate: -4, y: [0, -10, 0] }}
+        transition={reduce ? { duration: 1.1, ease: "easeOut" } : { opacity: { duration: 1.1, ease: "easeOut" }, scale: { duration: 1.1, ease: "easeOut" }, rotate: { duration: 1.1, ease: "easeOut" }, y: { duration: 7, repeat: Infinity, ease: "easeInOut" } }}
+        className="pointer-events-none absolute left-[-18%] top-[58%] z-[2] h-[72%] max-w-none -translate-y-1/2 object-contain select-none opacity-50 sm:left-[-10%] sm:h-[82%] md:left-[-4%] md:top-1/2 md:h-[105%] lg:left-[1%] lg:h-[110%]"
+        style={{
+          filter:
+            "drop-shadow(0 34px 46px rgba(58,36,48,0.2)) drop-shadow(0 10px 20px rgba(217,108,157,0.16))",
+        }}
+        draggable={false}
+      />
+
       {/* Cursor spotlight */}
       {!reduce && (
         <motion.div
@@ -80,13 +95,12 @@ export function HeroPremium() {
       )}
 
       <div className="container relative z-10 mx-auto px-4 py-8 sm:py-12 md:py-16">
-        <div className="grid md:grid-cols-12 gap-8 md:gap-6 items-center">
         {/* TEXT — right side in RTL (first in DOM) */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="relative md:col-span-7 md:col-start-6 md:row-start-1 text-center md:text-right space-y-5 sm:space-y-6"
+          className="relative ml-auto max-w-3xl text-center md:text-right space-y-5 sm:space-y-6"
         >
           <motion.span
             initial={{ opacity: 0, y: 8 }}
@@ -180,37 +194,6 @@ export function HeroPremium() {
             ))}
           </motion.div>
         </motion.div>
-
-        {/* MAIN HERO PRODUCT — left side in RTL (second in DOM) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92, x: 30 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative md:col-span-5 md:col-start-1 md:row-start-1 flex items-center justify-center order-first md:order-none"
-        >
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10"
-            style={{
-              background:
-                "radial-gradient(closest-side, rgba(231,168,191,0.55), rgba(248,220,229,0) 70%)",
-              filter: "blur(20px)",
-            }}
-          />
-          <motion.img
-            src={heroMain}
-            alt="منتج العناية الرئيسي"
-            animate={reduce ? undefined : { y: [0, -10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="w-[70%] sm:w-[55%] md:w-full max-w-[420px] h-auto object-contain select-none"
-            style={{
-              filter:
-                "drop-shadow(0 30px 40px rgba(58,36,48,0.25)) drop-shadow(0 8px 16px rgba(217,108,157,0.18))",
-            }}
-            draggable={false}
-          />
-        </motion.div>
-        </div>
       </div>
     </section>
   );
