@@ -27,7 +27,7 @@ export function MobileBottomBar() {
       </>
     );
     return href ? (
-      <a href={href} target="_blank" rel="noreferrer" className={cls}>{content}</a>
+      <a href={href} target="_blank" rel="noreferrer" className={cls} onClick={() => trackEvent("whatsapp_clicked", { source: "mobile_bottom_bar" })}>{content}</a>
     ) : (
       <Link to={to!} className={cls}>{content}</Link>
     );
