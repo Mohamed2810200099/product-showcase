@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { formatEGP } from "@/lib/format";
 import { Eye, Phone, MapPin, Trash2, X } from "lucide-react";
+import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/orders")({
