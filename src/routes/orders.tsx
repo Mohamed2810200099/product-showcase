@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { lookupOrdersByPhone, getMyOrders } from "@/server/orders.functions";
+import { lookupOrdersByPhone } from "@/server/orders.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ function statusLabel(s: string) {
 }
 
 function OrdersPage() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -48,14 +49,20 @@ function OrdersPage() {
   // Auto-fetch for logged-in users
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) return;
     let cancelled = false;
     setLoading(true);
     setSearched(true);
     (async () => {
       try {
-        const rows = await getMyOrders();
-        if (!cancelled) setOrders(rows as OrderRow[]);
+        const { data, error: err } = await supabase
+          .from("orders")
+          .select("id, order_number, status, created_at, total, items")
+          .eq("customer_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (err) throw err;
+        if (!cancelled) setOrders((data as OrderRow[]) ?? []);
       } catch {
         if (!cancelled) setError("حصل خطأ، حاولي تاني.");
       } finally {
@@ -63,7 +70,7 @@ function OrdersPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading, user]);
 
   const search = async (e: React.FormEvent) => {
     e.preventDefault();
