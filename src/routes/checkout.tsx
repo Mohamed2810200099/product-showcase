@@ -39,7 +39,7 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const brand = useBrand();
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading, user, session } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
