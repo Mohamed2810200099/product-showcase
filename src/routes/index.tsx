@@ -16,7 +16,7 @@ import { BeautyAssistant } from "@/components/BeautyAssistant";
 import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
-import { RoutineStory } from "@/components/RoutineStory";
+import { ScrollProductBackdrop } from "@/components/ScrollProductBackdrop";
 
 
 export const Route = createFileRoute("/")({
@@ -102,6 +102,8 @@ function HomePage() {
 
   return (
     <PublicLayout>
+      <ScrollProductBackdrop />
+      <div className="relative z-10">
       <HeroPremium />
       {showReferral && <ReferralSection />}
 
@@ -118,9 +120,6 @@ function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* ROUTINE STORY */}
-      <RoutineStory />
 
       {/* CATEGORIES */}
       <section className="container mx-auto px-4 py-16">
@@ -270,6 +269,7 @@ function HomePage() {
         </section>
       )}
       <BeautyAssistant />
+      </div>
     </PublicLayout>
   );
 }
