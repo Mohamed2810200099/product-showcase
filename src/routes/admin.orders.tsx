@@ -164,7 +164,7 @@ function OrdersPage() {
 }
 
 function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void }) {
-  const items = Array.isArray(order.items) ? (order.items as Array<{ name: string; qty: number; price: number; image?: string }>) : [];
+  const items: OrderItemLike[] = Array.isArray(order.items) ? (order.items as OrderItemLike[]) : [];
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-card max-w-2xl w-full rounded-2xl shadow-elegant max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
