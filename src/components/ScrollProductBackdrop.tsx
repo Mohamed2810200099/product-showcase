@@ -48,9 +48,9 @@ export function ScrollProductBackdrop() {
       className="pointer-events-none fixed inset-0 z-[1] overflow-hidden"
       style={{ contain: "strict" }}
     >
-      {/* Soft glow pad behind the product, also pinned right */}
+      {/* Soft glow pad behind the product, also pinned left */}
       <motion.div
-        className="absolute top-1/2 -translate-y-1/2 right-[-10%] h-[80vh] w-[80vh] rounded-full blur-3xl"
+        className="absolute top-1/2 -translate-y-1/2 left-[-10%] h-[80vh] w-[80vh] rounded-full blur-3xl"
         style={{
           background: `radial-gradient(circle, rgba(247,196,213,0.45) 0%, rgba(247,196,213,0) 65%)`,
           y: reduce ? 0 : yShift,
@@ -74,7 +74,7 @@ export function ScrollProductBackdrop() {
           className="
             absolute
             top-1/2 -translate-y-1/2
-            right-[-22%] sm:right-[-18%] md:right-[-12%] lg:right-[-8%]
+            left-[-22%] sm:left-[-18%] md:left-[-12%] lg:left-[-8%]
             h-[110vh] sm:h-[115vh] md:h-[120vh]
             w-auto max-w-none
             object-contain
