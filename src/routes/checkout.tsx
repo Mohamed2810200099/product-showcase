@@ -311,16 +311,22 @@ function CheckoutPage() {
             </div>
 
             {isAuthenticated && walletBalance > 0 && (
-              <label className="flex items-center justify-between gap-2 mb-3 p-3 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9] cursor-pointer">
-                <span className="text-sm">
-                  استخدمي رصيد محفظتك ({formatEGP(walletBalance)})
-                </span>
-                <input type="checkbox" checked={useWallet} onChange={(e) => setUseWallet(e.target.checked)} className="h-4 w-4 accent-primary" />
-              </label>
+              <div className="mb-3 p-4 rounded-xl bg-[#FFF8F4] border border-[#F0CCD9]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-[#D96C9D]" />
+                    <div>
+                      <div className="text-sm font-semibold text-[#3A2430]">رصيد محفظتك: {formatEGP(walletBalance)}</div>
+                      <div className="text-[11px] text-[#3A2430]/65">هل تريدي استخدامه؟ (حد أقصى {glowSettings.max_wallet_per_order_pct}٪ من قيمة الطلب)</div>
+                    </div>
+                  </div>
+                  <Switch checked={useWallet} onCheckedChange={setUseWallet} />
+                </div>
+              </div>
             )}
 
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt>المجموع</dt><dd>{formatEGP(subtotal)}</dd></div>
+              <div className="flex justify-between"><dt>المجموع الفرعي</dt><dd>{formatEGP(subtotal)}</dd></div>
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-primary"><dt>خصم ({appliedCoupon?.code})</dt><dd>-{formatEGP(couponDiscount)}</dd></div>
               )}
@@ -328,7 +334,7 @@ function CheckoutPage() {
                 <div className="flex justify-between text-primary"><dt>خصم صديقتك ({appliedReferral?.code})</dt><dd>-{formatEGP(referralDiscount)}</dd></div>
               )}
               {walletApplied > 0 && (
-                <div className="flex justify-between text-emerald-600"><dt>من المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
+                <div className="flex justify-between text-red-600"><dt>خصم المحفظة</dt><dd>-{formatEGP(walletApplied)}</dd></div>
               )}
               <div className="flex justify-between"><dt>الشحن</dt><dd>{shipping === 0 ? "مجاناً" : formatEGP(shipping)}</dd></div>
               <div className="border-t border-border pt-2 flex justify-between font-bold text-base">
