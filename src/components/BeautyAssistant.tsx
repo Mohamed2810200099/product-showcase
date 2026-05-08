@@ -284,6 +284,8 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
                 اسألي على واتساب
               </a>
             )}
+          </div>
+        )}
       </div>
     </div>
   );
