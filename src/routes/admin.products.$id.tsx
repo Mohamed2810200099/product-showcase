@@ -250,7 +250,22 @@ function ProductForm() {
               <Field label="السعر (ج.م) *" type="number" value={String(form.price)} onChange={(v) => setForm({ ...form, price: Number(v) })} />
               <Field label="السعر قبل الخصم" type="number" value={String(form.compare_at_price)} onChange={(v) => setForm({ ...form, compare_at_price: Number(v) })} />
               <Field label="سعر dm الأصلي (€)" type="number" value={String(form.dm_price_eur)} onChange={(v) => setForm({ ...form, dm_price_eur: Number(v) })} />
-              <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => setForm({ ...form, stock: Number(v) })} />
+              <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => {
+                const n = Number(v);
+                setForm((f) => {
+                  const next = { ...f, stock: n };
+                  if (f.stock_tracking_enabled) {
+                    if (n <= 0 && f.availability_status !== "out_of_stock") {
+                      next.availability_status = "out_of_stock";
+                      toast.message("تم ضبط الحالة على: نفذ المخزون");
+                    } else if (n > 0 && f.availability_status === "out_of_stock") {
+                      next.availability_status = "available";
+                      toast.message("تم إعادة المنتج كمتاح");
+                    }
+                  }
+                  return next;
+                });
+              }} />
               <Field label="SKU" value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} dir="ltr" />
               <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} dir="ltr" />
               <Field label="التصنيف الفرعي" value={form.sub_category} onChange={(v) => setForm({ ...form, sub_category: v })} dir="ltr" />
