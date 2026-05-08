@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Switch } from "@/components/ui/switch";
 import { Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
