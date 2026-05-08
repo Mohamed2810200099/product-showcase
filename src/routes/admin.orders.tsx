@@ -70,6 +70,23 @@ function OrdersPage() {
   const updateStatus = async (id: string, status: string) => {
     const previousStatus = orders.find((o) => o.id === id)?.status ?? "pending";
     if (previousStatus === status) return;
+
+    // Block unsafe manual transitions out of terminal/financial states.
+    if (previousStatus === "cancelled") {
+      return toast.error("الطلب الملغي لا يمكن إعادة فتحه من هنا.");
+    }
+    if (previousStatus === "delivered" && status !== "delivered") {
+      return toast.error("لا يمكن التراجع عن حالة 'تم التوصيل' يدوياً.");
+    }
+
+    // Confirmations for status changes that trigger financial side effects.
+    if (status === "delivered") {
+      if (!confirm("تأكيد التوصيل سيضيف مكافأة الإحالة إن وجدت. هل أنت متأكد؟")) return;
+    }
+    if (status === "cancelled") {
+      if (!confirm("إلغاء الطلب قد يعكس رصيد المحفظة أو مكافأة الإحالة. هل أنت متأكد؟")) return;
+    }
+
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token ?? null;
     if (!accessToken) {
@@ -87,10 +104,16 @@ function OrdersPage() {
     if (!result.ok) {
       return toast.error(result.error ?? "فشل تحديث الحالة");
     }
+
+    // Undo is only safe for transitions WITHOUT financial side effects.
+    // delivered/cancelled trigger referral/wallet mutations that aren't
+    // cleanly reversible by simply flipping status back.
+    const hasFinancialSideEffect = status === "delivered" || status === "cancelled";
+
     if (result.referral.ran && !result.referral.ok) {
-      toast.warning("تم تحديث الحالة، لكن فشلت عملية المكافأة/الاسترجاع. راجعي السجلات.", {
-        action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
-      });
+      toast.warning("تم تحديث الحالة، لكن فشلت عملية المكافأة/الاسترجاع. راجعي السجلات.");
+    } else if (hasFinancialSideEffect) {
+      toast.success("تم تحديث الحالة");
     } else {
       toast.success("تم تحديث الحالة", {
         action: { label: "تراجع", onClick: () => updateStatus(id, previousStatus) },
