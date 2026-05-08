@@ -103,17 +103,18 @@ function HomePage() {
 
   return (
     <PublicLayout>
+      <SiteSmokeBackground />
       <ScrollProductBackdrop />
       <div className="relative z-10">
       <HeroPremium />
       {showReferral && <ReferralSection />}
 
       {/* TRUST BADGES */}
-      <section className="border-y border-border bg-secondary/40">
+      <section className="border-y border-white/40 bg-white/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6 flex flex-wrap items-center justify-around gap-4">
           {trustBadges.map((b, i) => (
             <div key={i} className="flex items-center gap-2 text-sm">
-              <div className="h-9 w-9 rounded-full bg-background flex items-center justify-center text-primary shadow-soft">
+              <div className="h-9 w-9 rounded-full bg-white/70 backdrop-blur flex items-center justify-center text-primary shadow-soft">
                 <b.icon className="h-4 w-4" />
               </div>
               <span className="font-medium">{b.label}</span>
