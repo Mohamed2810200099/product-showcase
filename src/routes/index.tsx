@@ -240,7 +240,7 @@ function HomePage() {
 
       {/* TESTIMONIALS */}
       {testimonials.length > 0 && (
-        <section className="bg-secondary/40 py-16">
+        <section className="py-16 border-t border-white/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl font-bold">آراء عميلاتنا</h2>
