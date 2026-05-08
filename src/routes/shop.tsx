@@ -81,6 +81,11 @@ function ShopPage() {
   const activeQuery = search.search ?? search.q ?? "";
   const [searchInput, setSearchInput] = useState(activeQuery);
 
+  // Keep input synced with URL search param when it changes externally (e.g., chip removal, navigation)
+  useEffect(() => {
+    setSearchInput(activeQuery);
+  }, [activeQuery]);
+
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => (await supabase.from("categories").select("*").order("sort_order")).data ?? [],
