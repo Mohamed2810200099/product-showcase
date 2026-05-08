@@ -29,17 +29,7 @@ const GOALS: { id: Goal; label: string; type: "hair" | "skin"; routineName: stri
   { id: "skin_oily", label: "البشرة الدهنية والرؤوس السوداء", type: "skin", routineName: "روتين تنقية البشرة الدهنية", intro: "منتجات لتقليل الدهون وتنظيف المسام بعمق." },
 ];
 
-// Map by product order_index (1-based per user spec) — fallback
-const RECS: Record<Goal, number[]> = {
-  hair_growth: [1, 14],
-  hair_repair: [2, 3, 4, 6, 15],
-  hair_frizz: [14, 16, 6],
-  skin_glow: [5, 8, 11],
-  skin_hydrate: [10, 12, 13],
-  skin_oily: [7, 9, 17, 18, 19],
-};
-
-// Tag keywords for matching products by tags array
+// Tag keywords for matching products by tags array (concerns metadata)
 const GOAL_TAGS: Record<Goal, string[]> = {
   hair_growth: ["hair_growth", "growth", "نمو", "كثافة", "تكثيف", "anti-hair-loss", "hair-loss"],
   hair_repair: ["hair_repair", "repair", "damaged", "إصلاح", "متضرر", "تالف", "keratin", "كيراتين"],
