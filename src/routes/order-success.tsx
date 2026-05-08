@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { CheckCircle, MessageCircle } from "lucide-react";
+import { CheckCircle, MessageCircle, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/order-success")({
   validateSearch: z.object({ order: z.string().optional() }),
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/order-success")({
 function OrderSuccessPage() {
   const { order } = Route.useSearch();
   const brand = useBrand();
+  const { isAuthenticated, loading } = useAuth();
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-20">
@@ -39,7 +42,25 @@ function OrderSuccessPage() {
               متابعة التسوق
             </Link>
           </div>
+
+          {!loading && !isAuthenticated && (
+            <div className="mt-6 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 text-right" dir="rtl">
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1">
+                <Sparkles className="h-4 w-4 text-primary" /> اعملي حساب لمتابعة طلباتك
+              </div>
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                سجلي حساب علشان تتابعي طلباتك وتحصلي على كود خصم شخصي تشاركيه مع صحباتك ✨
+              </p>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center bg-primary text-primary-foreground px-5 py-2 rounded-full text-sm font-medium hover:opacity-90"
+              >
+                إنشاء حساب
+              </Link>
+            </div>
+          )}
         </div>
+
       </div>
     </PublicLayout>
   );

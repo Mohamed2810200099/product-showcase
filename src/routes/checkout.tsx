@@ -93,25 +93,6 @@ function CheckoutPage() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <PublicLayout>
-        <div className="container mx-auto max-w-md px-4 py-16 text-center" dir="rtl">
-          <div className="bg-card border border-border rounded-2xl p-8 shadow-elegant">
-            <h2 className="font-display text-2xl font-bold mb-3">سجلي دخول علشان تكملي الطلب</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              لازم يكون عندك حساب علشان نقدر نحفظ طلباتك ونرسلك تأكيد على البريد.
-            </p>
-            <Link to="/login" search={{ redirect: "/checkout" }} className="inline-flex items-center justify-center bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-medium hover:opacity-90">
-              تسجيل دخول / إنشاء حساب
-            </Link>
-          </div>
-        </div>
-      </PublicLayout>
-    );
-  }
-
-
   if (items.length === 0) {
     return (
       <PublicLayout>
@@ -159,9 +140,11 @@ function CheckoutPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form, customer_email: user?.email ?? "" };
+    const emailToUse = (user?.email ?? form.customer_email ?? "").trim();
+    const payload = { ...form, customer_email: emailToUse };
     const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
+
 
     setSubmitting(true);
     const { createOrder } = await import("@/server/orders.create.functions");
@@ -191,7 +174,7 @@ function CheckoutPage() {
     localStorage.setItem("tgh_has_ordered", "1");
 
     // Send branded order confirmation email (best-effort, non-blocking)
-    const emailToUse = user?.email ?? "";
+
     if (emailToUse) {
       try {
         const { sendTransactionalEmail } = await import("@/lib/email/send");
@@ -233,7 +216,16 @@ function CheckoutPage() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
-                
+                {!isAuthenticated && (
+                  <Field
+                    label="البريد الإلكتروني (اختياري)"
+                    type="email"
+                    value={form.customer_email}
+                    onChange={(v) => setForm({ ...form, customer_email: v })}
+                    className="sm:col-span-2"
+                  />
+                )}
+
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
                   <select
