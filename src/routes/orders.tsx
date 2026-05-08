@@ -25,7 +25,7 @@ type OrderRow = {
   status: string;
   created_at: string;
   total: number;
-  items: Array<{ name?: string; quantity?: number; price?: number }> | null;
+  items: OrderItemLike[] | null;
 };
 
 function statusLabel(s: string) {
