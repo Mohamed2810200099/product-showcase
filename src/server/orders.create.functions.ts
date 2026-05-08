@@ -26,7 +26,7 @@ const schema = z.object({
 
 export type CreateOrderResult =
   | { ok: true; order_number: string; id: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: "invalid_wallet_session" };
 
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => schema.parse(data))
@@ -38,7 +38,11 @@ export const createOrder = createServerFn({ method: "POST" })
     // If client supplied a token but it failed validation, and they're trying
     // to use wallet, refuse instead of silently treating them as guest.
     if (data.access_token && !customerUserId && data.use_wallet) {
-      return { ok: false, error: "انتهت جلستك. سجّلي دخول مرة تانية لاستخدام رصيد المحفظة" };
+      return {
+        ok: false,
+        code: "invalid_wallet_session",
+        error: "انتهت جلستك. سجّلي دخول مرة تانية لاستخدام رصيد المحفظة",
+      };
     }
 
 
