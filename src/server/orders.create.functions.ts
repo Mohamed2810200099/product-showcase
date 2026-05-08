@@ -32,6 +32,14 @@ export type CreateOrderResult =
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => schema.parse(data))
   .handler(async ({ data }): Promise<CreateOrderResult> => {
+    // Validate & normalize phone — single source of truth on the server.
+    if (!isValidEgyptPhone(data.customer_phone)) {
+      return { ok: false, error: "من فضلك اكتبي رقم موبايل مصري صحيح." };
+    }
+    const phoneNorm = normalizePhone(data.customer_phone);
+    const phoneRaw = data.customer_phone.trim();
+    const phoneCandidates = Array.from(new Set([phoneNorm, phoneRaw].filter(Boolean)));
+
     // SECURITY: derive user id from a validated token only — never from client payload.
     const authUser = await getUserFromAccessToken(data.access_token);
     const customerUserId = authUser?.userId ?? null;
