@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { formatEGP } from "@/lib/format";
-import { Eye, Phone, MapPin, Trash2, X } from "lucide-react";
+import { Eye, Phone, MapPin, Trash2, X, AlertTriangle, MessageCircle, CheckCircle2 } from "lucide-react";
+import { useBrand } from "@/hooks/use-brand";
+import { normalizePhone } from "@/lib/phone";
 import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
 import { formatPhoneDisplay } from "@/lib/phone";
@@ -39,6 +41,7 @@ type Order = {
   status: string;
   payment_method: string;
   created_at: string;
+  whatsapp_sent: boolean;
 };
 
 const STATUSES = [
@@ -105,6 +108,14 @@ function OrdersPage() {
     load();
   };
 
+  const toggleWhatsapp = async (id: string, value: boolean) => {
+    const { error } = await supabase.from("orders").update({ whatsapp_sent: value }).eq("id", id);
+    if (error) return toast.error("فشل التحديث");
+    toast.success(value ? "تم وضع علامة: تم التواصل عبر واتساب" : "تم إلغاء علامة واتساب");
+    if (selected?.id === id) setSelected({ ...selected, whatsapp_sent: value });
+    load();
+  };
+
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
   return (
@@ -139,12 +150,28 @@ function OrdersPage() {
             <tbody>
               {filtered.map((o) => {
                 const status = STATUSES.find((s) => s.value === o.status) ?? STATUSES[0];
+                const needsConfirm = o.status === "pending";
                 return (
-                  <tr key={o.id} className="border-t border-border hover:bg-secondary/30">
+                  <tr key={o.id} className={`border-t border-border hover:bg-secondary/30 ${needsConfirm ? "bg-amber-50/60" : ""}`}>
                     <td className="p-3 font-mono text-xs" dir="ltr">{o.order_number}</td>
                     <td className="p-3">
-                      <div className="font-medium">{o.customer_name}</div>
+                      <div className="font-medium flex items-center gap-2 flex-wrap">
+                        {o.customer_name}
+                        {needsConfirm && (
+                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                            <AlertTriangle className="h-3 w-3" /> يحتاج تأكيد
+                          </span>
+                        )}
+                        {o.whatsapp_sent && (
+                          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                            <CheckCircle2 className="h-3 w-3" /> واتساب
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(o.customer_phone)}</div>
+                      {needsConfirm && (
+                        <div className="text-[11px] text-amber-700 mt-1">⚠ لا تشحني الطلب قبل التأكيد.</div>
+                      )}
                     </td>
                     <td className="p-3 text-xs">{o.governorate}</td>
                     <td className="p-3 font-semibold whitespace-nowrap">{formatEGP(Number(o.total))}</td>
@@ -170,13 +197,18 @@ function OrdersPage() {
         )}
       </div>
 
-      {selected && <OrderModal order={selected} onClose={() => setSelected(null)} onDelete={() => remove(selected.id)} onStatus={(s) => updateStatus(selected.id, s)} />}
+      {selected && <OrderModal order={selected} onClose={() => setSelected(null)} onDelete={() => remove(selected.id)} onStatus={(s) => updateStatus(selected.id, s)} onToggleWhatsapp={(v) => toggleWhatsapp(selected.id, v)} />}
     </div>
   );
 }
 
-function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void }) {
+function OrderModal({ order, onClose, onDelete, onStatus, onToggleWhatsapp }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void; onToggleWhatsapp: (v: boolean) => void }) {
   const items: OrderItemLike[] = Array.isArray(order.items) ? (order.items as OrderItemLike[]) : [];
+  const brand = useBrand();
+  const needsConfirm = order.status === "pending";
+  const waNumber = normalizePhone(order.customer_phone).replace(/^0/, "20");
+  const waMessage = `مرحباً ${order.customer_name} 👋\nبخصوص طلبك رقم ${order.order_number} من The Girl House.\nالإجمالي: ${formatEGP(Number(order.total))}\nنرجو تأكيد الطلب والعنوان: ${order.governorate} - ${order.city}.\nشكراً لكِ 💕`;
+  const waLink = waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}` : null;
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-card max-w-2xl w-full rounded-2xl shadow-elegant max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
@@ -188,6 +220,42 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
           <button onClick={onClose} className="p-2 hover:bg-secondary rounded-full"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-5">
+          {needsConfirm && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-900 p-3 text-sm flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+              <div>
+                <div className="font-bold">يحتاج تأكيد</div>
+                <div>لا تشحني الطلب قبل التأكيد.</div>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-border bg-secondary/30 p-3 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <div>
+                <div className="text-xs text-muted-foreground">رقم الطلب</div>
+                <div className="font-mono" dir="ltr">{order.order_number}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-muted-foreground">هاتف العميل</div>
+                <div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {waLink && (
+                <a href={waLink} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm px-4 py-2 rounded-full hover:bg-emerald-700">
+                  <MessageCircle className="h-4 w-4" /> تواصل عبر واتساب
+                </a>
+              )}
+              <button onClick={() => onToggleWhatsapp(!order.whatsapp_sent)}
+                className={`inline-flex items-center gap-2 text-sm px-4 py-2 rounded-full border ${order.whatsapp_sent ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-card border-border"}`}>
+                <CheckCircle2 className="h-4 w-4" />
+                {order.whatsapp_sent ? "تم التواصل عبر واتساب" : "ضع علامة: تم التواصل"}
+              </button>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 gap-3 text-sm">
             <div className="flex items-start gap-2"><Phone className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">الهاتف</div><div dir="ltr">{formatPhoneDisplay(order.customer_phone)}</div></div></div>
             <div className="flex items-start gap-2"><MapPin className="h-4 w-4 text-primary mt-0.5" /><div><div className="text-xs text-muted-foreground">العنوان</div><div>{order.governorate} - {order.city}</div><div className="text-xs text-muted-foreground">{order.address}</div></div></div>
