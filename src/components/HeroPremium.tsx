@@ -3,7 +3,10 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import groupImg from "@/assets/products/hero-studio-cutout.png";
+import heroMain from "@/assets/products/cutout-plex-mask.png";
+import sideA from "@/assets/products/cutout-plex-oil.png";
+import sideB from "@/assets/products/cutout-keratin-overnight.png";
+import sideC from "@/assets/products/cutout-scalp-booster.png";
 
 function MagneticButton({
   children,
@@ -70,27 +73,6 @@ export function HeroPremium() {
     >
       {/* Decorative glow blobs removed — global smoke handles ambient color */}
 
-      {/* Studio group product image — sits behind text as a soft premium layer */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0, scale: 1.04, x: -30 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-        style={{ zIndex: 2 }}
-      >
-        <img
-          src={groupImg}
-          alt=""
-          className="w-full h-full object-contain object-center select-none"
-          style={{
-            opacity: 0.55,
-            filter: "drop-shadow(0 30px 50px rgba(58,36,48,0.18))",
-            background: "transparent",
-          }}
-        />
-      </motion.div>
-
       {/* Cursor spotlight */}
       {!reduce && (
         <motion.div
@@ -101,13 +83,44 @@ export function HeroPremium() {
       )}
 
       <div className="container relative z-10 mx-auto px-4 py-8 sm:py-12 md:py-16">
-        {/* Centered content — backdrop product visual lives outside */}
+        <div className="grid md:grid-cols-12 gap-8 md:gap-6 items-center">
+        {/* TEXT — right side in RTL (first in DOM) */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="text-center md:text-right space-y-5 sm:space-y-6 max-w-2xl"
+          className="relative md:col-span-7 text-center md:text-right space-y-5 sm:space-y-6"
         >
+          {/* Supporting product cluster — subtle, behind text on the right */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-visible hidden md:block">
+            <motion.img
+              src={sideA}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.18, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -top-10 -right-6 w-32 lg:w-40 rotate-[-8deg] select-none"
+              alt=""
+              draggable={false}
+            />
+            <motion.img
+              src={sideB}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.16, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.6 }}
+              className="absolute -bottom-8 right-20 w-28 lg:w-36 rotate-[8deg] select-none"
+              alt=""
+              draggable={false}
+            />
+            <motion.img
+              src={sideC}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.14, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.8 }}
+              className="absolute top-4 right-1/2 w-24 lg:w-32 rotate-[12deg] select-none"
+              alt=""
+              draggable={false}
+            />
+          </div>
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,6 +213,37 @@ export function HeroPremium() {
             ))}
           </motion.div>
         </motion.div>
+
+        {/* MAIN HERO PRODUCT — left side in RTL (second in DOM) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, x: 30 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="relative md:col-span-5 flex items-center justify-center order-first md:order-none"
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                "radial-gradient(closest-side, rgba(231,168,191,0.55), rgba(248,220,229,0) 70%)",
+              filter: "blur(20px)",
+            }}
+          />
+          <motion.img
+            src={heroMain}
+            alt="منتج العناية الرئيسي"
+            animate={reduce ? undefined : { y: [0, -10, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="w-[70%] sm:w-[55%] md:w-full max-w-[420px] h-auto object-contain select-none"
+            style={{
+              filter:
+                "drop-shadow(0 30px 40px rgba(58,36,48,0.25)) drop-shadow(0 8px 16px rgba(217,108,157,0.18))",
+            }}
+            draggable={false}
+          />
+        </motion.div>
+        </div>
       </div>
     </section>
   );
