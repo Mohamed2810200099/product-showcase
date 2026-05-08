@@ -11,6 +11,7 @@ import { BeautyAssistant } from "@/components/BeautyAssistant";
 import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
+import { SplineBeautyHero } from "@/components/home/SplineBeautyHero";
 
 
 export const Route = createFileRoute("/")({
