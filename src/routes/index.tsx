@@ -147,7 +147,9 @@ function HomePage() {
         )}
       </section>
 
-      {/* LIMITED STOCK URGENCY */}
+      {/* GERMAN BEAUTY SCROLL SHOWCASE */}
+      <GermanBeautyScrollShowcase />
+
       {limited.length > 0 && (
         <section className="container mx-auto px-4 py-10">
           <div className="bg-gradient-blush rounded-3xl p-6 sm:p-10 text-primary-foreground text-center mb-8 shadow-elegant relative overflow-hidden">
