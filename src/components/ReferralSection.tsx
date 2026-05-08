@@ -24,18 +24,33 @@ export function ReferralSection() {
   const { isAuthenticated, loading } = useAuth();
   const [data, setData] = useState<ProfileData>(null);
   const [copied, setCopied] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    if (loading || !isAuthenticated) return;
+    if (loading) return;
+    if (!isAuthenticated) {
+      setData(null);
+      setFetching(false);
+      setFetchError(false);
+      return;
+    }
+    let cancelled = false;
+    setFetching(true);
+    setFetchError(false);
     (async () => {
       try {
         const { getMyGlowProfile } = await import("@/server/referral.functions");
         const res = await getMyGlowProfile();
-        setData(res as ProfileData);
+        if (!cancelled) setData(res as ProfileData);
       } catch (e) {
         console.warn("Glow profile failed", e);
+        if (!cancelled) setFetchError(true);
+      } finally {
+        if (!cancelled) setFetching(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [isAuthenticated, loading]);
 
   const code = data?.profile?.personal_code ?? "";
@@ -102,10 +117,16 @@ export function ReferralSection() {
                 <LogIn className="h-4 w-4" /> دخول / إنشاء حساب
               </Link>
             </div>
-          ) : !code ? (
+          ) : fetching && !code ? (
             <div className="bg-white/80 backdrop-blur rounded-2xl border border-white p-6 text-center max-w-md mx-auto">
               <div className="h-5 w-5 mx-auto rounded-full border-2 border-[#D96C9D] border-t-transparent animate-spin" />
               <p className="text-sm text-[#3A2430]/70 mt-3">جاري تجهيز كودك…</p>
+            </div>
+          ) : !code ? (
+            <div className="bg-white/80 backdrop-blur rounded-2xl border border-white p-6 text-center max-w-md mx-auto">
+              <p className="text-sm text-[#3A2430]/70">
+                {fetchError ? "تعذّر تحميل كودك دلوقتي، حاولي تاني بعد لحظات." : "كودك لسه مش جاهز، جربي تعملي تحديث للصفحة."}
+              </p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
