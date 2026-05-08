@@ -45,7 +45,7 @@ export function ScrollProductBackdrop() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      className="pointer-events-none fixed inset-0 z-[1] overflow-hidden"
       style={{ contain: "strict" }}
     >
       {/* Soft glow pad behind the product, also pinned right */}

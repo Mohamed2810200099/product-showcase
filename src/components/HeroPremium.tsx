@@ -2,8 +2,8 @@ import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } fro
 import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
-import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
+import groupImg from "@/assets/products/group.png";
 
 function MagneticButton({
   children,
@@ -67,40 +67,52 @@ export function HeroPremium() {
       dir="rtl"
       onMouseMove={onSectionMove}
       className="relative overflow-hidden min-h-[78vh] md:min-h-[86vh] flex items-center"
-      style={{
-        background:
-          "radial-gradient(120% 80% at 80% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
-      }}
     >
-      {/* Hero-local WebGL smoke (stronger) */}
-      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <SmokeBackground variant="hero" className="absolute inset-0 h-full w-full" />
-      </div>
-
-      {/* Animated CSS glow blobs */}
+      {/* Animated CSS glow blobs (kept, very subtle) */}
       {!reduce && (
         <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block" style={{ zIndex: 1 }}>
           <motion.div
             className="absolute -top-24 -right-24 h-[520px] w-[520px] rounded-full"
-            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.35 }}
+            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.22 }}
             animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             className="absolute -bottom-32 -left-24 h-[560px] w-[560px] rounded-full"
-            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.45 }}
+            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.3 }}
             animate={{ scale: [1, 1.12, 1], x: [0, 30, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
       )}
 
+      {/* Studio group product image — sits behind text as a soft premium layer */}
+      <motion.div
+        aria-hidden
+        initial={{ opacity: 0, scale: 1.04, x: -30 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        className="pointer-events-none absolute inset-y-0 left-[-8%] sm:left-[-4%] md:left-0 md:right-auto md:w-[62%] lg:w-[58%] flex items-center justify-center"
+        style={{ zIndex: 2 }}
+      >
+        <img
+          src={groupImg}
+          alt=""
+          className="h-[70%] md:h-[88%] w-auto max-w-none object-contain select-none mix-blend-multiply"
+          style={{
+            opacity: 0.55,
+            filter: "drop-shadow(0 40px 60px rgba(58,36,48,0.18))",
+            background: "transparent",
+          }}
+        />
+      </motion.div>
+
       {/* Cursor spotlight */}
       {!reduce && (
         <motion.div
           aria-hidden
           className="pointer-events-none absolute inset-0 mix-blend-soft-light hidden md:block"
-          style={{ background: spotlight }}
+          style={{ background: spotlight, zIndex: 3 }}
         />
       )}
 

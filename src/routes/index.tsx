@@ -17,6 +17,7 @@ import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
 import { ScrollProductBackdrop } from "@/components/ScrollProductBackdrop";
+import { SiteSmokeBackground } from "@/components/layout/SiteSmokeBackground";
 
 
 export const Route = createFileRoute("/")({
@@ -102,17 +103,18 @@ function HomePage() {
 
   return (
     <PublicLayout>
+      <SiteSmokeBackground />
       <ScrollProductBackdrop />
       <div className="relative z-10">
       <HeroPremium />
       {showReferral && <ReferralSection />}
 
       {/* TRUST BADGES */}
-      <section className="border-y border-border bg-secondary/40">
+      <section className="border-y border-white/40 bg-white/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-6 flex flex-wrap items-center justify-around gap-4">
           {trustBadges.map((b, i) => (
             <div key={i} className="flex items-center gap-2 text-sm">
-              <div className="h-9 w-9 rounded-full bg-background flex items-center justify-center text-primary shadow-soft">
+              <div className="h-9 w-9 rounded-full bg-white/70 backdrop-blur flex items-center justify-center text-primary shadow-soft">
                 <b.icon className="h-4 w-4" />
               </div>
               <span className="font-medium">{b.label}</span>
@@ -161,7 +163,7 @@ function HomePage() {
           </div>
         </RevealOnView>
         {featured.length > 0 ? (
-          <div className="relative z-10 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FCE9F1] rounded-[32px] p-6 sm:p-10 border border-[#E7A8BF]/30 shadow-[0_30px_80px_-40px_rgba(217,108,157,0.4)]">
+          <div className="relative z-10 bg-white/30 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-white/50 shadow-[0_30px_80px_-40px_rgba(217,108,157,0.25)]">
             <div className="text-center mb-6">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-xs font-medium text-[#D96C9D]">
                 <Sparkles className="h-3.5 w-3.5" /> اختياراتنا المفضلة لكِ
@@ -238,7 +240,7 @@ function HomePage() {
 
       {/* TESTIMONIALS */}
       {testimonials.length > 0 && (
-        <section className="bg-secondary/40 py-16">
+        <section className="py-16 border-t border-white/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl font-bold">آراء عميلاتنا</h2>
@@ -246,7 +248,7 @@ function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.slice(0, 6).map((t: any) => (
-                <div key={t.id} className="bg-background rounded-2xl p-6 border border-border shadow-soft">
+                <div key={t.id} className="bg-white/50 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-soft">
                   <div className="flex gap-0.5 mb-3">
                     {Array.from({ length: t.rating }).map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-gold text-gold" />
