@@ -38,6 +38,8 @@ const trustBadges = [
 
 function HomePage() {
   const brand = useBrand();
+  const navigate = useNavigate();
+  const { add } = useCart();
 
   const { data: featured = [] } = useQuery({
     queryKey: ["featured-products"],
