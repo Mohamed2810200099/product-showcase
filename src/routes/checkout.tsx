@@ -140,9 +140,11 @@ function CheckoutPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form, customer_email: user?.email ?? "" };
+    const emailToUse = (user?.email ?? form.customer_email ?? "").trim();
+    const payload = { ...form, customer_email: emailToUse };
     const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
+
 
     setSubmitting(true);
     const { createOrder } = await import("@/server/orders.create.functions");
