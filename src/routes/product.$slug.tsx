@@ -180,9 +180,9 @@ function ProductPage() {
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition ${activeImg === i ? "border-primary" : "border-transparent opacity-70"}`}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition bg-white p-1.5 ${activeImg === i ? "border-primary" : "border-border opacity-70"}`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" className="w-full h-full object-contain" />
                   </button>
                 ))}
               </div>
