@@ -1,7 +1,8 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Minus, Plus, Star, ShoppingBag, MessageCircle, ShieldCheck, Truck, Heart, ArrowLeft, Zap, Check, AlertTriangle, Sparkles, Info } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Minus, Plus, Star, ShoppingBag, MessageCircle, ShieldCheck, Truck, Heart, ArrowLeft, Zap, Check, AlertTriangle, Sparkles, Info, BadgeCheck, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
@@ -29,6 +30,7 @@ function ProductPage() {
   const { add, subtotal } = useCart();
   const brand = useBrand();
   const navigate = useNavigate();
+  const reduce = useReducedMotion();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [reviewName, setReviewName] = useState("");
@@ -110,6 +112,18 @@ function ProductPage() {
   const isOutProduct =
     availabilityStatus === "out_of_stock" || (trackingEnabled && Number(product.stock ?? 0) <= 0);
   const notPurchasable = isComingSoonProduct || isOutProduct;
+  const maxQty = trackingEnabled ? Math.max(0, Number(product.stock ?? 0)) : Infinity;
+
+  const incQty = () => {
+    setQty((q) => {
+      if (trackingEnabled && q + 1 > maxQty) {
+        toast.error("الكمية المطلوبة غير متاحة حالياً");
+        return q;
+      }
+      return q + 1;
+    });
+  };
+  const decQty = () => setQty((q) => Math.max(1, q - 1));
 
   const handleAdd = () => {
     if (notPurchasable) {
@@ -160,9 +174,11 @@ function ProductPage() {
   const benefits = (product.key_benefits as string[] | null) ?? [];
   const ingredients = (product.key_ingredients as string[] | null) ?? [];
 
+  const statusLabel = isComingSoonProduct ? "قريباً" : isOutProduct ? "نفد المخزون" : "متاح للطلب";
+
   return (
     <PublicLayout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-28 md:pb-8">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">الرئيسية</Link>
           <ArrowLeft className="h-3 w-3" />
@@ -171,22 +187,57 @@ function ProductPage() {
           <span className="text-foreground">{product.arabic_title || product.name}</span>
         </nav>
 
-        <div className="grid md:grid-cols-2 gap-10">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Gallery */}
           <div>
-            <div className="aspect-square bg-white rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-border">
-              <img src={images[activeImg]} alt={product.arabic_title || product.name} className="w-full h-full object-contain" />
+            <div
+              className="aspect-square rounded-[2rem] overflow-hidden relative p-6 sm:p-12 border border-border/60 shadow-[0_25px_60px_-25px_rgba(217,108,157,0.35)]"
+              style={{
+                background:
+                  "radial-gradient(80% 70% at 50% 40%, #ffffff 0%, #fdf6f9 55%, #f8e3ec 100%)",
+              }}
+            >
+              {/* soft radial glow */}
+              <div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(55% 50% at 50% 60%, rgba(217,108,157,0.18), transparent 70%)",
+                }}
+              />
+              <motion.img
+                key={activeImg}
+                src={images[activeImg]}
+                alt={product.arabic_title || product.name}
+                loading="eager"
+                fetchPriority="high"
+                className="relative z-[1] w-full h-full object-contain drop-shadow-[0_25px_35px_rgba(180,90,130,0.25)]"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={
+                  reduce
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 1, scale: 1, y: [0, -6, 0] }
+                }
+                transition={
+                  reduce
+                    ? { duration: 0.4 }
+                    : { opacity: { duration: 0.4 }, scale: { duration: 0.5 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut" } }
+                }
+              />
               {discount && (
-                <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-sm font-bold px-3 py-1.5 rounded-full shadow-soft">
+                <span className="absolute top-4 right-4 z-[2] inline-flex items-center bg-primary text-primary-foreground text-sm font-bold px-3 py-1.5 rounded-full shadow-soft ring-1 ring-white/40">
                   -{discount}%
                 </span>
               )}
-              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
+              {product.is_limited && (
+                <span className="absolute top-4 left-4 z-[2] inline-flex items-center gap-1 bg-gradient-to-br from-gold to-amber-300 text-foreground text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-soft ring-1 ring-white/40">
+                  <Sparkles className="h-3 w-3" /> كمية محدودة
+                </span>
+              )}
+              <div className="absolute bottom-4 left-4 right-4 z-[2] flex flex-wrap gap-2 justify-center">
                 <span className="bg-background/90 backdrop-blur text-xs font-semibold px-3 py-1.5 rounded-full text-primary shadow-soft">
                   🇩🇪 منتج ألماني أصلي
-                </span>
-                <span className="bg-background/90 backdrop-blur text-xs font-semibold px-3 py-1.5 rounded-full text-foreground shadow-soft">
-                  مستورد من ألمانيا
                 </span>
               </div>
             </div>
@@ -196,7 +247,12 @@ function ProductPage() {
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition bg-white p-1.5 ${activeImg === i ? "border-primary" : "border-border opacity-70"}`}
+                    aria-label={`صورة ${i + 1}`}
+                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 bg-white p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                      activeImg === i
+                        ? "border-primary shadow-[0_8px_20px_-8px_rgba(217,108,157,0.5)] scale-[1.03]"
+                        : "border-border/60 opacity-70 hover:opacity-100 hover:border-primary/40"
+                    }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-contain" />
                   </button>
@@ -208,13 +264,19 @@ function ProductPage() {
           {/* Info */}
           <div className="space-y-5">
             <div className="flex items-center gap-2 flex-wrap">
-              {product.brand && <span className="text-xs uppercase tracking-widest text-muted-foreground">{product.brand}</span>}
+              {product.brand && (
+                <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.18em] font-semibold text-primary bg-primary/8 border border-primary/20 px-2.5 py-1 rounded-full">
+                  <BadgeCheck className="h-3 w-3" /> {product.brand}
+                </span>
+              )}
               {(product as any).sub_category && (
-                <span className="text-xs bg-secondary px-2 py-1 rounded-full">{(product as any).sub_category}</span>
+                <span className="text-xs bg-secondary/70 border border-border px-2.5 py-1 rounded-full">{(product as any).sub_category}</span>
               )}
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-bold leading-tight">{product.arabic_title || product.name}</h1>
-            <p className="text-sm text-muted-foreground" dir="ltr">{product.name}</p>
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.15] tracking-tight text-foreground/90">
+              {product.arabic_title || product.name}
+            </h1>
+            <p className="text-sm text-muted-foreground/80" dir="ltr">{product.name}</p>
 
             {Number(product.reviews_count) > 0 && (
               <div className="flex items-center gap-2">
@@ -227,10 +289,20 @@ function ProductPage() {
               </div>
             )}
 
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-3xl font-bold text-primary">{formatEGP(Number(product.price))}</span>
-              {product.compare_at_price && (
-                <span className="text-lg text-muted-foreground line-through">{formatEGP(Number(product.compare_at_price))}</span>
+            {/* Price block */}
+            <div className="flex items-end gap-3 flex-wrap">
+              <span className="text-4xl font-bold text-primary tracking-tight leading-none">
+                {formatEGP(Number(product.price))}
+              </span>
+              {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
+                <>
+                  <span className="text-lg text-muted-foreground line-through">{formatEGP(Number(product.compare_at_price))}</span>
+                  {discount && (
+                    <span className="inline-flex items-center bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full">
+                      وفّري {discount}%
+                    </span>
+                  )}
+                </>
               )}
             </div>
 
@@ -253,67 +325,103 @@ function ProductPage() {
               );
             })()}
 
-            {(() => {
-              const status = (product as any).availability_status ?? "available";
-              const tracking = (product as any).stock_tracking_enabled === true;
-              const isComingSoon = status === "coming_soon";
-              const isOut = status === "out_of_stock" || (tracking && product.stock === 0);
-              const unavailable = isOut || isComingSoon;
-              const statusLabel = isComingSoon ? "قريباً" : isOut ? "نفد المخزون" : "متاح للطلب";
-              return (
-                <>
-                  <div className="flex items-center gap-4 py-3 border-y border-border">
-                    <span className="text-sm font-medium">الكمية:</span>
-                    <div className="flex items-center border border-border rounded-full">
-                      <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-2 hover:bg-accent rounded-r-full"><Minus className="h-4 w-4" /></button>
-                      <span className="w-10 text-center font-semibold">{qty}</span>
-                      <button onClick={() => setQty((q) => q + 1)} className="p-2 hover:bg-accent rounded-l-full"><Plus className="h-4 w-4" /></button>
-                    </div>
-                    <span className={`text-xs font-medium ${unavailable ? (isComingSoon ? "text-amber-600" : "text-destructive") : "text-emerald-600"}`}>
-                      {statusLabel}
-                    </span>
-                  </div>
+            {/* Quantity + status */}
+            <div className="flex items-center gap-4 py-4 border-y border-border/60">
+              <span className="text-sm font-medium">الكمية:</span>
+              <div className="flex items-center bg-card border border-border rounded-full shadow-[0_4px_14px_-6px_rgba(217,108,157,0.25)]">
+                <button
+                  onClick={decQty}
+                  aria-label="إنقاص"
+                  className="p-2.5 hover:bg-primary/10 hover:text-primary rounded-r-full transition-colors disabled:opacity-40"
+                  disabled={qty <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="w-12 text-center font-semibold tabular-nums">{qty}</span>
+                <button
+                  onClick={incQty}
+                  aria-label="زيادة"
+                  className="p-2.5 hover:bg-primary/10 hover:text-primary rounded-l-full transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                  isComingSoonProduct
+                    ? "text-amber-700 bg-amber-50 border-amber-200"
+                    : isOutProduct
+                    ? "text-destructive bg-destructive/10 border-destructive/30"
+                    : "text-emerald-700 bg-emerald-50 border-emerald-200"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    isComingSoonProduct ? "bg-amber-500" : isOutProduct ? "bg-destructive" : "bg-emerald-500 animate-pulse"
+                  }`}
+                />
+                {statusLabel}
+              </span>
+            </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      onClick={handleAdd}
-                      disabled={unavailable}
-                      className="bg-card border-2 border-primary text-primary py-3.5 rounded-full font-medium hover:bg-primary hover:text-primary-foreground transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
-                    </button>
-                    <button
-                      onClick={handleBuyNow}
-                      disabled={unavailable}
-                      className="bg-primary text-primary-foreground py-3.5 rounded-full font-medium shadow-elegant hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      <Zap className="h-4 w-4" /> اشتري الآن
-                    </button>
-                    {brand.whatsapp ? (
-                      <a
-                        href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => trackEvent("whatsapp_clicked", { source: "product_page", product_id: product.id, product_name: product.name })}
-                        className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
-                      >
-                        <MessageCircle className="h-4 w-4" /> واتساب
-                      </a>
-                    ) : null}
-                  </div>
-                </>
-              );
-            })()}
+            {/* CTAs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={handleBuyNow}
+                disabled={notPurchasable}
+                className="group relative inline-flex items-center justify-center gap-2 py-4 rounded-full font-semibold text-base
+                  bg-gradient-to-br from-primary to-[#C95588] text-primary-foreground
+                  shadow-[0_18px_38px_-12px_rgba(217,108,157,0.7)]
+                  transition-all duration-300 ease-out
+                  hover:shadow-[0_22px_44px_-12px_rgba(217,108,157,0.85)] hover:-translate-y-0.5
+                  active:translate-y-0 active:scale-[0.98]
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:bg-muted disabled:bg-none disabled:text-muted-foreground disabled:shadow-none"
+              >
+                <Zap className="h-4 w-4 transition-transform group-hover:-rotate-12" /> اشتري الآن
+              </button>
+              <button
+                onClick={handleAdd}
+                disabled={notPurchasable}
+                className="group inline-flex items-center justify-center gap-2 py-4 rounded-full font-semibold text-base
+                  bg-card border-2 border-primary/80 text-primary
+                  hover:bg-primary hover:text-primary-foreground hover:border-primary
+                  transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:bg-card disabled:hover:text-primary"
+              >
+                <ShoppingBag className="h-4 w-4" /> أضيفي للسلة
+              </button>
+            </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-2">
+            {brand.whatsapp ? (
+              <a
+                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("whatsapp_clicked", { source: "product_page", product_id: product.id, product_name: product.name })}
+                className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-full font-medium text-sm text-[#1FAA52] bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366]/60"
+              >
+                <MessageCircle className="h-4 w-4" /> أو تواصلي عبر واتساب
+              </a>
+            ) : null}
+
+            {/* Reassurance card */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
               {[
-                { icon: ShieldCheck, label: "أصلية ١٠٠٪" },
-                { icon: Truck, label: "توصيل سريع" },
-                { icon: Heart, label: "خدمة راقية" },
+                { icon: ShieldCheck, label: "منتج ألماني أصلي" },
+                { icon: Wallet, label: "الدفع عند الاستلام" },
+                { icon: MessageCircle, label: "تأكيد الطلب عبر واتساب" },
+                { icon: Truck, label: "توصيل داخل مصر" },
               ].map((b, i) => (
-                <div key={i} className="flex flex-col items-center gap-1 p-3 bg-secondary/40 rounded-xl text-center text-xs">
-                  <b.icon className="h-5 w-5 text-primary" />
-                  <span>{b.label}</span>
+                <div
+                  key={i}
+                  className="flex items-center gap-2 p-3 bg-gradient-to-br from-card to-secondary/30 border border-border/60 rounded-xl text-xs sm:text-[13px]"
+                >
+                  <span className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <b.icon className="h-4 w-4" />
+                  </span>
+                  <span className="font-medium">{b.label}</span>
                 </div>
               ))}
             </div>
@@ -410,7 +518,8 @@ function ProductPage() {
           </div>
 
           <form onSubmit={submitReview} className="bg-secondary/40 rounded-2xl p-6 border border-border h-fit">
-            <h3 className="font-display text-xl font-semibold mb-4">شاركينا رأيك</h3>
+            <h3 className="font-display text-xl font-semibold mb-1">شاركينا رأيك</h3>
+            <p className="text-xs text-muted-foreground mb-4">يتم مراجعة التقييم قبل ظهوره</p>
             <div className="space-y-3">
               <input
                 type="text" placeholder="اسمك" value={reviewName} onChange={(e) => setReviewName(e.target.value)} maxLength={100}
@@ -446,6 +555,34 @@ function ProductPage() {
             </div>
           </section>
         )}
+      </div>
+
+      {/* Sticky mobile buy bar */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-10px_30px_-10px_rgba(58,36,48,0.18)] px-4 py-3"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] text-muted-foreground">السعر</span>
+            <span className="text-lg font-bold text-primary tabular-nums">{formatEGP(Number(product.price) * qty)}</span>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={notPurchasable}
+            aria-label="أضيفي للسلة"
+            className="h-12 w-12 shrink-0 rounded-full border-2 border-primary text-primary flex items-center justify-center active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ShoppingBag className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleBuyNow}
+            disabled={notPurchasable}
+            className="flex-1 h-12 rounded-full font-semibold text-sm bg-gradient-to-br from-primary to-[#C95588] text-primary-foreground shadow-[0_12px_28px_-10px_rgba(217,108,157,0.7)] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-muted disabled:bg-none disabled:text-muted-foreground disabled:shadow-none inline-flex items-center justify-center gap-2"
+          >
+            {notPurchasable ? (isComingSoonProduct ? "قريباً" : "نفد المخزون") : (<><Zap className="h-4 w-4" /> اشتري الآن</>)}
+          </button>
+        </div>
       </div>
     </PublicLayout>
   );
