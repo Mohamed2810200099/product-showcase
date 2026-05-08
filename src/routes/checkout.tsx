@@ -216,7 +216,16 @@ function CheckoutPage() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
-                
+                {!isAuthenticated && (
+                  <Field
+                    label="البريد الإلكتروني (اختياري)"
+                    type="email"
+                    value={form.customer_email}
+                    onChange={(v) => setForm({ ...form, customer_email: v })}
+                    className="sm:col-span-2"
+                  />
+                )}
+
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">المحافظة *</label>
                   <select
