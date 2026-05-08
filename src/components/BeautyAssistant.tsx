@@ -79,7 +79,7 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,arabic_title,slug,price,images,order_index,tags")
+        .select("id,name,arabic_title,slug,price,images,tags,product_type,suitable_for")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
       return data ?? [];
