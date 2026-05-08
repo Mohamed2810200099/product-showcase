@@ -58,10 +58,10 @@ export function ScrollProductBackdrop() {
           key={active}
           src={current.src}
           alt=""
-          initial={{ opacity: 0, scale: 0.96, rotate: current.tilt }}
-          animate={{ opacity: 0.85, scale: 1, rotate: current.tilt }}
-          exit={{ opacity: 0, scale: 1.02 }}
-          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.98, rotate: current.tilt }}
+          animate={{ opacity: 0.7, scale: 1, rotate: current.tilt }}
+          exit={{ opacity: 0, scale: 1.01 }}
+          transition={{ duration: 2.4, ease: [0.22, 1, 0.36, 1] }}
           style={{
             y: reduce ? 0 : yShift,
             scale: reduce ? 1 : scaleShift,
@@ -75,8 +75,8 @@ export function ScrollProductBackdrop() {
             w-auto max-w-none
             object-contain
             select-none
-            drop-shadow-[0_60px_80px_rgba(58,36,48,0.25)]
-            opacity-80 md:opacity-85
+            drop-shadow-[0_60px_80px_rgba(58,36,48,0.22)]
+            opacity-65 md:opacity-70
             mix-blend-multiply
           "
         />
