@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Sparkles, X, ShoppingBag, ArrowRight, RotateCcw } from "lucide-react";
+import { Sparkles, X, ShoppingBag, ArrowRight, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
