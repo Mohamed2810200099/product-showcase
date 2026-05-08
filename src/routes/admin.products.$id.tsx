@@ -62,6 +62,8 @@ function ProductForm() {
     is_active: true,
     is_featured: false,
     is_limited: false,
+    stock_tracking_enabled: false,
+    availability_status: "available" as "available" | "out_of_stock" | "coming_soon",
   });
 
   useEffect(() => {
@@ -105,6 +107,8 @@ function ProductForm() {
               is_active: !!data.is_active,
               is_featured: !!data.is_featured,
               is_limited: !!data.is_limited,
+              stock_tracking_enabled: !!(data as any).stock_tracking_enabled,
+              availability_status: ((data as any).availability_status ?? "available") as "available" | "out_of_stock" | "coming_soon",
             });
           }
           setLoading(false);
@@ -147,6 +151,8 @@ function ProductForm() {
       is_active: form.is_active,
       is_featured: form.is_featured,
       is_limited: form.is_limited,
+      stock_tracking_enabled: form.stock_tracking_enabled,
+      availability_status: form.availability_status,
     } as any;
 
     // SECURITY: write gated by RLS "Admins manage products" via has_role(auth.uid(),'admin').
@@ -244,7 +250,22 @@ function ProductForm() {
               <Field label="السعر (ج.م) *" type="number" value={String(form.price)} onChange={(v) => setForm({ ...form, price: Number(v) })} />
               <Field label="السعر قبل الخصم" type="number" value={String(form.compare_at_price)} onChange={(v) => setForm({ ...form, compare_at_price: Number(v) })} />
               <Field label="سعر dm الأصلي (€)" type="number" value={String(form.dm_price_eur)} onChange={(v) => setForm({ ...form, dm_price_eur: Number(v) })} />
-              <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => setForm({ ...form, stock: Number(v) })} />
+              <Field label="المخزون" type="number" value={String(form.stock)} onChange={(v) => {
+                const n = Number(v);
+                setForm((f) => {
+                  const next = { ...f, stock: n };
+                  if (f.stock_tracking_enabled) {
+                    if (n <= 0 && f.availability_status !== "out_of_stock") {
+                      next.availability_status = "out_of_stock";
+                      toast.message("تم ضبط الحالة على: نفذ المخزون");
+                    } else if (n > 0 && f.availability_status === "out_of_stock") {
+                      next.availability_status = "available";
+                      toast.message("تم إعادة المنتج كمتاح");
+                    }
+                  }
+                  return next;
+                });
+              }} />
               <Field label="SKU" value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} dir="ltr" />
               <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} dir="ltr" />
               <Field label="التصنيف الفرعي" value={form.sub_category} onChange={(v) => setForm({ ...form, sub_category: v })} dir="ltr" />
@@ -312,6 +333,22 @@ function ProductForm() {
             <Toggle label="منشور (ظاهر للعملاء)" checked={form.is_active} onChange={(v) => setForm({ ...form, is_active: v })} />
             <Toggle label="منتج مميز" checked={form.is_featured} onChange={(v) => setForm({ ...form, is_featured: v })} />
             <Toggle label="كمية محدودة" checked={form.is_limited} onChange={(v) => setForm({ ...form, is_limited: v })} />
+            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => setForm({ ...form, stock_tracking_enabled: v })} />
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">حالة التوفر</label>
+              <select
+                value={form.availability_status}
+                onChange={(e) => setForm({ ...form, availability_status: e.target.value as typeof form.availability_status })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="available">متاح</option>
+                <option value="out_of_stock">نفذ المخزون</option>
+                <option value="coming_soon">قريباً</option>
+              </select>
+              {form.stock_tracking_enabled && form.stock <= 0 && form.availability_status === "available" && (
+                <p className="text-[11px] text-amber-600 mt-1">⚠️ المخزون صفر — يفضّل اختيار "نفذ المخزون"</p>
+              )}
+            </div>
           </Section>
         </aside>
       </div>
