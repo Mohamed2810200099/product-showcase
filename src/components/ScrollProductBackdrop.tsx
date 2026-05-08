@@ -9,12 +9,10 @@ import plexCondImg from "@/assets/products/cutout-plex-conditioner.png";
 import plexMaskImg from "@/assets/products/cutout-plex-mask.png";
 
 const PRODUCTS = [
-  { src: intenseImg, alt: "Intense Repair", tilt: -8, glow: "from-[#FBE7C8]/70 via-[#F8DCE5]/40 to-transparent" },
-  { src: scalpImg, alt: "Scalp Booster", tilt: 6, glow: "from-[#FADCE7]/70 via-[#F8C8D8]/40 to-transparent" },
-  { src: keratinImg, alt: "Night Repair", tilt: -5, glow: "from-[#F8C8D8]/70 via-[#EFA7C3]/30 to-transparent" },
-  { src: plexOilImg, alt: "Plex Care Oil", tilt: 8, glow: "from-[#EDE7F6]/70 via-[#F9EEF3]/40 to-transparent" },
-  { src: plexCondImg, alt: "Plex Conditioner", tilt: -7, glow: "from-[#F9EEF3]/70 via-[#FADCE7]/40 to-transparent" },
-  { src: plexMaskImg, alt: "Plex Mask", tilt: 5, glow: "from-[#EDE7F6]/70 via-[#F9EEF3]/50 to-transparent" },
+  { src: intenseImg, alt: "Intense Repair", tilt: -6, glow: "from-[#FBE7C8]/70 via-[#F8DCE5]/40 to-transparent" },
+  { src: keratinImg, alt: "Night Repair", tilt: -4, glow: "from-[#F8C8D8]/70 via-[#EFA7C3]/30 to-transparent" },
+  { src: plexCondImg, alt: "Plex Conditioner", tilt: -5, glow: "from-[#F9EEF3]/70 via-[#FADCE7]/40 to-transparent" },
+  { src: plexMaskImg, alt: "Plex Mask", tilt: 4, glow: "from-[#EDE7F6]/70 via-[#F9EEF3]/50 to-transparent" },
 ];
 
 /**
