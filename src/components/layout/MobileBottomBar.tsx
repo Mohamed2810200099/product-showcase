@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { Home, Store, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useBrand } from "@/hooks/use-brand";
+import { trackEvent } from "@/lib/analytics";
 
 export function MobileBottomBar() {
   const { pathname } = useLocation();
