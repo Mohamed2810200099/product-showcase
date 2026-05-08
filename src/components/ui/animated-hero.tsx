@@ -24,7 +24,7 @@ export function AnimatedHeroWords({ words, interval = 2000, className }: Props) 
   return (
     <span
       className={cn(
-        "relative inline-flex items-center justify-center md:justify-start align-bottom overflow-hidden",
+        "relative inline-flex items-center justify-center md:justify-start align-bottom overflow-hidden rounded-2xl bg-[#FFF8F2]/75 backdrop-blur-sm px-3 sm:px-4 py-1 shadow-[0_4px_18px_-8px_rgba(217,108,157,0.25)] ring-1 ring-white/60",
         className
       )}
       aria-live="polite"
