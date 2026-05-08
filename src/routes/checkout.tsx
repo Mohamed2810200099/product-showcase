@@ -156,16 +156,28 @@ function CheckoutPage() {
     });
   };
 
-  const applyReferral = () => {
+  const applyReferral = async () => {
     const code = referralInput.trim().toUpperCase();
     if (!code) return;
-    if (!glowSettings) return toast.error("جاري التحميل…");
-    const d = Math.round((subtotal * glowSettings.friend_discount_pct) / 100);
-    setAppliedReferral({ code, discount: d });
+    const { normalizePhone, isValidEgyptPhone } = await import("@/lib/phone");
+    const phoneOk = isValidEgyptPhone(form.customer_phone);
+    if (!isAuthenticated && !phoneOk) {
+      return toast.error("اكتبي رقم موبايل مصري صحيح الأول عشان نتأكد إن الكود صالح ليكي.");
+    }
+    const phone = phoneOk ? normalizePhone(form.customer_phone) : null;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token ?? null;
+    const { validateReferralCode } = await import("@/server/referral.functions");
+    const result = await validateReferralCode({
+      data: { code, subtotal, phone, access_token: accessToken },
+    });
+    if (!result.ok) return toast.error(result.error);
+    setAppliedReferral({ code: result.code, discount: result.discount });
     setAppliedCoupon(null);
-    trackEvent("referral_applied", { code, discount: d, cart_total: subtotal });
-    toast.success(`تم تطبيق كود صديقتك — خصم ${glowSettings.friend_discount_pct}٪`);
+    trackEvent("referral_applied", { code: result.code, discount: result.discount, cart_total: subtotal });
+    toast.success(`تم تطبيق كود صديقتك — خصم ${result.discount_pct}٪`);
   };
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
