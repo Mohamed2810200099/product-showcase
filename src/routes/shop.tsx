@@ -123,7 +123,12 @@ function ShopPage() {
         default: q = q.order("order_index", { ascending: true });
       }
       const { data } = await q;
-      return (data ?? []) as unknown as Product[];
+      let rows = (data ?? []) as unknown as Product[];
+      // "عروض فقط": only show products with a real visible discount (compare_at_price > price)
+      if (search.offers) {
+        rows = rows.filter((p: any) => p.compare_at_price != null && Number(p.compare_at_price) > Number(p.price));
+      }
+      return rows;
     },
   });
 
