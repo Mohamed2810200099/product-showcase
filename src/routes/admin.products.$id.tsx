@@ -151,6 +151,8 @@ function ProductForm() {
       is_active: form.is_active,
       is_featured: form.is_featured,
       is_limited: form.is_limited,
+      stock_tracking_enabled: form.stock_tracking_enabled,
+      availability_status: form.availability_status,
     } as any;
 
     // SECURITY: write gated by RLS "Admins manage products" via has_role(auth.uid(),'admin').
