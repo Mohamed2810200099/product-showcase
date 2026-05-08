@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift, Sparkles } from "lucide-react";
 import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
+import { AnimatedHeroWords } from "@/components/ui/animated-hero";
 
 import groupImg from "@/assets/products/group.png";
 import langhaarImg from "@/assets/products/langhaar.png";
@@ -253,8 +254,12 @@ export function HeroPremium() {
           >
             Original German Beauty
             <br />
-            <span className="bg-gradient-to-r from-[#D96C9D] via-[#E7A8BF] to-[#C95588] bg-clip-text text-transparent">
-              for Your Everyday Glow
+            <span className="inline-flex flex-wrap items-baseline gap-x-3 justify-center md:justify-start">
+              <span className="text-[#3A2430]">for Your</span>
+              <AnimatedHeroWords
+                words={["Everyday Glow", "Hair Repair", "Skin Glow", "Scalp Care", "Soft Hair"]}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] min-w-[8ch]"
+              />
             </span>
           </motion.h1>
 
