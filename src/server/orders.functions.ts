@@ -48,67 +48,80 @@ export const getMyOrders = createServerFn({ method: "POST" })
 export const getMyAccount = createServerFn({ method: "POST" })
   .inputValidator(parseAuthInput)
   .handler(async ({ data }) => {
-    const authUser = await getUserFromAccessToken(data.access_token);
-    if (!authUser) {
-      return { ok: false as const, error: "unauthorized", profile: null, orders: [] };
-    }
-    const { user, userId, email } = authUser;
-    const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string };
+    try {
+      const authUser = await getUserFromAccessToken(data.access_token);
+      if (!authUser) {
+        return { ok: false as const, error: "unauthorized", profile: null, orders: [] };
+      }
+      const { user, userId, email } = authUser;
+      const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string };
 
-    const loadProfile = () =>
-      supabaseAdmin
-        .from("customer_profiles")
-        .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const loadProfile = () =>
+        supabaseAdmin
+          .from("customer_profiles")
+          .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-    const [profileRes, ordersRes] = await Promise.all([
-      loadProfile(),
-      supabaseAdmin
+      const profileRes = await loadProfile();
+      if (profileRes.error) {
+        return { ok: false as const, error: "profile_load_failed", profile: null, orders: [] };
+      }
+
+      let profile = profileRes.data;
+
+      if (!profile) {
+        const seed = meta.full_name || meta.name || (email ? email.split("@")[0] : "Glow");
+        const displayName = seed || "Glow";
+
+        const { data: codeRpc } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
+        const personalCode = codeRpc ?? `GLOW${Math.floor(10 + Math.random() * 90)}`;
+
+        const { data: inserted, error: insertErr } = await supabaseAdmin
+          .from("customer_profiles")
+          .upsert(
+            {
+              user_id: userId,
+              display_name: displayName,
+              personal_code: personalCode,
+              wallet_balance: 0,
+            },
+            { onConflict: "user_id" }
+          )
+          .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
+          .maybeSingle();
+
+        if (insertErr) {
+          const refetch = await loadProfile();
+          if (refetch.error || !refetch.data) {
+            return { ok: false as const, error: "profile_create_failed", profile: null, orders: [] };
+          }
+          profile = refetch.data;
+        } else {
+          profile = inserted;
+        }
+      }
+
+      const { data: orders, error: ordersError } = await supabaseAdmin
         .from("orders")
         .select("id, order_number, status, created_at, total, items")
         .eq("customer_user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(50),
-    ]);
+        .limit(50);
 
-    let profile = profileRes.data;
-
-    if (!profile) {
-      const seed = meta.full_name || meta.name || (email ? email.split("@")[0] : "Glow");
-      const displayName = seed || "Glow";
-
-      const { data: codeRpc } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
-      const personalCode = codeRpc ?? `GLOW${Math.floor(10 + Math.random() * 90)}`;
-
-      const { data: inserted, error: insertErr } = await supabaseAdmin
-        .from("customer_profiles")
-        .upsert(
-          {
-            user_id: userId,
-            display_name: displayName,
-            personal_code: personalCode,
-            wallet_balance: 0,
-          },
-          { onConflict: "user_id" }
-        )
-        .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
-        .maybeSingle();
-
-      if (insertErr) {
-        const refetch = await loadProfile();
-        profile = refetch.data;
-      } else {
-        profile = inserted;
+      if (ordersError) {
+        return { ok: false as const, error: "orders_load_failed", profile: profile ?? null, orders: [] };
       }
-    }
 
-    return {
-      ok: true as const,
-      error: null,
-      profile: profile ?? null,
-      orders: ordersRes.data ?? [],
-    };
+      return {
+        ok: true as const,
+        error: null,
+        profile: profile ?? null,
+        orders: orders ?? [],
+      };
+    } catch {
+      return { ok: false as const, error: "account_load_failed", profile: null, orders: [] };
+    }
   });
 
 

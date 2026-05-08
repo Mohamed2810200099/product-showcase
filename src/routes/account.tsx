@@ -55,26 +55,38 @@ function AccountPage() {
   const [data, setData] = useState<AccountData>(null);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated || !user) { setData(null); return; }
+    if (!isAuthenticated || !user) {
+      setData(null);
+      setError(null);
+      setNeedsLogin(false);
+      return;
+    }
     let cancelled = false;
     setFetching(true);
     setError(null);
+    setNeedsLogin(false);
     (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const accessToken = sessionData.session?.access_token;
-        if (!accessToken) {
-          if (!cancelled) setError("انتهت الجلسة، سجلي الدخول من جديد.");
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          if (!cancelled) {
+            setData(null);
+            setNeedsLogin(true);
+            setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          }
           return;
         }
-        const result = await getMyAccount({ data: { access_token: accessToken } });
+        const result = await getMyAccount({ data: { access_token: session.access_token } });
         if (cancelled) return;
         if (!result.ok) {
-          setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          setData(null);
+          setNeedsLogin(result.error === "unauthorized");
+          setError(result.error === "unauthorized" ? "انتهت الجلسة، سجلي الدخول من جديد." : "حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
           return;
         }
         setData({
@@ -83,7 +95,10 @@ function AccountPage() {
         });
       } catch (e) {
         console.warn("Account load failed");
-        if (!cancelled) setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
+        if (!cancelled) {
+          setData(null);
+          setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
+        }
       } finally {
         if (!cancelled) setFetching(false);
       }
@@ -119,7 +134,7 @@ function AccountPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || needsLogin) {
     return (
       <PublicLayout>
         <section dir="rtl" className="container mx-auto px-4 py-16">
@@ -128,7 +143,7 @@ function AccountPage() {
               <LogIn className="h-7 w-7" />
             </div>
             <h1 className="font-display text-2xl font-bold text-[#3A2430]">سجلي دخولك</h1>
-            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">سجلي دخولك عشان تشوفي بياناتك وطلباتك.</p>
+            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">{error ?? "سجلي دخولك عشان تشوفي بياناتك وطلباتك."}</p>
             <Link
               to="/login"
               className="inline-flex items-center gap-2 rounded-full bg-[#D96C9D] hover:bg-[#C95588] text-white px-6 py-3 font-medium shadow-[0_12px_30px_-10px_rgba(217,108,157,0.6)] transition"
@@ -146,6 +161,11 @@ function AccountPage() {
   return (
     <PublicLayout>
       <section dir="rtl" className="container mx-auto px-4 py-10 sm:py-14">
+        {error && !fetching ? (
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
