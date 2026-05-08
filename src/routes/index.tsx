@@ -85,10 +85,24 @@ function HomePage() {
     },
   });
 
+  const { data: showReferral = false } = useQuery({
+    queryKey: ["setting", "show_referral_section"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "show_referral_section")
+        .maybeSingle();
+      const v = data?.value as { show_referral_section?: boolean } | boolean | null;
+      if (typeof v === "boolean") return v;
+      return Boolean(v?.show_referral_section);
+    },
+  });
+
   return (
     <PublicLayout>
       <HeroPremium />
-      {brand.show_referral_section && <ReferralSection />}
+      {showReferral && <ReferralSection />}
 
       {/* TRUST BADGES */}
       <section className="border-y border-border bg-secondary/40">
