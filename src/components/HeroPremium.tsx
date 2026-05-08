@@ -73,27 +73,6 @@ export function HeroPremium() {
     >
       {/* Decorative glow blobs removed — global smoke handles ambient color */}
 
-      {/* Studio group product image — sits behind text as a soft premium layer */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0, scale: 1.04, x: -30 }}
-        animate={{ opacity: 1, scale: 1, x: 0 }}
-        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-        style={{ zIndex: 2 }}
-      >
-        <img
-          src={groupImg}
-          alt=""
-          className="w-full h-full object-contain object-center select-none"
-          style={{
-            opacity: 0.55,
-            filter: "drop-shadow(0 30px 50px rgba(58,36,48,0.18))",
-            background: "transparent",
-          }}
-        />
-      </motion.div>
-
       {/* Cursor spotlight */}
       {!reduce && (
         <motion.div
@@ -104,13 +83,44 @@ export function HeroPremium() {
       )}
 
       <div className="container relative z-10 mx-auto px-4 py-8 sm:py-12 md:py-16">
-        {/* Centered content — backdrop product visual lives outside */}
+        <div className="grid md:grid-cols-12 gap-8 md:gap-6 items-center">
+        {/* TEXT — right side in RTL (first in DOM) */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="text-center md:text-right space-y-5 sm:space-y-6 max-w-2xl"
+          className="relative md:col-span-7 text-center md:text-right space-y-5 sm:space-y-6"
         >
+          {/* Supporting product cluster — subtle, behind text on the right */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-visible hidden md:block">
+            <motion.img
+              src={sideA}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.18, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -top-10 -right-6 w-32 lg:w-40 rotate-[-8deg] select-none"
+              alt=""
+              draggable={false}
+            />
+            <motion.img
+              src={sideB}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.16, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.6 }}
+              className="absolute -bottom-8 right-20 w-28 lg:w-36 rotate-[8deg] select-none"
+              alt=""
+              draggable={false}
+            />
+            <motion.img
+              src={sideC}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 0.14, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.8 }}
+              className="absolute top-4 right-1/2 w-24 lg:w-32 rotate-[12deg] select-none"
+              alt=""
+              draggable={false}
+            />
+          </div>
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
