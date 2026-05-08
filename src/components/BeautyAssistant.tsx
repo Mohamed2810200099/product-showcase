@@ -268,6 +268,22 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
             </p>
           </div>
         )}
+
+        {step === "result" && goalDef && recommended.length === 0 && (
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-4 border border-white/80 shadow-soft mt-2 text-center">
+            <p className="text-sm text-[#3A2430] leading-relaxed">
+              مش لاقيين ترشيح مناسب حالياً، كلمينا على واتساب.
+            </p>
+            {brand.whatsapp && (
+              <a
+                href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`مرحبًا، محتاجة مساعدة في اختيار روتين ${goalDef.label}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center gap-1 bg-[#25D366] text-white rounded-full px-4 py-2 text-xs font-medium"
+              >
+                اسألي على واتساب
+              </a>
+            )}
       </div>
     </div>
   );
