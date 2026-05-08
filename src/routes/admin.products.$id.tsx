@@ -47,6 +47,7 @@ function ProductForm() {
     brand: "",
     category_id: "",
     sub_category: "",
+    product_type: "",
     images: [] as string[],
     tags: "",
     order_index: 0,
