@@ -228,7 +228,7 @@ function CheckoutPage() {
               <h2 className="font-display text-xl font-semibold mb-4">بيانات التوصيل</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 <Field label="الاسم بالكامل *" value={form.customer_name} onChange={(v) => setForm({ ...form, customer_name: v })} invalidMessage="من فضلك أدخلي اسمك الكامل" />
-                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={(v) => setForm({ ...form, customer_phone: v })} invalidMessage="من فضلك أدخلي رقم موبايلك" />
+                <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={setPhone} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 {!isAuthenticated && (
                   <Field
                     label="البريد الإلكتروني (اختياري)"
