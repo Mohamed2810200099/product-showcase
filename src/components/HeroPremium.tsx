@@ -387,13 +387,18 @@ export function HeroPremium() {
             style={{ x: groupX, y: groupY }}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FFF8F4] via-[#F9EEF3]/70 to-[#E7A8BF]/30 blur-2xl" />
-            <motion.img
-              src={groupImg}
-              alt="The Girl House products"
+            <motion.div
               animate={reduce ? undefined : { y: [0, -8, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full h-full object-contain drop-shadow-[0_30px_45px_rgba(58,36,48,0.2)]"
-            />
+              className="relative w-full h-full"
+            >
+              <SmartImage
+                src={groupImg}
+                alt="The Girl House products"
+                eager
+                className="relative w-full h-full object-contain drop-shadow-[0_30px_45px_rgba(58,36,48,0.2)]"
+              />
+            </motion.div>
           </motion.div>
 
           {/* Floating products */}
