@@ -163,7 +163,7 @@ function HomePage() {
           </div>
         </RevealOnView>
         {featured.length > 0 ? (
-          <div className="relative z-10 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FCE9F1] rounded-[32px] p-6 sm:p-10 border border-[#E7A8BF]/30 shadow-[0_30px_80px_-40px_rgba(217,108,157,0.4)]">
+          <div className="relative z-10 bg-white/30 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-white/50 shadow-[0_30px_80px_-40px_rgba(217,108,157,0.25)]">
             <div className="text-center mb-6">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-xs font-medium text-[#D96C9D]">
                 <Sparkles className="h-3.5 w-3.5" /> اختياراتنا المفضلة لكِ
