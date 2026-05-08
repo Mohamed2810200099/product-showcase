@@ -3,7 +3,10 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import groupImg from "@/assets/products/hero-studio-cutout.png";
+import heroMain from "@/assets/products/cutout-plex-mask.png";
+import sideA from "@/assets/products/cutout-plex-oil.png";
+import sideB from "@/assets/products/cutout-keratin-overnight.png";
+import sideC from "@/assets/products/cutout-scalp-booster.png";
 
 function MagneticButton({
   children,
