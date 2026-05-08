@@ -384,7 +384,9 @@ function CheckoutPage() {
               {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
             </button>
             <p className="text-xs text-muted-foreground text-center mt-3">
-              هنبعتلك تأكيد الطلب على إيميلك فوراً ✨
+              {(user?.email || form.customer_email)
+                ? "هنبعتلك تأكيد الطلب على إيميلك فوراً ✨"
+                : "هنأكد الطلب معاكِ عبر واتساب أو الهاتف."}
             </p>
           </aside>
         </form>
