@@ -55,26 +55,38 @@ function AccountPage() {
   const [data, setData] = useState<AccountData>(null);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (loading) return;
-    if (!isAuthenticated || !user) { setData(null); return; }
+    if (!isAuthenticated || !user) {
+      setData(null);
+      setError(null);
+      setNeedsLogin(false);
+      return;
+    }
     let cancelled = false;
     setFetching(true);
     setError(null);
+    setNeedsLogin(false);
     (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const accessToken = sessionData.session?.access_token;
-        if (!accessToken) {
-          if (!cancelled) setError("انتهت الجلسة، سجلي الدخول من جديد.");
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          if (!cancelled) {
+            setData(null);
+            setNeedsLogin(true);
+            setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          }
           return;
         }
-        const result = await getMyAccount({ data: { access_token: accessToken } });
+        const result = await getMyAccount({ data: { access_token: session.access_token } });
         if (cancelled) return;
         if (!result.ok) {
-          setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          setData(null);
+          setNeedsLogin(result.error === "unauthorized");
+          setError(result.error === "unauthorized" ? "انتهت الجلسة، سجلي الدخول من جديد." : "حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
           return;
         }
         setData({
@@ -83,7 +95,10 @@ function AccountPage() {
         });
       } catch (e) {
         console.warn("Account load failed");
-        if (!cancelled) setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
+        if (!cancelled) {
+          setData(null);
+          setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
+        }
       } finally {
         if (!cancelled) setFetching(false);
       }
