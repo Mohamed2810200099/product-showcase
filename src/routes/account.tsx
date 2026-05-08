@@ -65,15 +65,24 @@ function AccountPage() {
     setError(null);
     (async () => {
       try {
-        const result = await getMyAccount();
-        if (!cancelled) {
-          setData({
-            profile: (result.profile as AccountData extends null ? never : NonNullable<AccountData>["profile"]) ?? null,
-            orders: (result.orders as OrderRow[]) ?? [],
-          });
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData.session?.access_token;
+        if (!accessToken) {
+          if (!cancelled) setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          return;
         }
+        const result = await getMyAccount({ data: { access_token: accessToken } });
+        if (cancelled) return;
+        if (!result.ok) {
+          setError("انتهت الجلسة، سجلي الدخول من جديد.");
+          return;
+        }
+        setData({
+          profile: (result.profile as NonNullable<AccountData>["profile"]) ?? null,
+          orders: (result.orders as OrderRow[]) ?? [],
+        });
       } catch (e) {
-        console.warn("Account load failed", e);
+        console.warn("Account load failed");
         if (!cancelled) setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
       } finally {
         if (!cancelled) setFetching(false);
