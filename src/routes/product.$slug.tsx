@@ -158,8 +158,8 @@ function ProductPage() {
         <div className="grid md:grid-cols-2 gap-10">
           {/* Gallery */}
           <div>
-            <div className="aspect-square bg-muted rounded-3xl overflow-hidden relative">
-              <img src={images[activeImg]} alt={product.arabic_title || product.name} className="w-full h-full object-cover" />
+            <div className="aspect-square bg-white rounded-3xl overflow-hidden relative p-6 sm:p-10 border border-border">
+              <img src={images[activeImg]} alt={product.arabic_title || product.name} className="w-full h-full object-contain" />
               {discount && (
                 <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-sm font-bold px-3 py-1.5 rounded-full shadow-soft">
                   -{discount}%
