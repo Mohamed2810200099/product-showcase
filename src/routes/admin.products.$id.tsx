@@ -119,6 +119,17 @@ function ProductForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.price <= 0) return toast.error("الاسم والسعر مطلوبين");
+    if (form.stock < 0) return toast.error("المخزون لا يمكن أن يكون أقل من صفر");
+
+    // Reconcile availability with stock at save time. Never override coming_soon.
+    let availability = form.availability_status;
+    if (form.stock_tracking_enabled && availability !== "coming_soon") {
+      if (form.stock <= 0) availability = "out_of_stock";
+      else if (availability === "out_of_stock") availability = "available";
+    }
+    if (availability !== form.availability_status) {
+      setForm((f) => ({ ...f, availability_status: availability }));
+    }
 
     setSaving(true);
     const splitLines = (s: string) => s.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
@@ -152,7 +163,7 @@ function ProductForm() {
       is_featured: form.is_featured,
       is_limited: form.is_limited,
       stock_tracking_enabled: form.stock_tracking_enabled,
-      availability_status: form.availability_status,
+      availability_status: availability,
     } as any;
 
     // SECURITY: write gated by RLS "Admins manage products" via has_role(auth.uid(),'admin').
@@ -254,7 +265,7 @@ function ProductForm() {
                 const n = Number(v);
                 setForm((f) => {
                   const next = { ...f, stock: n };
-                  if (f.stock_tracking_enabled) {
+                  if (f.stock_tracking_enabled && f.availability_status !== "coming_soon") {
                     if (n <= 0 && f.availability_status !== "out_of_stock") {
                       next.availability_status = "out_of_stock";
                       toast.message("تم ضبط الحالة على: نفذ المخزون");
@@ -333,7 +344,16 @@ function ProductForm() {
             <Toggle label="منشور (ظاهر للعملاء)" checked={form.is_active} onChange={(v) => setForm({ ...form, is_active: v })} />
             <Toggle label="منتج مميز" checked={form.is_featured} onChange={(v) => setForm({ ...form, is_featured: v })} />
             <Toggle label="كمية محدودة" checked={form.is_limited} onChange={(v) => setForm({ ...form, is_limited: v })} />
-            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => setForm({ ...form, stock_tracking_enabled: v })} />
+            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => {
+              setForm((f) => {
+                const next = { ...f, stock_tracking_enabled: v };
+                if (v && f.stock <= 0 && f.availability_status !== "coming_soon" && f.availability_status !== "out_of_stock") {
+                  next.availability_status = "out_of_stock";
+                  toast.message("تم ضبط الحالة على: نفذ المخزون");
+                }
+                return next;
+              });
+            }} />
             <div>
               <label className="text-xs text-muted-foreground block mb-1">حالة التوفر</label>
               <select
