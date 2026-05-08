@@ -189,8 +189,8 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
                 <li key={i} className="flex items-center gap-3 text-sm bg-secondary/30 rounded-lg p-2">
                   {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded object-cover" />}
                   <div className="flex-1">{it.name}</div>
-                  <div className="text-muted-foreground">× {it.qty}</div>
-                  <div className="font-semibold">{formatEGP(it.price * it.qty)}</div>
+                  <div className="text-muted-foreground">× {getItemQty(it)}</div>
+                  <div className="font-semibold">{formatEGP(getItemPrice(it) * getItemQty(it))}</div>
                 </li>
               ))}
             </ul>
