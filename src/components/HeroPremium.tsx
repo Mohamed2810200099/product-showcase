@@ -213,6 +213,37 @@ export function HeroPremium() {
             ))}
           </motion.div>
         </motion.div>
+
+        {/* MAIN HERO PRODUCT — left side in RTL (second in DOM) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, x: 30 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="relative md:col-span-5 flex items-center justify-center order-first md:order-none"
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                "radial-gradient(closest-side, rgba(231,168,191,0.55), rgba(248,220,229,0) 70%)",
+              filter: "blur(20px)",
+            }}
+          />
+          <motion.img
+            src={heroMain}
+            alt="منتج العناية الرئيسي"
+            animate={reduce ? undefined : { y: [0, -10, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="w-[70%] sm:w-[55%] md:w-full max-w-[420px] h-auto object-contain select-none"
+            style={{
+              filter:
+                "drop-shadow(0 30px 40px rgba(58,36,48,0.25)) drop-shadow(0 8px 16px rgba(217,108,157,0.18))",
+            }}
+            draggable={false}
+          />
+        </motion.div>
+        </div>
       </div>
     </section>
   );
