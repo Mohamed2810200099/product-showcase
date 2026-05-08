@@ -17,9 +17,10 @@ export function SiteSmokeBackground() {
       }}
     >
       <SmokeBackground
-        variant="section"
-        opacity={0.55}
-        speed={0.07}
+        variant="hero"
+        opacity={0.85}
+        speed={0.09}
+        scale={1.7}
         className="absolute inset-0 h-full w-full"
       />
     </div>
