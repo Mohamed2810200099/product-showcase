@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/products/")({
   head: () => ({ meta: [{ title: "المنتجات — لوحة الإدارة" }] }),
