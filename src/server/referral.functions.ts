@@ -17,17 +17,27 @@ export const getMyGlowProfile = createServerFn({ method: "GET" })
         return { profile: null, settings, transactions: [] as any[] };
       }
 
+      // Decode JWT payload to get user id without an extra round-trip
+      let userId: string | undefined;
+      try {
+        const payload = JSON.parse(
+          Buffer.from(token.split(".")[1] ?? "", "base64").toString("utf8"),
+        );
+        userId = payload?.sub;
+      } catch {
+        userId = undefined;
+      }
+      if (!userId) {
+        return { profile: null, settings, transactions: [] as any[] };
+      }
+
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(
         process.env.SUPABASE_URL!,
         process.env.SUPABASE_PUBLISHABLE_KEY!,
         { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } },
       );
-      const { data: claims } = await supabase.auth.getClaims(token);
-      const userId = claims?.claims?.sub;
-      if (!userId) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
+
 
       let { data: profile } = await supabase
         .from("customer_profiles")
