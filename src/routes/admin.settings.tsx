@@ -47,16 +47,31 @@ function SettingsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from("settings").select("value").eq("key", "brand").maybeSingle().then(({ data }) => {
-      if (data?.value) setBrand({ ...DEFAULTS, ...(data.value as Partial<Brand>) });
+    (async () => {
+      const [{ data: brandRow }, { data: refRow }] = await Promise.all([
+        supabase.from("settings").select("value").eq("key", "brand").maybeSingle(),
+        supabase.from("settings").select("value").eq("key", "show_referral_section").maybeSingle(),
+      ]);
+      const merged: Brand = { ...DEFAULTS, ...((brandRow?.value as Partial<Brand>) ?? {}) };
+      const refVal = refRow?.value as { show_referral_section?: boolean } | boolean | null;
+      if (typeof refVal === "boolean") merged.show_referral_section = refVal;
+      else if (refVal && typeof refVal === "object") merged.show_referral_section = Boolean(refVal.show_referral_section);
+      setBrand(merged);
       setLoading(false);
-    });
+    })();
   }, []);
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from("settings").upsert({ key: "brand", value: brand });
+    const [{ error: e1 }, { error: e2 }] = await Promise.all([
+      supabase.from("settings").upsert({ key: "brand", value: brand }),
+      supabase.from("settings").upsert({
+        key: "show_referral_section",
+        value: { show_referral_section: brand.show_referral_section },
+      }),
+    ]);
     setSaving(false);
+    const error = e1 ?? e2;
     if (error) return toast.error(error.message);
     toast.success("تم الحفظ — حدّثي الصفحة لرؤية التغييرات");
   };
