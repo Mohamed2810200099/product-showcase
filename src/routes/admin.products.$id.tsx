@@ -207,7 +207,31 @@ function ProductForm() {
           <Section title="تفاصيل المنتج للعميلات">
             <div className="grid sm:grid-cols-1 gap-3">
               <TextArea label="الفوائد الرئيسية (سطر لكل فائدة)" value={form.key_benefits} onChange={(v) => setForm({ ...form, key_benefits: v })} rows={5} />
-              <TextArea label="مناسب لـ" value={form.suitable_for} onChange={(v) => setForm({ ...form, suitable_for: v })} rows={2} />
+              <TextArea label="مناسب لـ (اكتبي أنواع البشرة/الشعر — يستخدم في فلتر المتجر)" value={form.suitable_for} onChange={(v) => setForm({ ...form, suitable_for: v })} rows={2} />
+              <div className="flex flex-wrap gap-1.5 -mt-1">
+                {["دهنية","جافة","مختلطة","حساسة","عادية","شعر جاف","شعر دهني","شعر تالف","شعر مصبوغ","كل أنواع الشعر"].map((s) => {
+                  const has = form.suitable_for.includes(s);
+                  return (
+                    <button
+                      type="button"
+                      key={s}
+                      onClick={() => {
+                        if (has) {
+                          const next = form.suitable_for
+                            .split(/[,،]/).map((x) => x.trim()).filter((x) => x && x !== s).join("، ");
+                          setForm({ ...form, suitable_for: next });
+                        } else {
+                          const sep = form.suitable_for.trim() ? "، " : "";
+                          setForm({ ...form, suitable_for: form.suitable_for + sep + s });
+                        }
+                      }}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border ${has ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:bg-accent"}`}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
               <TextArea label="طريقة الاستخدام" value={form.how_to_use} onChange={(v) => setForm({ ...form, how_to_use: v })} rows={4} />
               <TextArea label="المكونات الفعّالة (سطر لكل مكون)" value={form.key_ingredients} onChange={(v) => setForm({ ...form, key_ingredients: v })} rows={5} />
               <TextArea label="تفاصيل المنتج" value={form.product_details} onChange={(v) => setForm({ ...form, product_details: v })} rows={2} />
