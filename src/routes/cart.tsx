@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { useEffect } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useCart } from "@/context/CartContext";
 import { formatEGP } from "@/lib/format";
 import { useBrand } from "@/hooks/use-brand";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -17,6 +19,15 @@ function CartPage() {
   const brand = useBrand();
   const shipping = subtotal >= brand.free_shipping_threshold ? 0 : brand.shipping_fee;
   const total = subtotal + shipping;
+
+  useEffect(() => {
+    trackEvent("cart_view", {
+      cart_total: subtotal,
+      items_count: items.reduce((s, i) => s + i.qty, 0),
+      product_ids: items.map((i) => i.id),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (items.length === 0) {
     return (
