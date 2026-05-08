@@ -9,6 +9,7 @@ export type SwiperProduct = {
   arabicName?: string;
   image: string;
   priceEgp?: number;
+  comparePriceEgp?: number;
   category?: string;
   label?: string;
 };
