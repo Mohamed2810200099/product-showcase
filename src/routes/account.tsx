@@ -201,8 +201,10 @@ function AccountPage() {
                   {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4 text-[#D96C9D]" />}
                 </button>
               </div>
+            ) : error ? (
+              <p className="text-sm text-red-600">{error}</p>
             ) : (
-              <p className="text-sm text-[#3A2430]/70">كودك لسه مش جاهز.</p>
+              <p className="text-sm text-[#3A2430]/70">جاري تجهيز كودك…</p>
             )}
           </div>
         </div>
