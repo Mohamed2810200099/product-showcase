@@ -32,7 +32,9 @@ export function ProductCard({ product }: { product: Product }) {
     : null;
 
   const status = product.availability_status ?? "available";
+  const isComingSoon = status === "coming_soon";
   const isOut = status === "out_of_stock" || (product.stock_tracking_enabled === true && product.stock === 0);
+  const unavailable = isOut || isComingSoon;
 
   return (
     <Product3DCard className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:shadow-[0_25px_60px_-20px_rgba(217,108,157,0.45)] transition-shadow duration-500">
