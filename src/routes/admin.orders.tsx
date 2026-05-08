@@ -7,6 +7,7 @@ import { formatEGP } from "@/lib/format";
 import { Eye, Phone, MapPin, Trash2, X } from "lucide-react";
 import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
+import { formatPhoneDisplay } from "@/lib/phone";
 
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({ meta: [{ title: "الطلبات — لوحة الإدارة" }] }),
