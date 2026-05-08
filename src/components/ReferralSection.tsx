@@ -24,18 +24,33 @@ export function ReferralSection() {
   const { isAuthenticated, loading } = useAuth();
   const [data, setData] = useState<ProfileData>(null);
   const [copied, setCopied] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
-    if (loading || !isAuthenticated) return;
+    if (loading) return;
+    if (!isAuthenticated) {
+      setData(null);
+      setFetching(false);
+      setFetchError(false);
+      return;
+    }
+    let cancelled = false;
+    setFetching(true);
+    setFetchError(false);
     (async () => {
       try {
         const { getMyGlowProfile } = await import("@/server/referral.functions");
         const res = await getMyGlowProfile();
-        setData(res as ProfileData);
+        if (!cancelled) setData(res as ProfileData);
       } catch (e) {
         console.warn("Glow profile failed", e);
+        if (!cancelled) setFetchError(true);
+      } finally {
+        if (!cancelled) setFetching(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [isAuthenticated, loading]);
 
   const code = data?.profile?.personal_code ?? "";
