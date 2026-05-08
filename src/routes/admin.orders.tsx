@@ -144,7 +144,7 @@ function OrdersPage() {
                     <td className="p-3 font-mono text-xs" dir="ltr">{o.order_number}</td>
                     <td className="p-3">
                       <div className="font-medium">{o.customer_name}</div>
-                      <div className="text-xs text-muted-foreground" dir="ltr">{o.customer_phone}</div>
+                      <div className="text-xs text-muted-foreground" dir="ltr">{formatPhoneDisplay(o.customer_phone)}</div>
                     </td>
                     <td className="p-3 text-xs">{o.governorate}</td>
                     <td className="p-3 font-semibold whitespace-nowrap">{formatEGP(Number(o.total))}</td>
