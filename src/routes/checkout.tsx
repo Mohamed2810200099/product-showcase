@@ -242,7 +242,17 @@ function CheckoutPage() {
       referral_code: appliedReferral?.code ?? null,
       items_count: items.reduce((s, i) => s + i.qty, 0),
     });
-    navigate({ to: "/order-success", search: { order: data.order_number } });
+    navigate({
+      to: "/order-success",
+      search: {
+        order: data.order_number,
+        name: form.customer_name,
+        phone: normalizedPhone,
+        total,
+        gov: form.governorate,
+        city: form.city,
+      },
+    });
   };
 
   return (

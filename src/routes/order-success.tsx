@@ -1,22 +1,49 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
+
 import { CheckCircle, MessageCircle, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
 import { useAuth } from "@/hooks/use-auth";
 import { trackEvent } from "@/lib/analytics";
+import { formatEGP } from "@/lib/format";
 
 export const Route = createFileRoute("/order-success")({
-  validateSearch: z.object({ order: z.string().optional() }),
+  validateSearch: z.object({
+    order: z.string().optional().catch(undefined),
+    name: z.string().optional().catch(undefined),
+    phone: z.string().optional().catch(undefined),
+    total: z.number().optional().catch(undefined),
+    gov: z.string().optional().catch(undefined),
+    city: z.string().optional().catch(undefined),
+  }),
   head: () => ({ meta: [{ title: "تم الطلب — The Girl House" }] }),
   component: OrderSuccessPage,
 });
 
 function OrderSuccessPage() {
-  const { order } = Route.useSearch();
+  const { order, name, phone, total, gov, city } = Route.useSearch();
   const brand = useBrand();
   const { isAuthenticated, loading } = useAuth();
+
+  const whatsappNumber = (brand.whatsapp ?? "").replace(/[^\d]/g, "");
+  const hasWhatsapp = whatsappNumber.length > 0;
+
+  const buildWhatsAppMessage = () => {
+    const lines: string[] = ["السلام عليكم 🌸", "حابة أأكد طلبي من The Girl House."];
+    if (order) lines.push(`رقم الطلب: ${order}`);
+    if (name) lines.push(`الاسم: ${name}`);
+    if (phone) lines.push(`الموبايل: ${phone}`);
+    if (gov || city) lines.push(`العنوان: ${[gov, city].filter(Boolean).join(" - ")}`);
+    if (total && total > 0) lines.push(`الإجمالي: ${formatEGP(total)}`);
+    lines.push("شكراً 💕");
+    return lines.join("\n");
+  };
+
+  const whatsappHref = hasWhatsapp
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(buildWhatsAppMessage())}`
+    : "";
 
   return (
     <PublicLayout>
@@ -54,16 +81,24 @@ function OrderSuccessPage() {
             هنتواصل معاكِ خلال ساعات لتأكيد الطلب وموعد التوصيل.
           </p>
 
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <a
-              href={`https://wa.me/${brand.whatsapp}`}
-              target="_blank" rel="noreferrer"
-              onClick={() => trackEvent("whatsapp_clicked", { source: "order_success", order_number: order })}
-              className="bg-[#25D366] text-white py-2.5 rounded-full text-sm font-medium inline-flex items-center justify-center gap-2 hover:opacity-90"
-            >
-              <MessageCircle className="h-4 w-4" /> تواصلي معنا
-            </a>
-            <Link to="/shop" className="bg-secondary text-secondary-foreground py-2.5 rounded-full text-sm font-medium hover:bg-accent">
+          {hasWhatsapp && (
+            <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
+              لتأكيد الطلب أسرع، ابعتي لنا رسالة واتساب برقم الطلب.
+            </p>
+          )}
+
+          <div className={`grid ${hasWhatsapp ? "grid-cols-2" : "grid-cols-1"} gap-3 mt-4`}>
+            {hasWhatsapp && (
+              <a
+                href={whatsappHref}
+                target="_blank" rel="noreferrer"
+                onClick={() => trackEvent("whatsapp_clicked", { source: "order_success", order_number: order })}
+                className="bg-[#25D366] text-white py-2.5 rounded-full text-sm font-medium inline-flex items-center justify-center gap-2 hover:opacity-90"
+              >
+                <MessageCircle className="h-4 w-4" /> أكدّي على واتساب
+              </a>
+            )}
+            <Link to="/shop" className="bg-secondary text-secondary-foreground py-2.5 rounded-full text-sm font-medium hover:bg-accent inline-flex items-center justify-center">
               متابعة التسوق
             </Link>
           </div>
