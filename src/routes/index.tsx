@@ -17,6 +17,7 @@ import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
 import { ScrollProductBackdrop } from "@/components/ScrollProductBackdrop";
+import { SiteSmokeBackground } from "@/components/layout/SiteSmokeBackground";
 
 
 export const Route = createFileRoute("/")({
