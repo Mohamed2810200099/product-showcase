@@ -62,6 +62,8 @@ function ProductForm() {
     is_active: true,
     is_featured: false,
     is_limited: false,
+    stock_tracking_enabled: false,
+    availability_status: "available" as "available" | "out_of_stock" | "coming_soon",
   });
 
   useEffect(() => {
