@@ -9,6 +9,7 @@ export type SwiperProduct = {
   arabicName?: string;
   image: string;
   priceEgp?: number;
+  comparePriceEgp?: number;
   category?: string;
   label?: string;
 };
@@ -183,7 +184,7 @@ export function ImageSwiper({
                   src={p.image}
                   alt={p.arabicName || p.name}
                   draggable={false}
-                  className="w-full h-full object-contain p-6 pointer-events-none"
+                  className="w-full h-full object-contain p-3 sm:p-4 pointer-events-none"
                 />
                 {p.label && (
                   <span className="absolute top-4 right-4 bg-[#D96C9D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -241,8 +242,15 @@ export function ImageSwiper({
             {activeProduct.arabicName || activeProduct.name}
           </h3>
           {typeof activeProduct.priceEgp === "number" && (
-            <div className="mt-2 text-lg font-bold text-[#D96C9D]">
-              {new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(activeProduct.priceEgp)}
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <span className="text-lg font-bold text-[#D96C9D]">
+                {new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(activeProduct.priceEgp)}
+              </span>
+              {typeof activeProduct.comparePriceEgp === "number" && activeProduct.comparePriceEgp > activeProduct.priceEgp && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {new Intl.NumberFormat("ar-EG", { style: "currency", currency: "EGP", maximumFractionDigits: 0 }).format(activeProduct.comparePriceEgp)}
+                </span>
+              )}
             </div>
           )}
           <div className="mt-4 flex items-center justify-center gap-3">
