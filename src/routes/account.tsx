@@ -54,6 +54,7 @@ function AccountPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<AccountData>(null);
   const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -61,24 +62,19 @@ function AccountPage() {
     if (!isAuthenticated || !user) { setData(null); return; }
     let cancelled = false;
     setFetching(true);
+    setError(null);
     (async () => {
       try {
-        const [{ data: profile }, { data: orders }] = await Promise.all([
-          supabase
-            .from("customer_profiles")
-            .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
-            .eq("user_id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("orders")
-            .select("id, order_number, status, created_at, total, items")
-            .eq("customer_user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(50),
-        ]);
-        if (!cancelled) setData({ profile: (profile as any) ?? null, orders: (orders as any) ?? [] });
+        const result = await getMyAccount();
+        if (!cancelled) {
+          setData({
+            profile: (result.profile as AccountData extends null ? never : NonNullable<AccountData>["profile"]) ?? null,
+            orders: (result.orders as OrderRow[]) ?? [],
+          });
+        }
       } catch (e) {
         console.warn("Account load failed", e);
+        if (!cancelled) setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
       } finally {
         if (!cancelled) setFetching(false);
       }
