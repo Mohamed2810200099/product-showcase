@@ -108,6 +108,14 @@ function OrdersPage() {
     load();
   };
 
+  const toggleWhatsapp = async (id: string, value: boolean) => {
+    const { error } = await supabase.from("orders").update({ whatsapp_sent: value }).eq("id", id);
+    if (error) return toast.error("فشل التحديث");
+    toast.success(value ? "تم وضع علامة: تم التواصل عبر واتساب" : "تم إلغاء علامة واتساب");
+    if (selected?.id === id) setSelected({ ...selected, whatsapp_sent: value });
+    load();
+  };
+
   const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
   return (
