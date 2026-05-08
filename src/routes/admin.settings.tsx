@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Switch } from "@/components/ui/switch";
 import { Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,7 +68,7 @@ function SettingsPage() {
       supabase.from("settings").upsert({ key: "brand", value: brand }),
       supabase.from("settings").upsert({
         key: "show_referral_section",
-        value: { show_referral_section: brand.show_referral_section },
+        value: brand.show_referral_section,
       }),
     ]);
     setSaving(false);
@@ -99,18 +100,16 @@ function SettingsPage() {
         </div>
 
         <div className="border-t border-border pt-4">
-          <label className="flex items-center justify-between gap-3 cursor-pointer">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <div className="font-semibold text-sm">إظهار قسم "Share the Glow" في الصفحة الرئيسية</div>
+              <div className="font-semibold text-sm">تفعيل قسم "Share the Glow" في الصفحة الرئيسية</div>
               <div className="text-xs text-muted-foreground mt-0.5">قسم دعوة الصديقات للحصول على خصم</div>
             </div>
-            <input
-              type="checkbox"
+            <Switch
               checked={brand.show_referral_section}
-              onChange={(e) => setBrand({ ...brand, show_referral_section: e.target.checked })}
-              className="h-5 w-5 accent-primary"
+              onCheckedChange={(v) => setBrand({ ...brand, show_referral_section: v })}
             />
-          </label>
+          </div>
         </div>
 
         <button onClick={save} disabled={saving} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full inline-flex items-center gap-2 font-medium shadow-elegant disabled:opacity-50">
