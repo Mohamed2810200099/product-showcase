@@ -127,7 +127,7 @@ function CheckoutPage() {
   const couponDiscount = appliedCoupon?.discount ?? 0;
   const referralDiscount = appliedReferral?.discount ?? 0;
   const discount = couponDiscount + referralDiscount;
-  const maxWalletByOrder = glowSettings ? Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100) : 0;
+  const maxWalletByOrder = Math.floor((subtotal * glowSettings.max_wallet_per_order_pct) / 100);
   const walletApplied = useWallet
     ? Math.min(walletBalance, Math.max(0, subtotal - discount), maxWalletByOrder)
     : 0;
