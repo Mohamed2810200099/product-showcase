@@ -68,23 +68,7 @@ export function HeroPremium() {
       onMouseMove={onSectionMove}
       className="relative overflow-hidden min-h-[68vh] md:min-h-[74vh] flex items-center"
     >
-      {/* Animated CSS glow blobs (kept, very subtle) */}
-      {!reduce && (
-        <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block" style={{ zIndex: 1 }}>
-          <motion.div
-            className="absolute -top-24 -right-24 h-[520px] w-[520px] rounded-full"
-            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.22 }}
-            animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute -bottom-32 -left-24 h-[560px] w-[560px] rounded-full"
-            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.3 }}
-            animate={{ scale: [1, 1.12, 1], x: [0, 30, 0] }}
-            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-      )}
+      {/* Decorative glow blobs removed — global smoke handles ambient color */}
 
       {/* Studio group product image — sits behind text as a soft premium layer */}
       <motion.div
