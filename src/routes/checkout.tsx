@@ -169,7 +169,12 @@ function CheckoutPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const emailToUse = (user?.email ?? form.customer_email ?? "").trim();
-    const payload = { ...form, customer_email: emailToUse };
+    const { normalizePhone, isValidEgyptPhone } = await import("@/lib/phone");
+    if (!isValidEgyptPhone(form.customer_phone)) {
+      return toast.error("من فضلك اكتبي رقم موبايل مصري صحيح.");
+    }
+    const normalizedPhone = normalizePhone(form.customer_phone);
+    const payload = { ...form, customer_phone: normalizedPhone, customer_email: emailToUse };
     const parsed = schema.safeParse(payload);
     if (!parsed.success) return toast.error("راجعي البيانات لو سمحتي");
 
