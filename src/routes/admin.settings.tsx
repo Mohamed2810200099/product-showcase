@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Switch } from "@/components/ui/switch";
 import { Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { handleAdminError } from "@/lib/admin-mutate";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "الإعدادات — لوحة الإدارة" }] }),
