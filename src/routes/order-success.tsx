@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { CheckCircle, MessageCircle } from "lucide-react";
+import { CheckCircle, MessageCircle, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/order-success")({
   validateSearch: z.object({ order: z.string().optional() }),
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/order-success")({
 function OrderSuccessPage() {
   const { order } = Route.useSearch();
   const brand = useBrand();
+  const { isAuthenticated, loading } = useAuth();
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-20">
