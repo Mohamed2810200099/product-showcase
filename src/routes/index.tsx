@@ -141,6 +141,48 @@ function HomePage() {
             </Link>
           </div>
         </RevealOnView>
+        {featured.length > 0 && (
+          <div className="mb-12 relative z-10 grid md:grid-cols-2 gap-8 items-center bg-gradient-to-br from-[#FFF8F4] via-white to-[#FCE9F1] rounded-[32px] p-6 sm:p-10 border border-[#E7A8BF]/30 shadow-[0_30px_80px_-40px_rgba(217,108,157,0.4)]">
+            <div className="text-center md:text-right order-2 md:order-1">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-xs font-medium text-[#D96C9D]">
+                <Sparkles className="h-3.5 w-3.5" /> اختياراتنا المفضلة لكِ
+              </span>
+              <h3 className="font-display text-2xl sm:text-3xl font-bold mt-3 text-[#3B2332]">
+                منتجات مختارة للشعر والبشرة من ألمانيا
+              </h3>
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                اسحبي الكروت يمين وشمال أو استخدمي الأسهم لاكتشاف أحدث منتجاتنا المميزة.
+              </p>
+            </div>
+            <div className="order-1 md:order-2 flex justify-center">
+              <ImageSwiper
+                products={featured.map<SwiperProduct>((p) => ({
+                  id: p.id,
+                  slug: p.slug,
+                  name: p.name,
+                  arabicName: p.arabic_title || p.name,
+                  image: (p.images && p.images[0]) || placeholderImg,
+                  priceEgp: p.price,
+                  category: p.is_limited ? "كمية محدودة" : undefined,
+                }))}
+                onProductClick={(sp) => sp.slug && navigate({ to: "/product/$slug", params: { slug: sp.slug } })}
+                onAddToCart={(sp) => {
+                  const orig = featured.find((f) => f.id === sp.id);
+                  if (!orig) return;
+                  add({
+                    id: orig.id,
+                    name: orig.name,
+                    slug: orig.slug,
+                    price: orig.price,
+                    image: sp.image,
+                  });
+                  toast.success("تمت الإضافة للسلة 🛍️");
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {featured.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
             {featured.map((p, i) => (
