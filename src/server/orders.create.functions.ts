@@ -265,5 +265,37 @@ export const createOrder = createServerFn({ method: "POST" })
       }
     }
 
+    // Best-effort: send branded order confirmation email if a recipient was
+    // provided. Never block or fail the order on email errors.
+    if (data.customer_email) {
+      try {
+        const { enqueueTransactionalEmail } = await import("./email.server");
+        await enqueueTransactionalEmail({
+          templateName: "order-confirmation",
+          recipientEmail: data.customer_email,
+          idempotencyKey: `order-${inserted.order_number}`,
+          templateData: {
+            customerName: data.customer_name,
+            orderNumber: inserted.order_number,
+            items: orderItems.map((it) => ({
+              name: it.name,
+              qty: it.qty,
+              price: it.price,
+            })),
+            subtotal,
+            discount,
+            shipping,
+            total,
+            address: data.address,
+            governorate: data.governorate,
+            city: data.city,
+            phone: phoneNorm,
+          },
+        });
+      } catch (err) {
+        console.warn("Order confirmation email failed:", err);
+      }
+    }
+
     return { ok: true, id: inserted.id, order_number: inserted.order_number };
   });
