@@ -4,9 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
 import heroMain from "@/assets/products/cutout-plex-mask.png";
-import sideA from "@/assets/products/cutout-plex-oil.png";
-import sideB from "@/assets/products/cutout-keratin-overnight.png";
-import sideC from "@/assets/products/cutout-scalp-booster.png";
 
 function MagneticButton({
   children,
@@ -91,36 +88,6 @@ export function HeroPremium() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="relative md:col-span-7 text-center md:text-right space-y-5 sm:space-y-6"
         >
-          {/* Supporting product cluster — subtle, behind text on the right */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-visible hidden md:block">
-            <motion.img
-              src={sideA}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.18, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.4 }}
-              className="absolute -top-10 -right-6 w-32 lg:w-40 rotate-[-8deg] select-none"
-              alt=""
-              draggable={false}
-            />
-            <motion.img
-              src={sideB}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.16, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.6 }}
-              className="absolute -bottom-8 right-20 w-28 lg:w-36 rotate-[8deg] select-none"
-              alt=""
-              draggable={false}
-            />
-            <motion.img
-              src={sideC}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.14, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.8 }}
-              className="absolute top-4 right-1/2 w-24 lg:w-32 rotate-[12deg] select-none"
-              alt=""
-              draggable={false}
-            />
-          </div>
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
