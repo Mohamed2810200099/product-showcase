@@ -134,7 +134,7 @@ function AccountPage() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || needsLogin) {
     return (
       <PublicLayout>
         <section dir="rtl" className="container mx-auto px-4 py-16">
@@ -143,7 +143,7 @@ function AccountPage() {
               <LogIn className="h-7 w-7" />
             </div>
             <h1 className="font-display text-2xl font-bold text-[#3A2430]">سجلي دخولك</h1>
-            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">سجلي دخولك عشان تشوفي بياناتك وطلباتك.</p>
+            <p className="text-sm text-[#3A2430]/70 mt-2 mb-5">{error ?? "سجلي دخولك عشان تشوفي بياناتك وطلباتك."}</p>
             <Link
               to="/login"
               className="inline-flex items-center gap-2 rounded-full bg-[#D96C9D] hover:bg-[#C95588] text-white px-6 py-3 font-medium shadow-[0_12px_30px_-10px_rgba(217,108,157,0.6)] transition"
@@ -161,6 +161,11 @@ function AccountPage() {
   return (
     <PublicLayout>
       <section dir="rtl" className="container mx-auto px-4 py-10 sm:py-14">
+        {error && !fetching ? (
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
