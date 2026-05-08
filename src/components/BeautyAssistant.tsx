@@ -318,7 +318,7 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-24 sm:bottom-24 left-4 sm:left-6 z-50 w-[92vw] sm:w-[400px] h-[600px] max-h-[80vh] rounded-3xl overflow-hidden shadow-2xl border border-white/70"
+            className="fixed bottom-24 sm:bottom-24 left-4 sm:left-6 z-[100] w-[88vw] sm:w-[360px] h-[540px] max-h-[78vh] rounded-3xl overflow-hidden shadow-2xl border border-white/70"
           >
             {panel}
           </motion.div>
