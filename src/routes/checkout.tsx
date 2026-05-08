@@ -141,6 +141,7 @@ function CheckoutPage() {
     if (!result.ok) return toast.error(result.error);
     setAppliedCoupon({ code: result.code, discount: result.discount });
     setAppliedReferral(null); // mutually exclusive
+    trackEvent("coupon_applied", { code: result.code, discount: result.discount, cart_total: subtotal });
     toast.success("تم تطبيق الخصم بنجاح");
   };
 
