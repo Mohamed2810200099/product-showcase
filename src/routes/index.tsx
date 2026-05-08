@@ -4,6 +4,11 @@ import { Sparkles, Truck, ShieldCheck, Award, Heart, ArrowLeft, Star, Flame } fr
 import { supabase } from "@/integrations/supabase/client";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ProductCard, type Product } from "@/components/ProductCard";
+import { ImageSwiper, type SwiperProduct } from "@/components/ui/image-swiper";
+import { useNavigate } from "@tanstack/react-router";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+import placeholderImg from "@/assets/product-placeholder.jpg";
 
 import { HeroPremium } from "@/components/HeroPremium";
 import { ReferralSection } from "@/components/ReferralSection";
