@@ -2,42 +2,27 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { getUserFromAccessToken } from "./auth-helpers";
 import { getGlowSettings } from "./referral.server";
 
+const authInputSchema = z.object({
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+const parseAuthInput = (data: unknown) => {
+  const parsed = authInputSchema.safeParse(data ?? {});
+  return parsed.success ? parsed.data : { access_token: null };
+};
+
 /** Get the current customer's referral profile + wallet + recent transactions. */
-export const getMyGlowProfile = createServerFn({ method: "GET" })
-  .handler(async () => {
+export const getMyGlowProfile = createServerFn({ method: "POST" })
+  .inputValidator(parseAuthInput)
+  .handler(async ({ data }) => {
     try {
       const settings = await getGlowSettings().catch(() => null);
-      const { getRequest } = await import("@tanstack/react-start/server");
-      const req = getRequest();
-      const authHeader = req?.headers?.get("authorization") ?? "";
-      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-      if (!token) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
-
-      // Decode JWT payload to get user id without an extra round-trip
-      let userId: string | undefined;
-      try {
-        const payload = JSON.parse(
-          Buffer.from(token.split(".")[1] ?? "", "base64").toString("utf8"),
-        );
-        userId = payload?.sub;
-      } catch {
-        userId = undefined;
-      }
-      if (!userId) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
-
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_PUBLISHABLE_KEY!,
-        { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } },
-      );
-
+      const authUser = await getUserFromAccessToken(data.access_token);
+      if (!authUser) return { profile: null, settings, transactions: [] as any[] };
+      const { user, userId, email } = authUser;
 
       let { data: profile } = await supabase
         .from("customer_profiles")
