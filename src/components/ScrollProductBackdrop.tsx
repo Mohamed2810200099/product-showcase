@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 import intenseImg from "@/assets/products/cutout-intense-repair.png";
-import scalpImg from "@/assets/products/cutout-scalp-booster.png";
 import keratinImg from "@/assets/products/cutout-keratin-overnight.png";
-import plexOilImg from "@/assets/products/cutout-plex-oil.png";
 import plexCondImg from "@/assets/products/cutout-plex-conditioner.png";
 import plexMaskImg from "@/assets/products/cutout-plex-mask.png";
 
