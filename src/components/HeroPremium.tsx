@@ -2,6 +2,7 @@ import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } fro
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift, Sparkles } from "lucide-react";
+import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 
 import groupImg from "@/assets/products/group.png";
 import langhaarImg from "@/assets/products/langhaar.png";
