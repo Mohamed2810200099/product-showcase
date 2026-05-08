@@ -1,61 +1,9 @@
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift, Sparkles } from "lucide-react";
+import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-
-import groupImg from "@/assets/products/group.png";
-import keratinImg from "@/assets/products/cutout-keratin-overnight.png";
-import scalpImg from "@/assets/products/cutout-scalp-booster.png";
-import plexOilImg from "@/assets/products/cutout-plex-oil.png";
-
-type FloatProduct = {
-  src: string;
-  label: string;
-  glow: string;
-  className: string;
-  delay: number;
-  parallax: number;
-  accent?: boolean;
-  to: string;
-  search?: Record<string, string>;
-};
-
-const products: FloatProduct[] = [
-  {
-    src: keratinImg,
-    label: "Keratin Repair",
-    glow: "from-[#F8C8D8] via-[#EFA7C3]/40 to-transparent",
-    className: "hidden sm:block top-[4%] left-[2%] w-[26%] sm:w-[22%]",
-    delay: 0.7,
-    parallax: -18,
-    to: "/shop",
-    search: { search: "keratin" },
-  },
-  {
-    src: scalpImg,
-    label: "Scalp Booster",
-    glow: "from-[#FADCE7] via-[#F8C8D8]/60 to-transparent",
-    className: "top-[6%] right-[2%] w-[28%] sm:w-[22%]",
-    delay: 0.9,
-    parallax: 20,
-    to: "/shop",
-    search: { category: "hair-care" },
-  },
-  {
-    src: plexOilImg,
-    label: "Plex Care Oil",
-    glow: "from-[#EDE7F6] via-[#F9EEF3]/70 to-transparent",
-    className: "bottom-[6%] right-[8%] w-[24%] sm:w-[20%]",
-    delay: 1.1,
-    parallax: -14,
-    accent: true,
-    to: "/shop",
-    search: { search: "plex" },
-  },
-];
-
 
 function MagneticButton({
   children,
@@ -96,15 +44,6 @@ function MagneticButton({
 
 export function HeroPremium() {
   const reduce = useReducedMotion();
-  const [focus, setFocus] = useState(0);
-  const [hover, setHover] = useState<number | null>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-
-  // Smooth mouse tracking
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 60, damping: 20, mass: 0.6 });
-  const sy = useSpring(my, { stiffness: 60, damping: 20, mass: 0.6 });
 
   // Spotlight
   const lx = useMotionValue(50);
@@ -117,33 +56,17 @@ export function HeroPremium() {
       `radial-gradient(600px circle at ${x}% ${y}%, rgba(255,255,255,0.55), rgba(248,220,229,0.25) 35%, transparent 65%)`
   );
 
-  useEffect(() => {
-    if (reduce) return;
-    const id = setInterval(() => setFocus((f) => (f + 1) % products.length), 3500);
-    return () => clearInterval(id);
-  }, [reduce]);
-
-  const onMove = (e: React.MouseEvent) => {
-    if (reduce || !stageRef.current) return;
-    const r = stageRef.current.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
-  };
-
   const onSectionMove = (e: React.MouseEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
     lx.set(((e.clientX - r.left) / r.width) * 100);
     ly.set(((e.clientY - r.top) / r.height) * 100);
   };
 
-  const groupX = useTransform(sx, (v) => v * 14);
-  const groupY = useTransform(sy, (v) => v * 14);
-
   return (
     <section
       dir="rtl"
       onMouseMove={onSectionMove}
-      className="relative overflow-hidden min-h-[88vh] md:min-h-[92vh] flex items-center"
+      className="relative overflow-hidden min-h-[78vh] md:min-h-[86vh] flex items-center"
       style={{
         background:
           "radial-gradient(120% 80% at 80% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
@@ -154,18 +77,18 @@ export function HeroPremium() {
         <SmokeBackground variant="hero" className="absolute inset-0 h-full w-full" />
       </div>
 
-      {/* Animated CSS glow blobs — lighter on mobile */}
+      {/* Animated CSS glow blobs */}
       {!reduce && (
         <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block" style={{ zIndex: 1 }}>
           <motion.div
             className="absolute -top-24 -right-24 h-[520px] w-[520px] rounded-full"
-            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.4 }}
+            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.35 }}
             animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
             transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             className="absolute -bottom-32 -left-24 h-[560px] w-[560px] rounded-full"
-            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.5 }}
+            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.45 }}
             animate={{ scale: [1, 1.12, 1], x: [0, 30, 0] }}
             transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -181,34 +104,13 @@ export function HeroPremium() {
         />
       )}
 
-      {/* Glass blobs */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block">
-        <div className="absolute -top-32 -left-20 h-[460px] w-[460px] rounded-full bg-[#E7A8BF]/25 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 h-[380px] w-[380px] rounded-full bg-[#EDE7F6]/45 blur-3xl" />
-      </div>
-
-      {/* Sparkles — fewer, only on md+ */}
-      {!reduce && (
-        <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <motion.span
-              key={i}
-              className="absolute h-1 w-1 rounded-full bg-white/90 shadow-[0_0_10px_2px_rgba(255,255,255,0.8)]"
-              style={{ top: `${(i * 53) % 100}%`, left: `${(i * 37) % 100}%` }}
-              animate={{ opacity: [0.15, 0.8, 0.15], y: [0, -8, 0] }}
-              transition={{ duration: 5 + (i % 4), repeat: Infinity, delay: i * 0.3 }}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="container relative z-10 mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 px-4 py-12 sm:py-16 md:py-20 items-center">
-        {/* Text */}
+      <div className="container relative z-10 mx-auto px-4 py-16 sm:py-20 md:py-24">
+        {/* Centered content — backdrop product visual lives outside */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
-          className="text-center md:text-right space-y-5 sm:space-y-6 order-2 md:order-1"
+          className="text-center md:text-right space-y-5 sm:space-y-6 max-w-2xl"
         >
           <motion.span
             initial={{ opacity: 0, y: 8 }}
@@ -224,7 +126,7 @@ export function HeroPremium() {
             initial={{ opacity: 0, filter: "blur(10px)", y: 16 }}
             animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
             transition={{ duration: 1, delay: 0.25 }}
-            className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] text-[#3A2430] tracking-tight"
+            className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] text-[#3A2430] tracking-tight"
           >
             جمالك يستحق الأصلي
             <br />
@@ -302,140 +204,7 @@ export function HeroPremium() {
             ))}
           </motion.div>
         </motion.div>
-
-        {/* Product showcase */}
-        <div
-          ref={stageRef}
-          onMouseMove={onMove}
-          onMouseLeave={() => {
-            mx.set(0);
-            my.set(0);
-          }}
-          className="relative aspect-square w-full max-w-[580px] mx-auto order-1 md:order-2"
-          style={{ perspective: 1200 }}
-        >
-          {/* Center group */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.1, delay: 0.3, ease: "easeOut" }}
-            className="absolute inset-[10%] flex items-center justify-center"
-            style={{ x: groupX, y: groupY }}
-          >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FFF8F4] via-[#F9EEF3]/70 to-[#E7A8BF]/30 blur-2xl" />
-            <motion.img
-              src={groupImg}
-              alt="منتجات The Girl House الأصلية من ألمانيا"
-              loading="eager"
-              fetchPriority="high"
-              animate={reduce ? undefined : { y: [0, -8, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full h-full object-contain drop-shadow-[0_30px_45px_rgba(58,36,48,0.2)]"
-            />
-          </motion.div>
-
-          {/* Floating products */}
-          {products.map((p, i) => (
-            <FloatingProduct
-              key={p.src}
-              p={p}
-              index={i}
-              sx={sx}
-              sy={sy}
-              active={hover === i || focus === i}
-              onEnter={() => setHover(i)}
-              onLeave={() => setHover((h) => (h === i ? null : h))}
-              reduce={!!reduce}
-            />
-          ))}
-
-          {/* Glossy floor reflection */}
-          <div className="absolute bottom-0 inset-x-10 h-12 rounded-[100%] bg-gradient-to-b from-white/60 to-transparent blur-xl" />
-          <div className="absolute -bottom-2 inset-x-16 h-3 rounded-full bg-[#3A2430]/10 blur-md" />
-        </div>
       </div>
     </section>
-  );
-}
-
-function FloatingProduct({
-  p,
-  index,
-  sx,
-  sy,
-  active,
-  onEnter,
-  onLeave,
-  reduce,
-}: {
-  p: FloatProduct;
-  index: number;
-  sx: any;
-  sy: any;
-  active: boolean;
-  onEnter: () => void;
-  onLeave: () => void;
-  reduce: boolean;
-}) {
-  const px = useTransform(sx, (v: number) => v * p.parallax);
-  const py = useTransform(sy, (v: number) => v * p.parallax);
-  const rx = useTransform(sy, (v: number) => v * -6);
-  const ry = useTransform(sx, (v: number) => v * 6);
-
-  return (
-    <motion.div
-      className={`absolute ${p.className}`}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      initial={{ opacity: 0, scale: 0.6, y: 30 }}
-      animate={{ opacity: active ? 1 : 0.92, scale: active ? 1.1 : 1, y: 0 }}
-      transition={{
-        opacity: { duration: 0.7, delay: p.delay },
-        scale: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
-        y: { duration: 0.7, delay: p.delay },
-      }}
-      style={{
-        x: px,
-        y: py,
-        rotateX: rx,
-        rotateY: ry,
-        transformStyle: "preserve-3d",
-        zIndex: active ? 30 : 10,
-      }}
-    >
-      <motion.div
-        animate={reduce ? undefined : { y: [0, -8, 0], rotate: [-1, 1, -1] }}
-        transition={{ duration: 7 + index, repeat: Infinity, ease: "easeInOut", delay: index * 0.4 }}
-        className="relative"
-      >
-        <motion.div
-          aria-hidden
-          className={`absolute -inset-8 rounded-full bg-gradient-to-br ${p.glow} blur-2xl`}
-          animate={{ opacity: active ? 0.95 : 0.55 }}
-          transition={{ duration: 0.6 }}
-        />
-        <Link
-          to={p.to}
-          search={p.search as any}
-          aria-label={p.label}
-          className="block relative cursor-pointer"
-        >
-          <img
-            src={p.src}
-            alt={p.label}
-            loading="lazy"
-            className="relative w-full h-auto object-contain drop-shadow-[0_25px_40px_rgba(58,36,48,0.28)] transition-transform duration-500 hover:scale-105"
-            style={{ background: "transparent" }}
-          />
-        </Link>
-        <motion.span
-          animate={{ opacity: active ? 1 : 0.85, y: active ? 0 : 2 }}
-          className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 backdrop-blur px-3 py-1 text-[10px] sm:text-xs font-semibold text-[#3A2430] shadow-[0_6px_18px_-6px_rgba(58,36,48,0.3)] border border-white"
-        >
-          {p.accent && <Sparkles className="inline h-3 w-3 mr-1 text-[#D96C9D]" />}
-          {p.label}
-        </motion.span>
-      </motion.div>
-    </motion.div>
   );
 }
