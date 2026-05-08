@@ -69,8 +69,11 @@ export function ProductCard({ product }: { product: Product }) {
             <span>({product.reviews_count})</span>
           </div>
         )}
-        {!isOut && (
+        {!unavailable && (
           <div className="mt-1 text-[11px] text-emerald-600 font-medium">متاح للطلب</div>
+        )}
+        {isComingSoon && (
+          <div className="mt-1 text-[11px] text-amber-600 font-medium">قريباً</div>
         )}
         <div className="mt-3 flex items-end justify-between gap-2">
           <div>
