@@ -160,9 +160,12 @@ export function ReferralSection() {
                   {balance.toLocaleString("ar-EG")} <span className="text-base font-normal text-[#3A2430]/60">ج.م</span>
                 </div>
                 <p className="text-xs text-[#3A2430]/60 mt-1">يُصرف تلقائيًا في طلبك الجاي</p>
+              </div>
+            </div>
+          )}
 
           <p className="text-[10px] text-[#3A2430]/55 text-center leading-relaxed mt-6 max-w-xl mx-auto">
-            الرصيد يدخل بعد تسليم طلب صديقتك. لا يُحتسب على الطلبات الملغية أو المرتجعة. حد شهري: {data?.settings?.monthly_cap ?? 500} ج.م.
+            الرصيد يدخل بعد تسليم طلب صديقتك. لا يُحتسب على الطلبات الملغية أو المرتجعة.
           </p>
         </div>
       </motion.div>
