@@ -275,6 +275,7 @@ function ProductPage() {
                         href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(waMsg)}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => trackEvent("whatsapp_clicked", { source: "product_page", product_id: product.id, product_name: product.name })}
                         className="bg-[#25D366] text-white py-3.5 rounded-full font-medium hover:opacity-90 transition inline-flex items-center justify-center gap-2"
                       >
                         <MessageCircle className="h-4 w-4" /> واتساب
