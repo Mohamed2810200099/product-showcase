@@ -44,27 +44,44 @@ function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [referralInput, setReferralInput] = useState("");
   const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
-  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } | null>(null);
+  const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number }>({ friend_discount_pct: 15, min_redemption: 0, max_wallet_per_order_pct: 50 });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [useWallet, setUseWallet] = useState(false);
+  const [useWallet, setUseWallet] = useState(true);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
   });
 
-  // Load glow profile when authenticated
+  // Load wallet balance directly from customer_profiles (RLS-protected)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) { setWalletBalance(0); return; }
+    let cancelled = false;
     (async () => {
-      try {
-        const { getMyGlowProfile } = await import("@/server/referral.functions");
-        const res = await getMyGlowProfile();
-        const r = res as { profile: { wallet_balance: number } | null; settings: { friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number } };
-        setWalletBalance(Number(r.profile?.wallet_balance ?? 0));
-        setGlowSettings(r.settings);
-      } catch (e) { console.warn(e); }
+      const { data } = await supabase
+        .from("customer_profiles")
+        .select("wallet_balance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setWalletBalance(Number(data?.wallet_balance ?? 0));
     })();
-  }, [isAuthenticated]);
+    // also load glow settings (best-effort)
+    (async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "share_the_glow")
+        .maybeSingle();
+      if (cancelled) return;
+      const v = data?.value as { friend_discount_pct?: number; min_redemption?: number; max_wallet_per_order_pct?: number } | null;
+      if (v) setGlowSettings({
+        friend_discount_pct: v.friend_discount_pct ?? 15,
+        min_redemption: v.min_redemption ?? 0,
+        max_wallet_per_order_pct: v.max_wallet_per_order_pct ?? 50,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, user]);
 
   if (authLoading) {
     return (
