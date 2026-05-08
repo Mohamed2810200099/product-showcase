@@ -11,12 +11,12 @@ import { formatEGP } from "@/lib/format";
 
 export const Route = createFileRoute("/order-success")({
   validateSearch: z.object({
-    order: fallback(z.string(), "").optional(),
-    name: fallback(z.string(), "").optional(),
-    phone: fallback(z.string(), "").optional(),
-    total: fallback(z.number(), 0).optional(),
-    gov: fallback(z.string(), "").optional(),
-    city: fallback(z.string(), "").optional(),
+    order: z.string().optional().catch(undefined),
+    name: z.string().optional().catch(undefined),
+    phone: z.string().optional().catch(undefined),
+    total: z.number().optional().catch(undefined),
+    gov: z.string().optional().catch(undefined),
+    city: z.string().optional().catch(undefined),
   }),
   head: () => ({ meta: [{ title: "تم الطلب — The Girl House" }] }),
   component: OrderSuccessPage,
