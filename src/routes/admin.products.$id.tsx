@@ -344,7 +344,16 @@ function ProductForm() {
             <Toggle label="منشور (ظاهر للعملاء)" checked={form.is_active} onChange={(v) => setForm({ ...form, is_active: v })} />
             <Toggle label="منتج مميز" checked={form.is_featured} onChange={(v) => setForm({ ...form, is_featured: v })} />
             <Toggle label="كمية محدودة" checked={form.is_limited} onChange={(v) => setForm({ ...form, is_limited: v })} />
-            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => setForm({ ...form, stock_tracking_enabled: v })} />
+            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => {
+              setForm((f) => {
+                const next = { ...f, stock_tracking_enabled: v };
+                if (v && f.stock <= 0 && f.availability_status !== "coming_soon" && f.availability_status !== "out_of_stock") {
+                  next.availability_status = "out_of_stock";
+                  toast.message("تم ضبط الحالة على: نفذ المخزون");
+                }
+                return next;
+              });
+            }} />
             <div>
               <label className="text-xs text-muted-foreground block mb-1">حالة التوفر</label>
               <select
