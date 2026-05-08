@@ -158,6 +158,35 @@ export function HeroPremium() {
           "radial-gradient(120% 80% at 20% 10%, #FFF8F4 0%, #FDF4EF 28%, #F8DCE5 70%, #F9EEF3 100%)",
       }}
     >
+      {/* Hero-local WebGL smoke (stronger) */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <SmokeBackground variant="hero" className="absolute inset-0 h-full w-full" />
+      </div>
+
+      {/* Animated CSS glow blobs */}
+      {!reduce && (
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }}>
+          <motion.div
+            className="absolute -top-24 -left-24 h-[520px] w-[520px] rounded-full"
+            style={{ background: "radial-gradient(circle, #D96C9D 0%, transparent 65%)", filter: "blur(70px)", opacity: 0.45 }}
+            animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-32 -right-24 h-[560px] w-[560px] rounded-full"
+            style={{ background: "radial-gradient(circle, #F6E7D8 0%, transparent 65%)", filter: "blur(80px)", opacity: 0.55 }}
+            animate={{ scale: [1, 1.15, 1], x: [0, -30, 0] }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute top-1/3 left-1/3 h-[420px] w-[420px] rounded-full"
+            style={{ background: "radial-gradient(circle, #E7A8BF 0%, transparent 65%)", filter: "blur(60px)", opacity: 0.4 }}
+            animate={{ y: [0, -40, 0], x: [0, 20, 0] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      )}
+
       {/* Cursor spotlight */}
       {!reduce && (
         <motion.div
