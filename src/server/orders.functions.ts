@@ -93,7 +93,7 @@ const lookupSchema = z.object({
   order_number: z.string().trim().min(4).max(40),
 });
 
-const normalizePhone = (p: string) => p.replace(/[\s\-+]/g, "").trim();
+
 
 export const lookupOrderByPhoneAndNumber = createServerFn({ method: "POST" })
   .inputValidator((data) => lookupSchema.parse(data))
