@@ -1,5 +1,6 @@
 import { useBrand } from "@/hooks/use-brand";
 import { MessageCircle } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export function WhatsAppFloat() {
   const brand = useBrand();
