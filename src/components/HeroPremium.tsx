@@ -26,9 +26,10 @@ type FloatProduct = {
 const products: FloatProduct[] = [
   {
     src: keratinImg,
-    label: "Hair Repair",
+    label: "علاج الكيراتين",
     glow: "from-[#F8C8D8] via-[#EFA7C3]/40 to-transparent",
-    className: "top-[2%] left-[4%] w-[28%] sm:w-[22%]",
+    // hidden on small screens to keep mobile clean
+    className: "hidden sm:block top-[2%] left-[4%] w-[28%] sm:w-[22%]",
     delay: 0.7,
     parallax: -20,
     to: "/shop",
@@ -36,7 +37,7 @@ const products: FloatProduct[] = [
   },
   {
     src: langhaarImg,
-    label: "Scalp Care",
+    label: "العناية بفروة الرأس",
     glow: "from-[#FADCE7] via-[#F8C8D8]/60 to-transparent",
     className: "top-[6%] right-[3%] w-[26%] sm:w-[20%]",
     delay: 0.9,
@@ -46,7 +47,7 @@ const products: FloatProduct[] = [
   },
   {
     src: plexMaskImg,
-    label: "Plex Care",
+    label: "ماسك بليكس",
     glow: "from-[#EDE7F6] via-[#F9EEF3]/70 to-transparent",
     className: "bottom-[8%] left-[1%] w-[32%] sm:w-[24%]",
     delay: 1.1,
@@ -57,15 +58,17 @@ const products: FloatProduct[] = [
   },
   {
     src: plexSpuelungImg,
-    label: "Stronger Hair",
+    label: "بلسم بليكس",
     glow: "from-[#F9EEF3] via-[#FADCE7]/60 to-transparent",
-    className: "bottom-[12%] right-[2%] w-[26%] sm:w-[20%]",
+    // hidden on small screens to keep mobile clean
+    className: "hidden sm:block bottom-[12%] right-[2%] w-[26%] sm:w-[20%]",
     delay: 1.3,
     parallax: 18,
     to: "/shop",
     search: { search: "plex" },
   },
 ];
+
 
 function MagneticButton({
   children,
