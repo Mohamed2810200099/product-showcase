@@ -518,7 +518,8 @@ function ProductPage() {
           </div>
 
           <form onSubmit={submitReview} className="bg-secondary/40 rounded-2xl p-6 border border-border h-fit">
-            <h3 className="font-display text-xl font-semibold mb-4">شاركينا رأيك</h3>
+            <h3 className="font-display text-xl font-semibold mb-1">شاركينا رأيك</h3>
+            <p className="text-xs text-muted-foreground mb-4">يتم مراجعة التقييم قبل ظهوره</p>
             <div className="space-y-3">
               <input
                 type="text" placeholder="اسمك" value={reviewName} onChange={(e) => setReviewName(e.target.value)} maxLength={100}
