@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getUserFromAccessToken } from "./auth-helpers.server";
 
 const lookupSchema = z.object({
   phone: z.string().trim().min(6).max(20),
@@ -20,41 +20,40 @@ export const lookupOrdersByPhone = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
-export const getMyOrders = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId } = context;
+const authInputSchema = z.object({
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+const parseAuthInput = (data: unknown) => {
+  const parsed = authInputSchema.safeParse(data ?? {});
+  return parsed.success ? parsed.data : { access_token: null };
+};
+
+export const getMyOrders = createServerFn({ method: "POST" })
+  .inputValidator(parseAuthInput)
+  .handler(async ({ data }) => {
+    const authUser = await getUserFromAccessToken(data.access_token);
+    if (!authUser) return [];
+
     const { data: rows, error } = await supabaseAdmin
       .from("orders")
       .select("id, order_number, status, created_at, total, items")
-      .eq("customer_user_id", userId)
+      .eq("customer_user_id", authUser.userId)
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
 
-const accountSchema = z.object({
-  access_token: z.string().min(10).max(4000),
-});
-
 export const getMyAccount = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => {
-    const parsed = accountSchema.safeParse(data ?? {});
-    return parsed.success ? parsed.data : { access_token: "" };
-  })
+  .inputValidator(parseAuthInput)
   .handler(async ({ data }) => {
-    // Validate the token server-side; never trust a client-supplied user id.
-    const { data: userData, error: authError } = await supabaseAdmin.auth.getUser(data.access_token);
-    if (authError || !userData?.user) {
+    const authUser = await getUserFromAccessToken(data.access_token);
+    if (!authUser) {
       return { ok: false as const, error: "unauthorized", profile: null, orders: [] };
     }
-    const user = userData.user;
-    const userId = user.id;
-    const claims = { user_metadata: user.user_metadata, email: user.email } as {
-      user_metadata?: { full_name?: string; name?: string };
-      email?: string;
-    };
+    const { user, userId, email } = authUser;
+    const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string };
 
     const loadProfile = () =>
       supabaseAdmin
@@ -76,8 +75,6 @@ export const getMyAccount = createServerFn({ method: "POST" })
     let profile = profileRes.data;
 
     if (!profile) {
-      const meta = claims.user_metadata ?? {};
-      const email = claims.email ?? "";
       const seed = meta.full_name || meta.name || (email ? email.split("@")[0] : "Glow");
       const displayName = seed || "Glow";
 

@@ -2,54 +2,54 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { getUserFromAccessToken } from "./auth-helpers.server";
 import { getGlowSettings } from "./referral.server";
 
+const authInputSchema = z.object({
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+const parseAuthInput = (data: unknown) => {
+  const parsed = authInputSchema.safeParse(data ?? {});
+  return parsed.success ? parsed.data : { access_token: null };
+};
+
+const adminActionSchema = z.object({
+  order_id: z.string().uuid(),
+  access_token: z.string().max(4000).optional().nullable(),
+});
+
+async function isAdminAccess(accessToken?: string | null) {
+  const authUser = await getUserFromAccessToken(accessToken);
+  if (!authUser) return false;
+
+  const { data } = await supabaseAdmin.rpc("has_role", {
+    _user_id: authUser.userId,
+    _role: "admin",
+  });
+  return data === true;
+}
+
 /** Get the current customer's referral profile + wallet + recent transactions. */
-export const getMyGlowProfile = createServerFn({ method: "GET" })
-  .handler(async () => {
+export const getMyGlowProfile = createServerFn({ method: "POST" })
+  .inputValidator(parseAuthInput)
+  .handler(async ({ data }) => {
     try {
       const settings = await getGlowSettings().catch(() => null);
-      const { getRequest } = await import("@tanstack/react-start/server");
-      const req = getRequest();
-      const authHeader = req?.headers?.get("authorization") ?? "";
-      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-      if (!token) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
+      const authUser = await getUserFromAccessToken(data.access_token);
+      if (!authUser) return { profile: null, settings, transactions: [] as any[] };
+      const { user, userId, email } = authUser;
 
-      // Decode JWT payload to get user id without an extra round-trip
-      let userId: string | undefined;
-      try {
-        const payload = JSON.parse(
-          Buffer.from(token.split(".")[1] ?? "", "base64").toString("utf8"),
-        );
-        userId = payload?.sub;
-      } catch {
-        userId = undefined;
-      }
-      if (!userId) {
-        return { profile: null, settings, transactions: [] as any[] };
-      }
-
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_PUBLISHABLE_KEY!,
-        { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } },
-      );
-
-
-      let { data: profile } = await supabase
+      let { data: profile } = await supabaseAdmin
         .from("customer_profiles")
         .select("*")
         .eq("user_id", userId)
         .maybeSingle();
 
       if (!profile) {
-        const { data: u } = await supabase.auth.getUser();
         const seed =
-          (u.user?.user_metadata?.full_name as string | undefined) ??
-          u.user?.email?.split("@")[0] ??
+          (user.user_metadata?.full_name as string | undefined) ??
+          email?.split("@")[0] ??
           "Glow";
         const { data: code } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
         const { data: created } = await supabaseAdmin
@@ -60,9 +60,10 @@ export const getMyGlowProfile = createServerFn({ method: "GET" })
         profile = created ?? null;
       }
 
-      const { data: tx } = await supabase
+      const { data: tx } = await supabaseAdmin
         .from("wallet_transactions")
         .select("*")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -75,8 +76,10 @@ export const getMyGlowProfile = createServerFn({ method: "GET" })
 
 /** Award referrer credit when an order is marked delivered. Admin-only. */
 export const awardReferralForOrder = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => adminActionSchema.parse(d))
   .handler(async ({ data }) => {
+    if (!(await isAdminAccess(data.access_token))) return { ok: false, error: "Unauthorized" };
+
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("*")
@@ -151,8 +154,10 @@ export const awardReferralForOrder = createServerFn({ method: "POST" })
 
 /** Reverse referral credit if an order is cancelled after being granted. Admin-only. */
 export const reverseReferralForOrder = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => adminActionSchema.parse(d))
   .handler(async ({ data }) => {
+    if (!(await isAdminAccess(data.access_token))) return { ok: false, error: "Unauthorized" };
+
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("*")
