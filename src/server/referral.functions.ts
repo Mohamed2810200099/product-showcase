@@ -8,7 +8,7 @@ import { getGlowSettings } from "./referral.server";
 export const getMyGlowProfile = createServerFn({ method: "GET" })
   .handler(async () => {
     try {
-      const settings = await getGlowSettings();
+      const settings = await getGlowSettings().catch(() => null);
       const { getRequest } = await import("@tanstack/react-start/server");
       const req = getRequest();
       const authHeader = req?.headers?.get("authorization") ?? "";
