@@ -11,7 +11,7 @@ import { BeautyAssistant } from "@/components/BeautyAssistant";
 import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
-import { GermanBeautyScrollShowcase } from "@/components/home/GermanBeautyScrollShowcase";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -146,9 +146,6 @@ function HomePage() {
           <p className="text-center text-muted-foreground py-8">قريباً منتجات مميزة 💕</p>
         )}
       </section>
-
-      {/* GERMAN BEAUTY SCROLL SHOWCASE */}
-      <GermanBeautyScrollShowcase />
 
       {limited.length > 0 && (
         <section className="container mx-auto px-4 py-10">
