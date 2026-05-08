@@ -47,7 +47,7 @@ function CheckoutPage() {
   const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
   const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number }>({ friend_discount_pct: 15, min_redemption: 0, max_wallet_per_order_pct: 50 });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [useWallet, setUseWallet] = useState(true);
+  const [useWallet, setUseWallet] = useState(false);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
@@ -355,12 +355,18 @@ function CheckoutPage() {
                   <div className="flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-[#D96C9D]" />
                     <div>
-                      <div className="text-sm font-semibold text-[#3A2430]">رصيد محفظتك: {formatEGP(walletBalance)}</div>
-                      <div className="text-[11px] text-[#3A2430]/65">هل تريدي استخدامه؟ (حد أقصى {glowSettings.max_wallet_per_order_pct}٪ من قيمة الطلب)</div>
+                      <div className="text-sm font-semibold text-[#3A2430]">هل تريدي استخدام رصيد المحفظة في هذا الطلب؟</div>
+                      <div className="text-[11px] text-[#3A2430]/65">رصيدك الحالي: {formatEGP(walletBalance)} (حد أقصى {glowSettings.max_wallet_per_order_pct}٪ من قيمة الطلب)</div>
                     </div>
                   </div>
                   <Switch checked={useWallet} onCheckedChange={setUseWallet} />
                 </div>
+                {useWallet && (
+                  <div className="mt-3 pt-3 border-t border-[#F0CCD9] text-[12px] text-[#3A2430]/80 space-y-1">
+                    <div className="flex justify-between"><span>أقصى مبلغ مسموح</span><span className="font-semibold">{formatEGP(Math.min(walletBalance, maxWalletByOrder))}</span></div>
+                    <div className="flex justify-between"><span>المبلغ المطبق فعلياً</span><span className="font-semibold text-[#D96C9D]">{formatEGP(walletApplied)}</span></div>
+                  </div>
+                )}
               </div>
             )}
 
