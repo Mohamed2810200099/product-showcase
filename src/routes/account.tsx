@@ -23,7 +23,7 @@ type OrderRow = {
   status: string;
   created_at: string;
   total: number;
-  items: Array<{ name?: string; quantity?: number; price?: number }> | null;
+  items: import("@/lib/order-items").OrderItemLike[] | null;
 };
 
 type AccountData = {

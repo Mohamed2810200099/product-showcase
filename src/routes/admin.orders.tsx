@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/admin/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { formatEGP } from "@/lib/format";
 import { Eye, Phone, MapPin, Trash2, X } from "lucide-react";
+import { getItemQty, getItemPrice, type OrderItemLike } from "@/lib/order-items";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/orders")({
@@ -163,7 +164,7 @@ function OrdersPage() {
 }
 
 function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onClose: () => void; onDelete: () => void; onStatus: (s: string) => void }) {
-  const items = Array.isArray(order.items) ? (order.items as Array<{ name: string; qty: number; price: number; image?: string }>) : [];
+  const items: OrderItemLike[] = Array.isArray(order.items) ? (order.items as OrderItemLike[]) : [];
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-card max-w-2xl w-full rounded-2xl shadow-elegant max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
@@ -188,8 +189,8 @@ function OrderModal({ order, onClose, onDelete, onStatus }: { order: Order; onCl
                 <li key={i} className="flex items-center gap-3 text-sm bg-secondary/30 rounded-lg p-2">
                   {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded object-cover" />}
                   <div className="flex-1">{it.name}</div>
-                  <div className="text-muted-foreground">× {it.qty}</div>
-                  <div className="font-semibold">{formatEGP(it.price * it.qty)}</div>
+                  <div className="text-muted-foreground">× {getItemQty(it)}</div>
+                  <div className="font-semibold">{formatEGP(getItemPrice(it) * getItemQty(it))}</div>
                 </li>
               ))}
             </ul>

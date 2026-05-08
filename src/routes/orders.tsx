@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, Package, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { getItemQty, type OrderItemLike } from "@/lib/order-items";
 
 export const Route = createFileRoute("/orders")({
   head: () => ({
@@ -24,7 +25,7 @@ type OrderRow = {
   status: string;
   created_at: string;
   total: number;
-  items: Array<{ name?: string; quantity?: number; price?: number }> | null;
+  items: OrderItemLike[] | null;
 };
 
 function statusLabel(s: string) {
@@ -156,7 +157,7 @@ function OrdersPage() {
               <ul className="text-sm space-y-1 mb-3 text-[#3A2430]/80">
                 {(o.items ?? []).map((it, i) => (
                   <li key={i} className="flex justify-between gap-2">
-                    <span>{it.name ?? "منتج"} × {it.quantity ?? 1}</span>
+                    <span>{it.name ?? "منتج"} × {getItemQty(it)}</span>
                   </li>
                 ))}
               </ul>
