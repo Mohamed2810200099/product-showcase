@@ -178,7 +178,7 @@ function ProductPage() {
 
   return (
     <PublicLayout>
-      <div className="container mx-auto px-4 py-8 pb-28 md:pb-8">
+      <div className="container mx-auto px-4 py-8 pb-[180px] md:pb-8">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">الرئيسية</Link>
           <ArrowLeft className="h-3 w-3" />
@@ -557,10 +557,10 @@ function ProductPage() {
         )}
       </div>
 
-      {/* Sticky mobile buy bar */}
+      {/* Sticky mobile buy bar — sits above MobileBottomBar (h≈56px) */}
       <div
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-10px_30px_-10px_rgba(58,36,48,0.18)] px-4 py-3"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+        className="md:hidden fixed inset-x-0 z-30 bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-10px_30px_-10px_rgba(58,36,48,0.18)] px-4 py-3"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 56px)" }}
       >
         <div className="flex items-center gap-3">
           <div className="flex flex-col leading-tight">
