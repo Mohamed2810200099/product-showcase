@@ -57,6 +57,10 @@ export const validateCoupon = createServerFn({ method: "POST" })
       if ((count ?? 0) > 0) return { ok: false, error: "هذا الكود مخصص لأول طلب فقط" };
     }
 
-    const d = row.type === "percent" ? (data.subtotal * Number(row.value)) / 100 : Number(row.value);
-    return { ok: true, code: row.code, discount: Math.round(d) };
+    // NOTE: This calculation MUST mirror createOrder's coupon logic so the
+    // checkout UI total equals the backend-saved order total. Always cap to
+    // subtotal and clamp to >= 0 — fixed coupons can exceed subtotal.
+    const raw = row.type === "percent" ? (data.subtotal * Number(row.value)) / 100 : Number(row.value);
+    const discount = Math.max(0, Math.min(Math.round(raw), data.subtotal));
+    return { ok: true, code: row.code, discount };
   });
