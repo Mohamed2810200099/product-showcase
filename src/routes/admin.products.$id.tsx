@@ -119,6 +119,17 @@ function ProductForm() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || form.price <= 0) return toast.error("الاسم والسعر مطلوبين");
+    if (form.stock < 0) return toast.error("المخزون لا يمكن أن يكون أقل من صفر");
+
+    // Reconcile availability with stock at save time. Never override coming_soon.
+    let availability = form.availability_status;
+    if (form.stock_tracking_enabled && availability !== "coming_soon") {
+      if (form.stock <= 0) availability = "out_of_stock";
+      else if (availability === "out_of_stock") availability = "available";
+    }
+    if (availability !== form.availability_status) {
+      setForm((f) => ({ ...f, availability_status: availability }));
+    }
 
     setSaving(true);
     const splitLines = (s: string) => s.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
@@ -152,7 +163,7 @@ function ProductForm() {
       is_featured: form.is_featured,
       is_limited: form.is_limited,
       stock_tracking_enabled: form.stock_tracking_enabled,
-      availability_status: form.availability_status,
+      availability_status: availability,
     } as any;
 
     // SECURITY: write gated by RLS "Admins manage products" via has_role(auth.uid(),'admin').
