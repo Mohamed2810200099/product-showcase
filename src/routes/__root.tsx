@@ -1,10 +1,11 @@
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, useLocation } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { CartProvider } from "@/context/CartContext";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { SiteAnimatedBackground } from "@/components/layout/SiteAnimatedBackground";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
@@ -91,10 +92,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <Outlet />
+        {!isAdmin && <SiteAnimatedBackground />}
+        <div className="relative z-10">
+          <Outlet />
+        </div>
         <Toaster position="top-center" richColors closeButton dir="rtl" />
       </CartProvider>
     </QueryClientProvider>
