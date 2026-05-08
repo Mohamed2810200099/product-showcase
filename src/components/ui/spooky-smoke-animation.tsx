@@ -41,16 +41,17 @@ float fbm(vec2 p){
   return v;
 }
 
+uniform float uSpeed;
+uniform float uScale;
 void main(){
   vec2 uv = (gl_FragCoord.xy - 0.5*iResolution.xy)/iResolution.y;
-  float t = iTime * 0.06;
-  vec2 q = uv * 1.4;
-  q += vec2(fbm(q + t), fbm(q - t)) * 0.6;
+  float t = iTime * uSpeed;
+  vec2 q = uv * uScale;
+  q += vec2(fbm(q + t), fbm(q - t)) * 0.65;
   float n = fbm(q + t*0.5);
-  // ivory base instead of dark
   vec3 base = vec3(1.0, 0.973, 0.957);
-  float smoke = smoothstep(0.35, 0.85, n);
-  vec3 col = mix(base, uSmoke, smoke * 0.85);
+  float smoke = smoothstep(0.30, 0.88, n);
+  vec3 col = mix(base, uSmoke, smoke);
   fragColor = vec4(col, 1.0);
 }
 `;
