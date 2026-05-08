@@ -24,17 +24,16 @@ export const getMyGlowProfile = createServerFn({ method: "POST" })
       if (!authUser) return { profile: null, settings, transactions: [] as any[] };
       const { user, userId, email } = authUser;
 
-      let { data: profile } = await supabase
+      let { data: profile } = await supabaseAdmin
         .from("customer_profiles")
         .select("*")
         .eq("user_id", userId)
         .maybeSingle();
 
       if (!profile) {
-        const { data: u } = await supabase.auth.getUser();
         const seed =
-          (u.user?.user_metadata?.full_name as string | undefined) ??
-          u.user?.email?.split("@")[0] ??
+          (user.user_metadata?.full_name as string | undefined) ??
+          email?.split("@")[0] ??
           "Glow";
         const { data: code } = await supabaseAdmin.rpc("generate_personal_code", { _seed: seed });
         const { data: created } = await supabaseAdmin
@@ -45,9 +44,10 @@ export const getMyGlowProfile = createServerFn({ method: "POST" })
         profile = created ?? null;
       }
 
-      const { data: tx } = await supabase
+      const { data: tx } = await supabaseAdmin
         .from("wallet_transactions")
         .select("*")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
 
