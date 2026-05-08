@@ -89,19 +89,28 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
 
 const lookupSchema = z.object({
   phone: z.string().trim().min(6).max(20),
+  order_number: z.string().trim().min(4).max(40),
 });
 
-export const lookupOrdersByPhone = createServerFn({ method: "POST" })
+const normalizePhone = (p: string) => p.replace(/[\s\-+]/g, "").trim();
+
+export const lookupOrderByPhoneAndNumber = createServerFn({ method: "POST" })
   .inputValidator((data) => lookupSchema.parse(data))
   .handler(async ({ data }) => {
+    const phoneNorm = normalizePhone(data.phone);
+    const orderNumber = data.order_number.trim().toUpperCase();
     const { data: rows, error } = await supabaseAdmin
       .from("orders")
-      .select("id, order_number, status, created_at, total, items")
-      .eq("customer_phone", data.phone)
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .select("id, order_number, status, created_at, total, items, customer_phone")
+      .eq("order_number", orderNumber)
+      .limit(1);
     if (error) throw new Error(error.message);
-    return rows ?? [];
+    const row = rows?.[0];
+    if (!row) return null;
+    if (normalizePhone(row.customer_phone ?? "") !== phoneNorm) return null;
+    const { customer_phone: _omit, ...safe } = row;
+    void _omit;
+    return safe;
   });
 
 const authInputSchema = z.object({

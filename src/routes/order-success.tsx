@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { CheckCircle, MessageCircle, Sparkles } from "lucide-react";
+import { CheckCircle, MessageCircle, Sparkles, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
 import { useAuth } from "@/hooks/use-auth";
@@ -25,7 +26,29 @@ function OrderSuccessPage() {
             <CheckCircle className="h-10 w-10 text-primary-foreground" />
           </div>
           <h1 className="font-display text-3xl font-bold mb-2">تم استلام طلبك! 🎉</h1>
-          {order && <p className="text-muted-foreground mb-1">رقم الطلب: <span className="font-mono font-bold text-foreground">{order}</span></p>}
+          {order && (
+            <div className="mt-3 mb-2 inline-flex flex-col items-center gap-2 bg-secondary/40 border border-border rounded-2xl px-4 py-3 w-full">
+              <div className="text-xs text-muted-foreground">رقم الطلب</div>
+              <div className="font-mono font-bold text-lg text-foreground" dir="ltr">{order}</div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(order);
+                    toast.success("تم نسخ رقم الطلب");
+                  } catch {
+                    toast.error("تعذّر النسخ");
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+              >
+                <Copy className="h-3.5 w-3.5" /> نسخ الرقم
+              </button>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                احفظي رقم الطلب — هتحتاجيه مع رقم الموبايل لتتبّع طلبك من صفحة "طلباتي".
+              </p>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
             شكراً لطلبك من The Girl House 💕<br />
             هنتواصل معاكِ خلال ساعات لتأكيد الطلب وموعد التوصيل.
