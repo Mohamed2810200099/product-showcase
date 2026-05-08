@@ -66,7 +66,7 @@ export function HeroPremium() {
     <section
       dir="rtl"
       onMouseMove={onSectionMove}
-      className="relative overflow-hidden min-h-[74vh] md:min-h-[82vh] flex items-start pt-6 md:pt-2"
+      className="relative overflow-hidden min-h-[68vh] md:min-h-[74vh] flex items-center"
     >
       {/* Animated CSS glow blobs (kept, very subtle) */}
       {!reduce && (
