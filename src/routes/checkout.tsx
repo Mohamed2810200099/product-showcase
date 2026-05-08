@@ -93,25 +93,6 @@ function CheckoutPage() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <PublicLayout>
-        <div className="container mx-auto max-w-md px-4 py-16 text-center" dir="rtl">
-          <div className="bg-card border border-border rounded-2xl p-8 shadow-elegant">
-            <h2 className="font-display text-2xl font-bold mb-3">سجلي دخول علشان تكملي الطلب</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              لازم يكون عندك حساب علشان نقدر نحفظ طلباتك ونرسلك تأكيد على البريد.
-            </p>
-            <Link to="/login" search={{ redirect: "/checkout" }} className="inline-flex items-center justify-center bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-medium hover:opacity-90">
-              تسجيل دخول / إنشاء حساب
-            </Link>
-          </div>
-        </div>
-      </PublicLayout>
-    );
-  }
-
-
   if (items.length === 0) {
     return (
       <PublicLayout>
