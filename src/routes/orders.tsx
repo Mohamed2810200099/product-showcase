@@ -42,6 +42,7 @@ function statusLabel(s: string) {
 function OrdersPage() {
   const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [phone, setPhone] = useState("");
+  const [orderNumber, setOrderNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -75,17 +76,24 @@ function OrdersPage() {
 
   const search = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = phone.trim();
-    if (trimmed.length < 6) {
+    const trimmedPhone = phone.trim();
+    const trimmedOrder = orderNumber.trim();
+    if (trimmedPhone.length < 6) {
       setError("ادخلي رقم موبايل صحيح");
+      return;
+    }
+    if (trimmedOrder.length < 4) {
+      setError("ادخلي رقم الطلب");
       return;
     }
     setError(null);
     setLoading(true);
     setSearched(true);
     try {
-      const rows = await lookupOrdersByPhone({ data: { phone: trimmed } });
-      setOrders(rows as OrderRow[]);
+      const row = await lookupOrderByPhoneAndNumber({
+        data: { phone: trimmedPhone, order_number: trimmedOrder },
+      });
+      setOrders(row ? [row as OrderRow] : []);
     } catch {
       setError("حصل خطأ، حاولي تاني.");
       setOrders([]);
@@ -98,29 +106,38 @@ function OrdersPage() {
       <div dir="rtl" className="container mx-auto px-4 py-10 max-w-2xl">
         <h1 className="font-display text-3xl font-bold text-center mb-2 text-[#3A2430]">طلباتي</h1>
         <p className="text-center text-[#3A2430]/60 mb-8 text-sm">
-          {isAuthenticated ? "كل طلباتك في مكان واحد." : "ادخلي رقم الموبايل اللي طلبتي بيه عشان تشوفي طلباتك."}
+          {isAuthenticated ? "كل طلباتك في مكان واحد." : "اكتبي رقم الطلب ورقم الموبايل المستخدم في الطلب."}
         </p>
 
         {!isAuthenticated && !authLoading && (
           <>
-            <form onSubmit={search} className="flex gap-2 mb-4">
+            <form onSubmit={search} className="space-y-2 mb-4">
               <Input
-                type="tel"
-                inputMode="tel"
+                type="text"
                 dir="ltr"
-                placeholder="01xxxxxxxxx"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="flex-1"
+                placeholder="رقم الطلب (TGH-...)"
+                value={orderNumber}
+                onChange={(e) => setOrderNumber(e.target.value)}
               />
-              <Button type="submit" disabled={loading} className="bg-[#D96C9D] hover:bg-[#C95588]">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                <span className="mr-2">بحث</span>
-              </Button>
+              <div className="flex gap-2">
+                <Input
+                  type="tel"
+                  inputMode="tel"
+                  dir="ltr"
+                  placeholder="01xxxxxxxxx"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={loading} className="bg-[#D96C9D] hover:bg-[#C95588]">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  <span className="mr-2">بحث</span>
+                </Button>
+              </div>
             </form>
             <div className="text-center mb-8">
               <Link to="/login" className="inline-flex items-center gap-1.5 text-sm text-[#D96C9D] hover:underline">
-                <User className="h-4 w-4" /> أو سجلي دخولك لعرض طلباتك تلقائيًا
+                <User className="h-4 w-4" /> أو سجلي دخولك لعرض كل طلباتك تلقائيًا
               </Link>
             </div>
           </>
