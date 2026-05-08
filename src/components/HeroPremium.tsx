@@ -487,10 +487,10 @@ function FloatingProduct({
           aria-label={p.label}
           className="block relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3 cursor-pointer hover:shadow-[0_30px_60px_-20px_rgba(217,108,157,0.55)] transition-shadow"
         >
-          <img
+          <SmartImage
             src={p.src}
             alt={p.label}
-            loading="lazy"
+            eager
             className="relative w-full h-auto object-contain drop-shadow-[0_18px_30px_rgba(58,36,48,0.25)]"
           />
         </Link>
