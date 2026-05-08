@@ -42,15 +42,17 @@ function HomePage() {
   const { add } = useCart();
 
   const { data: featured = [] } = useQuery({
-    queryKey: ["featured-products"],
+    queryKey: ["featured-products-onsale"],
     queryFn: async () => {
       const { data } = await supabase
         .from("products")
         .select("id,name,arabic_title,slug,price,compare_at_price,images,rating,reviews_count,stock,is_limited,short_description,availability_status,stock_tracking_enabled")
         .eq("is_active", true)
+        .not("compare_at_price", "is", null)
         .order("order_index", { ascending: true })
-        .limit(8);
-      return (data ?? []) as unknown as Product[];
+        .limit(20);
+      const all = (data ?? []) as unknown as Product[];
+      return all.filter((p) => p.compare_at_price && p.compare_at_price > p.price).slice(0, 8);
     },
   });
 
