@@ -184,7 +184,7 @@ export function ImageSwiper({
                   src={p.image}
                   alt={p.arabicName || p.name}
                   draggable={false}
-                  className="w-full h-full object-contain p-6 pointer-events-none"
+                  className="w-full h-full object-contain p-3 sm:p-4 pointer-events-none"
                 />
                 {p.label && (
                   <span className="absolute top-4 right-4 bg-[#D96C9D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
