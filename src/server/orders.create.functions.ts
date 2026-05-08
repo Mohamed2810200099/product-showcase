@@ -204,6 +204,28 @@ export const createOrder = createServerFn({ method: "POST" })
 
     if (iErr || !inserted) return { ok: false, error: "تعذر إنشاء الطلب" };
 
+    // Atomically decrement stock for stock-tracked products. If insufficient,
+    // roll back the order and surface a friendly error.
+    const stockItems = data.items
+      .filter((it) => {
+        const p = byId.get(it.product_id);
+        return p?.stock_tracking_enabled === true;
+      })
+      .map((it) => ({ product_id: it.product_id, qty: it.qty }));
+
+    if (stockItems.length > 0) {
+      const { data: failedPid, error: stockErr } = await supabaseAdmin.rpc(
+        "decrement_product_stock",
+        { _items: stockItems as unknown as never },
+      );
+      if (stockErr || failedPid) {
+        // roll back the order to keep state consistent
+        await supabaseAdmin.from("orders").delete().eq("id", inserted.id);
+        return { ok: false, error: "الكمية المطلوبة غير متاحة حالياً" };
+      }
+    }
+
+
     // increment coupon usage and auto-deactivate when usage limit reached
     if (couponCode) {
       const { data: cRow } = await supabaseAdmin
