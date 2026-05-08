@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getUserFromAccessToken } from "./auth-helpers.server";
 import { getGlowSettings } from "./referral.server";
+import { normalizePhone, isValidEgyptPhone } from "@/lib/phone";
 
 const authInputSchema = z.object({
   access_token: z.string().max(4000).optional().nullable(),
