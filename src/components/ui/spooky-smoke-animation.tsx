@@ -4,6 +4,9 @@ interface SmokeBackgroundProps {
   smokeColor?: string;
   className?: string;
   opacity?: number;
+  variant?: "subtle" | "hero" | "section";
+  speed?: number;
+  scale?: number;
 }
 
 const vertexSrc = `#version 300 es
