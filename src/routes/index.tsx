@@ -102,7 +102,7 @@ function HomePage() {
   return (
     <PublicLayout>
       <HeroPremium />
-      {brand.show_referral_section && <ReferralSection />}
+      {showReferral && <ReferralSection />}
 
       {/* TRUST BADGES */}
       <section className="border-y border-border bg-secondary/40">
