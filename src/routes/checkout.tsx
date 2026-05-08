@@ -268,12 +268,24 @@ function CheckoutPage() {
                 <Field label="رقم الموبايل *" type="tel" value={form.customer_phone} onChange={setPhone} invalidMessage="من فضلك أدخلي رقم موبايلك" />
                 {!isAuthenticated && (
                   <Field
-                    label="البريد الإلكتروني (اختياري)"
+                    label="البريد الإلكتروني (اختياري — لو حابة تستلمي تأكيد بالإيميل)"
                     type="email"
                     value={form.customer_email}
                     onChange={(v) => setForm({ ...form, customer_email: v })}
                     className="sm:col-span-2"
                   />
+                )}
+                {isAuthenticated && user?.email && (
+                  <div className="sm:col-span-2">
+                    <label className="text-xs text-muted-foreground block mb-1">البريد الإلكتروني (من حسابك)</label>
+                    <input
+                      type="email"
+                      value={user.email}
+                      readOnly
+                      dir="ltr"
+                      className="w-full bg-muted/40 border border-border rounded-lg px-3 py-2.5 text-sm text-muted-foreground cursor-not-allowed"
+                    />
+                  </div>
                 )}
 
                 <div>
@@ -393,9 +405,9 @@ function CheckoutPage() {
             <button type="submit" disabled={submitting} className="mt-5 w-full bg-primary text-primary-foreground py-3 rounded-full font-medium shadow-elegant hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
               {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
             </button>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              {(user?.email || form.customer_email)
-                ? "هنبعتلك تأكيد الطلب على إيميلك فوراً ✨"
+            <p className="text-xs text-muted-foreground text-center mt-3 leading-relaxed">
+              {isAuthenticated && user?.email
+                ? "هنبعتلك تأكيد الطلب على إيميلك، وكمان هنتواصل على واتساب أو الهاتف."
                 : "هنأكد الطلب معاكِ عبر واتساب أو الهاتف."}
             </p>
           </aside>
