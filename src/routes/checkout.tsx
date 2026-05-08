@@ -148,9 +148,10 @@ function CheckoutPage() {
 
   const setPhone = (v: string) => {
     setForm((prev) => {
-      if (prev.customer_phone !== v && appliedCoupon) {
+      if (prev.customer_phone !== v && (appliedCoupon || appliedReferral)) {
         setAppliedCoupon(null);
-        toast.info("غيّرتي رقم الموبايل، من فضلك طبّقي كود الخصم تاني.");
+        setAppliedReferral(null);
+        toast.info("غيّرتي رقم الموبايل، من فضلك طبّقي كود الخصم أو الإحالة تاني.");
       }
       return { ...prev, customer_phone: v };
     });
