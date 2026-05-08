@@ -405,9 +405,9 @@ function CheckoutPage() {
             <button type="submit" disabled={submitting} className="mt-5 w-full bg-primary text-primary-foreground py-3 rounded-full font-medium shadow-elegant hover:opacity-90 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
               {submitting ? "جاري التأكيد…" : "تأكيد الطلب"}
             </button>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              {(user?.email || form.customer_email)
-                ? "هنبعتلك تأكيد الطلب على إيميلك فوراً ✨"
+            <p className="text-xs text-muted-foreground text-center mt-3 leading-relaxed">
+              {isAuthenticated && user?.email
+                ? "هنبعتلك تأكيد الطلب على إيميلك، وكمان هنتواصل على واتساب أو الهاتف."
                 : "هنأكد الطلب معاكِ عبر واتساب أو الهاتف."}
             </p>
           </aside>
