@@ -175,7 +175,7 @@ export const createOrder = createServerFn({ method: "POST" })
       .from("orders")
       .insert([{
         customer_name: data.customer_name,
-        customer_phone: data.customer_phone,
+        customer_phone: phoneNorm,
         customer_email: data.customer_email || null,
         address: data.address,
         city: data.city,
