@@ -47,7 +47,7 @@ function CheckoutPage() {
   const [appliedReferral, setAppliedReferral] = useState<{ code: string; discount: number } | null>(null);
   const [glowSettings, setGlowSettings] = useState<{ friend_discount_pct: number; min_redemption: number; max_wallet_per_order_pct: number }>({ friend_discount_pct: 15, min_redemption: 0, max_wallet_per_order_pct: 50 });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [useWallet, setUseWallet] = useState(true);
+  const [useWallet, setUseWallet] = useState(false);
   const [form, setForm] = useState({
     customer_name: "", customer_phone: "", customer_email: user?.email ?? "",
     address: "", city: "", governorate: "القاهرة", notes: "",
