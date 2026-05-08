@@ -5,6 +5,7 @@ import { User, Package, Wallet, LogOut, Copy, Check, LogIn, Sparkles, Mail, Gift
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyAccount } from "@/server/orders.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
