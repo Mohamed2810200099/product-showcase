@@ -146,15 +146,6 @@ export function HeroPremium() {
                 <Tag className="h-4 w-4" /> شاهدي العروض
               </MagneticButton>
             </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event("open-referral-modal"))}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-3.5 text-sm font-medium text-[#3A2430]/70 hover:text-[#D96C9D] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D96C9D]/50"
-              >
-                <Gift className="h-4 w-4" /> ادعي صديقتك
-              </button>
-            </motion.div>
           </motion.div>
 
           {/* Trust badges */}
