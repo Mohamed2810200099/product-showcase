@@ -5,6 +5,7 @@ import { User, Package, Wallet, LogOut, Copy, Check, LogIn, Sparkles, Mail, Gift
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyAccount } from "@/server/orders.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
@@ -53,6 +54,7 @@ function AccountPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<AccountData>(null);
   const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -60,24 +62,19 @@ function AccountPage() {
     if (!isAuthenticated || !user) { setData(null); return; }
     let cancelled = false;
     setFetching(true);
+    setError(null);
     (async () => {
       try {
-        const [{ data: profile }, { data: orders }] = await Promise.all([
-          supabase
-            .from("customer_profiles")
-            .select("display_name, personal_code, wallet_balance, lifetime_credits_earned, phone")
-            .eq("user_id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("orders")
-            .select("id, order_number, status, created_at, total, items")
-            .eq("customer_user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(50),
-        ]);
-        if (!cancelled) setData({ profile: (profile as any) ?? null, orders: (orders as any) ?? [] });
+        const result = await getMyAccount();
+        if (!cancelled) {
+          setData({
+            profile: (result.profile as AccountData extends null ? never : NonNullable<AccountData>["profile"]) ?? null,
+            orders: (result.orders as OrderRow[]) ?? [],
+          });
+        }
       } catch (e) {
         console.warn("Account load failed", e);
+        if (!cancelled) setError("حصلت مشكلة وإحنا بنحمّل بياناتك. حاولي تاني.");
       } finally {
         if (!cancelled) setFetching(false);
       }
@@ -204,8 +201,10 @@ function AccountPage() {
                   {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4 text-[#D96C9D]" />}
                 </button>
               </div>
+            ) : error ? (
+              <p className="text-sm text-red-600">{error}</p>
             ) : (
-              <p className="text-sm text-[#3A2430]/70">كودك لسه مش جاهز.</p>
+              <p className="text-sm text-[#3A2430]/70">جاري تجهيز كودك…</p>
             )}
           </div>
         </div>
