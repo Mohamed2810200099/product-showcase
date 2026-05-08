@@ -4,6 +4,8 @@ import { CheckCircle, MessageCircle, Sparkles } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useBrand } from "@/hooks/use-brand";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/order-success")({
   validateSearch: z.object({ order: z.string().optional() }),
