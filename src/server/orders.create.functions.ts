@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getUserFromAccessToken } from "./auth-helpers.server";
 import { getGlowSettings } from "./referral.server";
+import { normalizePhone, isValidEgyptPhone } from "@/lib/phone";
 
 const itemSchema = z.object({
   product_id: z.string().uuid(),
@@ -11,7 +12,7 @@ const itemSchema = z.object({
 
 const schema = z.object({
   customer_name: z.string().trim().min(2).max(100),
-  customer_phone: z.string().trim().min(6).max(20).regex(/^[0-9+\-\s]+$/),
+  customer_phone: z.string().trim().min(6).max(20).regex(/^[0-9+\-\s()]+$/),
   customer_email: z.string().trim().email().max(255).optional().or(z.literal("")),
   address: z.string().trim().min(3).max(500),
   city: z.string().trim().min(2).max(100),
