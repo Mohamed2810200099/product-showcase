@@ -65,7 +65,7 @@ export const createOrder = createServerFn({ method: "POST" })
     const ids = data.items.map((i) => i.product_id);
     const { data: products, error: pErr } = await supabaseAdmin
       .from("products")
-      .select("id, name, slug, price, images, is_active")
+      .select("id, name, slug, price, images, is_active, stock, stock_tracking_enabled, availability_status")
       .in("id", ids);
 
     if (pErr || !products) return { ok: false, error: "تعذر جلب بيانات المنتجات" };
@@ -77,6 +77,12 @@ export const createOrder = createServerFn({ method: "POST" })
     for (const it of data.items) {
       const p = byId.get(it.product_id);
       if (!p || !p.is_active) return { ok: false, error: "أحد المنتجات غير متاح" };
+      if (p.availability_status === "out_of_stock") {
+        return { ok: false, error: "أحد المنتجات نفد من المخزون" };
+      }
+      if (p.stock_tracking_enabled && Number(p.stock ?? 0) < it.qty) {
+        return { ok: false, error: "الكمية المطلوبة غير متاحة حالياً" };
+      }
       const price = Number(p.price);
       subtotal += price * it.qty;
       const imgs = Array.isArray(p.images) ? (p.images as unknown[]) : [];
