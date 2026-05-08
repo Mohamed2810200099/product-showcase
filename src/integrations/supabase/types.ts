@@ -715,6 +715,7 @@ export type Database = {
       }
     }
     Functions: {
+      decrement_product_stock: { Args: { _items: Json }; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
