@@ -255,6 +255,7 @@ function ShopPage() {
             onSubmit={(e) => {
               e.preventDefault();
               const v = searchInput.trim();
+              if (v) trackEvent("search_submitted", { query: v, source: "shop" });
               navigate({ search: (s: any) => ({ ...s, search: v || undefined, q: undefined }) });
             }}
             className="mt-4 flex gap-2 max-w-xl"
