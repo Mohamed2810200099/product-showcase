@@ -132,6 +132,7 @@ function ProductForm() {
       brand: form.brand || null,
       category_id: form.category_id || null,
       sub_category: form.sub_category || null,
+      product_type: form.product_type || null,
       images: form.images,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : null,
       order_index: form.order_index,
