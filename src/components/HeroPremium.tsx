@@ -2,8 +2,8 @@ import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } fro
 import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
-import { SmokeBackground } from "@/components/ui/spooky-smoke-animation";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
+import groupImg from "@/assets/products/group.png";
 
 function MagneticButton({
   children,
