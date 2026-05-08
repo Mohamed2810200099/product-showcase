@@ -10,6 +10,43 @@ import langhaarImg from "@/assets/products/langhaar.png";
 import keratinImg from "@/assets/products/keratin.png";
 import plexMaskImg from "@/assets/products/plex-haarmaske.png";
 import plexSpuelungImg from "@/assets/products/plex-spuelung.png";
+import placeholderImg from "@/assets/product-placeholder.jpg";
+
+function SmartImage({
+  src,
+  alt,
+  className,
+  eager = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  eager?: boolean;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && !errored && (
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#F9EEF3] via-[#FFF8F4] to-[#F8DCE5] animate-pulse"
+        />
+      )}
+      <img
+        src={errored ? placeholderImg : src}
+        alt={alt}
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={eager ? "high" : "auto"}
+        onLoad={() => setLoaded(true)}
+        onError={() => { setErrored(true); setLoaded(true); }}
+        className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </div>
+  );
+}
+
 
 type FloatProduct = {
   src: string;
@@ -350,13 +387,18 @@ export function HeroPremium() {
             style={{ x: groupX, y: groupY }}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FFF8F4] via-[#F9EEF3]/70 to-[#E7A8BF]/30 blur-2xl" />
-            <motion.img
-              src={groupImg}
-              alt="The Girl House products"
+            <motion.div
               animate={reduce ? undefined : { y: [0, -8, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full h-full object-contain drop-shadow-[0_30px_45px_rgba(58,36,48,0.2)]"
-            />
+              className="relative w-full h-full"
+            >
+              <SmartImage
+                src={groupImg}
+                alt="The Girl House products"
+                eager
+                className="relative w-full h-full object-contain drop-shadow-[0_30px_45px_rgba(58,36,48,0.2)]"
+              />
+            </motion.div>
           </motion.div>
 
           {/* Floating products */}
@@ -445,10 +487,10 @@ function FloatingProduct({
           aria-label={p.label}
           className="block relative rounded-3xl bg-white/35 backdrop-blur-md border border-white/60 shadow-[0_20px_50px_-20px_rgba(58,36,48,0.35)] p-3 cursor-pointer hover:shadow-[0_30px_60px_-20px_rgba(217,108,157,0.55)] transition-shadow"
         >
-          <img
+          <SmartImage
             src={p.src}
             alt={p.label}
-            loading="lazy"
+            eager
             className="relative w-full h-auto object-contain drop-shadow-[0_18px_30px_rgba(58,36,48,0.25)]"
           />
         </Link>
