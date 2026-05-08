@@ -47,6 +47,7 @@ function ProductForm() {
     brand: "",
     category_id: "",
     sub_category: "",
+    product_type: "",
     images: [] as string[],
     tags: "",
     order_index: 0,
@@ -89,6 +90,7 @@ function ProductForm() {
               brand: data.brand ?? "",
               category_id: data.category_id ?? "",
               sub_category: (data as any).sub_category ?? "",
+              product_type: (data as any).product_type ?? "",
               images: Array.isArray(data.images) ? (data.images as string[]) : [],
               tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
               order_index: Number((data as any).order_index ?? 0),
@@ -130,6 +132,7 @@ function ProductForm() {
       brand: form.brand || null,
       category_id: form.category_id || null,
       sub_category: form.sub_category || null,
+      product_type: form.product_type || null,
       images: form.images,
       tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : null,
       order_index: form.order_index,
@@ -218,8 +221,49 @@ function ProductForm() {
               <Field label="SKU" value={form.sku} onChange={(v) => setForm({ ...form, sku: v })} dir="ltr" />
               <Field label="الماركة" value={form.brand} onChange={(v) => setForm({ ...form, brand: v })} dir="ltr" />
               <Field label="التصنيف الفرعي" value={form.sub_category} onChange={(v) => setForm({ ...form, sub_category: v })} dir="ltr" />
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">نوع المنتج</label>
+                <select
+                  value={form.product_type}
+                  onChange={(e) => setForm({ ...form, product_type: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">— اختاري —</option>
+                  <option value="shampoo">شامبو</option>
+                  <option value="conditioner">بلسم</option>
+                  <option value="mask">ماسك</option>
+                  <option value="oil">زيت</option>
+                  <option value="serum">سيروم</option>
+                  <option value="cream">كريم</option>
+                  <option value="cleanser">غسول</option>
+                  <option value="toner">تونر</option>
+                  <option value="sunscreen">واقي شمس</option>
+                  <option value="makeup">مكياج</option>
+                  <option value="treatment">علاج / تريتمنت</option>
+                  <option value="other">أخرى</option>
+                </select>
+              </div>
               <Field label="ترتيب العرض" type="number" value={String(form.order_index)} onChange={(v) => setForm({ ...form, order_index: Number(v) })} />
-              <Field label="وسوم (بفاصلة)" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} />
+              <Field label="وسوم concerns (بفاصلة) — مثل: hair_repair, frizz, glow" value={form.tags} onChange={(v) => setForm({ ...form, tags: v })} className="sm:col-span-3" />
+              <div className="sm:col-span-3 flex flex-wrap gap-1.5">
+                {["hair_repair","hair_growth","frizz","dry_skin","oily_skin","acne","glow","hydration"].map((t) => {
+                  const list = form.tags.split(",").map(s => s.trim()).filter(Boolean);
+                  const has = list.includes(t);
+                  return (
+                    <button
+                      type="button"
+                      key={t}
+                      onClick={() => {
+                        const next = has ? list.filter(x => x !== t) : [...list, t];
+                        setForm({ ...form, tags: next.join(", ") });
+                      }}
+                      className={`text-[11px] rounded-full px-2.5 py-1 border ${has ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:bg-accent"}`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
               <Field label="رابط المصدر (داخلي)" value={form.source_url} onChange={(v) => setForm({ ...form, source_url: v })} className="sm:col-span-3" dir="ltr" />
             </div>
           </Section>

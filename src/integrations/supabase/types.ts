@@ -334,6 +334,7 @@ export type Database = {
           order_index: number
           price: number
           product_details: string | null
+          product_type: string | null
           rating: number
           reviews_count: number
           short_description: string | null
@@ -370,6 +371,7 @@ export type Database = {
           order_index?: number
           price: number
           product_details?: string | null
+          product_type?: string | null
           rating?: number
           reviews_count?: number
           short_description?: string | null
@@ -406,6 +408,7 @@ export type Database = {
           order_index?: number
           price?: number
           product_details?: string | null
+          product_type?: string | null
           rating?: number
           reviews_count?: number
           short_description?: string | null
