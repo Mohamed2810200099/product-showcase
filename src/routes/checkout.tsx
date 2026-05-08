@@ -156,7 +156,7 @@ function CheckoutPage() {
         coupon_code: appliedCoupon?.code ?? null,
         referral_code: appliedReferral?.code ?? null,
         use_wallet: useWallet,
-        customer_user_id: user?.id ?? null,
+        
       },
     });
 

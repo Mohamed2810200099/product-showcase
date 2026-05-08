@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Database } from "@/integrations/supabase/types";
 import { getGlowSettings } from "./referral.server";
 
 const itemSchema = z.object({
@@ -20,16 +23,45 @@ const schema = z.object({
   coupon_code: z.string().trim().max(50).optional().nullable(),
   referral_code: z.string().trim().max(30).optional().nullable(),
   use_wallet: z.boolean().optional(),
-  customer_user_id: z.string().uuid().optional().nullable(),
 });
 
 export type CreateOrderResult =
   | { ok: true; order_number: string; id: string }
   | { ok: false; error: string };
 
+// Derive authenticated user id from the request's Bearer token (server-side only).
+// Returns null for guest checkout. Never trusts a client-supplied user id.
+async function getAuthUserId(): Promise<string | null> {
+  try {
+    const request = getRequest();
+    const authHeader = request?.headers?.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+    const token = authHeader.slice("Bearer ".length).trim();
+    if (!token) return null;
+
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
+
+    const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+    });
+    const { data, error } = await client.auth.getClaims(token);
+    if (error || !data?.claims?.sub) return null;
+    return String(data.claims.sub);
+  } catch (err) {
+    console.warn("getAuthUserId failed", err instanceof Error ? err.message : "unknown");
+    return null;
+  }
+}
+
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => schema.parse(data))
   .handler(async ({ data }): Promise<CreateOrderResult> => {
+    // SECURITY: derive user id from the auth token only — never from client payload.
+    const customerUserId = await getAuthUserId();
+
+
     const ids = data.items.map((i) => i.product_id);
     const { data: products, error: pErr } = await supabaseAdmin
       .from("products")
@@ -102,12 +134,12 @@ export const createOrder = createServerFn({ method: "POST" })
       const { data: ownerId } = await supabaseAdmin.rpc("lookup_referral_owner", { _code: code });
       const owner = ownerId as unknown as string | null;
       if (!owner) return { ok: false, error: "كود الإحالة غير موجود" };
-      if (data.customer_user_id && owner === data.customer_user_id)
+      if (customerUserId && owner === customerUserId)
         return { ok: false, error: "ميصحش تستخدمي كودك بنفسك" };
       // first-order-only for friend
-      if (data.customer_user_id) {
+      if (customerUserId) {
         const { count } = await supabaseAdmin.from("orders").select("id", { count: "exact", head: true })
-          .eq("customer_user_id", data.customer_user_id).neq("status", "cancelled");
+          .eq("customer_user_id", customerUserId).neq("status", "cancelled");
         if ((count ?? 0) > 0) return { ok: false, error: "كود الإحالة لأول طلب فقط" };
       } else {
         const { count } = await supabaseAdmin.from("orders").select("id", { count: "exact", head: true })
@@ -123,9 +155,9 @@ export const createOrder = createServerFn({ method: "POST" })
 
     // Wallet redemption (logged-in customers only)
     let walletRedeemed = 0;
-    if (data.use_wallet && data.customer_user_id) {
+    if (data.use_wallet && customerUserId) {
       const { data: cp } = await supabaseAdmin
-        .from("customer_profiles").select("wallet_balance").eq("user_id", data.customer_user_id).maybeSingle();
+        .from("customer_profiles").select("wallet_balance").eq("user_id", customerUserId).maybeSingle();
       const balance = Number(cp?.wallet_balance ?? 0);
       const remaining = Math.max(0, subtotal - discount);
       const maxByOrder = Math.floor((subtotal * glow.max_wallet_per_order_pct) / 100);
@@ -156,7 +188,7 @@ export const createOrder = createServerFn({ method: "POST" })
         coupon_code: couponCode,
         payment_method: "cod",
         status: "pending",
-        customer_user_id: data.customer_user_id ?? null,
+        customer_user_id: customerUserId ?? null,
         referral_code_used: referralCode,
         wallet_redeemed: walletRedeemed,
         referrer_credit_status: referralCode ? "pending" : "none",
@@ -184,7 +216,7 @@ export const createOrder = createServerFn({ method: "POST" })
       await supabaseAdmin.from("referral_uses").insert({
         code: referralCode,
         referrer_user_id: referrerUserId,
-        friend_user_id: data.customer_user_id ?? null,
+        friend_user_id: customerUserId ?? null,
         friend_phone: data.customer_phone,
         order_id: inserted.id,
         discount_amount: referralDiscount,
@@ -193,20 +225,20 @@ export const createOrder = createServerFn({ method: "POST" })
     }
 
     // Wallet redemption debit
-    if (walletRedeemed > 0 && data.customer_user_id) {
+    if (walletRedeemed > 0 && customerUserId) {
       await supabaseAdmin.from("wallet_transactions").insert({
-        user_id: data.customer_user_id,
+        user_id: customerUserId,
         amount: -walletRedeemed,
         kind: "redemption",
         order_id: inserted.id,
         note: `استخدام رصيد في طلب ${inserted.order_number}`,
       });
       const { data: cp } = await supabaseAdmin
-        .from("customer_profiles").select("wallet_balance").eq("user_id", data.customer_user_id).single();
+        .from("customer_profiles").select("wallet_balance").eq("user_id", customerUserId).single();
       if (cp) {
         await supabaseAdmin.from("customer_profiles")
           .update({ wallet_balance: Math.max(0, Number(cp.wallet_balance) - walletRedeemed) })
-          .eq("user_id", data.customer_user_id);
+          .eq("user_id", customerUserId);
       }
     }
 
