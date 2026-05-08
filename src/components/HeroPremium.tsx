@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Tag, ShieldCheck, Truck, Package, Gift } from "lucide-react";
 import { AnimatedHeroWords } from "@/components/ui/animated-hero";
-import groupImg from "@/assets/products/group.png";
+import groupImg from "@/assets/products/hero-studio.png";
 
 function MagneticButton({
   children,
@@ -66,7 +66,7 @@ export function HeroPremium() {
     <section
       dir="rtl"
       onMouseMove={onSectionMove}
-      className="relative overflow-hidden min-h-[78vh] md:min-h-[86vh] flex items-center"
+      className="relative overflow-hidden min-h-[74vh] md:min-h-[82vh] flex items-start pt-6 md:pt-2"
     >
       {/* Animated CSS glow blobs (kept, very subtle) */}
       {!reduce && (
@@ -92,13 +92,13 @@ export function HeroPremium() {
         initial={{ opacity: 0, scale: 1.04, x: -30 }}
         animate={{ opacity: 1, scale: 1, x: 0 }}
         transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute inset-y-0 left-[-8%] sm:left-[-4%] md:left-0 md:right-auto md:w-[62%] lg:w-[58%] flex items-center justify-center"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
         style={{ zIndex: 2 }}
       >
         <img
           src={groupImg}
           alt=""
-          className="h-[70%] md:h-[88%] w-auto max-w-none object-contain select-none mix-blend-multiply"
+          className="w-full h-full object-cover md:object-contain object-center select-none mix-blend-multiply"
           style={{
             opacity: 0.55,
             filter: "drop-shadow(0 40px 60px rgba(58,36,48,0.18))",
@@ -116,7 +116,7 @@ export function HeroPremium() {
         />
       )}
 
-      <div className="container relative z-10 mx-auto px-4 py-16 sm:py-20 md:py-24">
+      <div className="container relative z-10 mx-auto px-4 py-8 sm:py-12 md:py-16">
         {/* Centered content — backdrop product visual lives outside */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
