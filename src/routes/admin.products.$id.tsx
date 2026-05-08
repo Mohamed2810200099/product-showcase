@@ -333,6 +333,22 @@ function ProductForm() {
             <Toggle label="منشور (ظاهر للعملاء)" checked={form.is_active} onChange={(v) => setForm({ ...form, is_active: v })} />
             <Toggle label="منتج مميز" checked={form.is_featured} onChange={(v) => setForm({ ...form, is_featured: v })} />
             <Toggle label="كمية محدودة" checked={form.is_limited} onChange={(v) => setForm({ ...form, is_limited: v })} />
+            <Toggle label="تتبع المخزون" checked={form.stock_tracking_enabled} onChange={(v) => setForm({ ...form, stock_tracking_enabled: v })} />
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">حالة التوفر</label>
+              <select
+                value={form.availability_status}
+                onChange={(e) => setForm({ ...form, availability_status: e.target.value as typeof form.availability_status })}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="available">متاح</option>
+                <option value="out_of_stock">نفذ المخزون</option>
+                <option value="coming_soon">قريباً</option>
+              </select>
+              {form.stock_tracking_enabled && form.stock <= 0 && form.availability_status === "available" && (
+                <p className="text-[11px] text-amber-600 mt-1">⚠️ المخزون صفر — يفضّل اختيار "نفذ المخزون"</p>
+              )}
+            </div>
           </Section>
         </aside>
       </div>
