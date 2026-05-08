@@ -32,7 +32,9 @@ export function ProductCard({ product }: { product: Product }) {
     : null;
 
   const status = product.availability_status ?? "available";
+  const isComingSoon = status === "coming_soon";
   const isOut = status === "out_of_stock" || (product.stock_tracking_enabled === true && product.stock === 0);
+  const unavailable = isOut || isComingSoon;
 
   return (
     <Product3DCard className="group relative bg-card rounded-2xl overflow-hidden border border-border hover:shadow-[0_25px_60px_-20px_rgba(217,108,157,0.45)] transition-shadow duration-500">
@@ -48,9 +50,9 @@ export function ProductCard({ product }: { product: Product }) {
             كمية محدودة
           </span>
         )}
-        {isOut && (
+        {(isOut || isComingSoon) && (
           <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
-            <span className="font-display text-lg">نفد المخزون</span>
+            <span className="font-display text-lg">{isComingSoon ? "قريباً" : "نفد المخزون"}</span>
           </div>
         )}
       </Link>
@@ -67,8 +69,11 @@ export function ProductCard({ product }: { product: Product }) {
             <span>({product.reviews_count})</span>
           </div>
         )}
-        {!isOut && (
+        {!unavailable && (
           <div className="mt-1 text-[11px] text-emerald-600 font-medium">متاح للطلب</div>
+        )}
+        {isComingSoon && (
+          <div className="mt-1 text-[11px] text-amber-600 font-medium">قريباً</div>
         )}
         <div className="mt-3 flex items-end justify-between gap-2">
           <div>
@@ -79,12 +84,12 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
           <button
             onClick={() => {
-              if (isOut) return;
+              if (unavailable) return;
               add({ id: product.id, name: product.name, slug: product.slug, price: product.price, image: img });
               trackEvent("add_to_cart", { product_id: product.id, product_name: product.name, price: product.price, qty: 1, source: "product_card" });
               toast.success("تمت الإضافة للسلة 🛍️");
             }}
-            disabled={isOut}
+            disabled={unavailable}
             className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-soft"
             aria-label="أضيفي للسلة"
           >

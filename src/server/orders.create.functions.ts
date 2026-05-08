@@ -73,6 +73,9 @@ export const createOrder = createServerFn({ method: "POST" })
       if (p.availability_status === "out_of_stock") {
         return { ok: false, error: "أحد المنتجات نفد من المخزون" };
       }
+      if (p.availability_status === "coming_soon") {
+        return { ok: false, error: "هذا المنتج غير متاح للطلب حالياً" };
+      }
       if (p.stock_tracking_enabled && Number(p.stock ?? 0) < it.qty) {
         return { ok: false, error: "الكمية المطلوبة غير متاحة حالياً" };
       }
