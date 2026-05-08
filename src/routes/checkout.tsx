@@ -162,6 +162,7 @@ function CheckoutPage() {
     const d = Math.round((subtotal * glowSettings.friend_discount_pct) / 100);
     setAppliedReferral({ code, discount: d });
     setAppliedCoupon(null);
+    trackEvent("referral_applied", { code, discount: d, cart_total: subtotal });
     toast.success(`تم تطبيق كود صديقتك — خصم ${glowSettings.friend_discount_pct}٪`);
   };
 
