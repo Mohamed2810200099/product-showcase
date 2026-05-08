@@ -160,21 +160,6 @@ export function ReferralSection() {
                   {balance.toLocaleString("ar-EG")} <span className="text-base font-normal text-[#3A2430]/60">ج.م</span>
                 </div>
                 <p className="text-xs text-[#3A2430]/60 mt-1">يُصرف تلقائيًا في طلبك الجاي</p>
-                {data?.transactions && data.transactions.length > 0 && (
-                  <ul className="mt-3 space-y-1.5 text-xs text-[#3A2430]/70 max-h-24 overflow-auto">
-                    {data.transactions.slice(0, 4).map((t) => (
-                      <li key={t.id} className="flex justify-between gap-2 border-b border-dashed border-[#F0CCD9] pb-1">
-                        <span className="line-clamp-1">{t.note ?? t.kind}</span>
-                        <span className={`font-semibold whitespace-nowrap ${Number(t.amount) > 0 ? "text-emerald-600" : "text-[#3A2430]"}`}>
-                          {Number(t.amount) > 0 ? "+" : ""}{Number(t.amount).toLocaleString("ar-EG")} ج
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          )}
 
           <p className="text-[10px] text-[#3A2430]/55 text-center leading-relaxed mt-6 max-w-xl mx-auto">
             الرصيد يدخل بعد تسليم طلب صديقتك. لا يُحتسب على الطلبات الملغية أو المرتجعة. حد شهري: {data?.settings?.monthly_cap ?? 500} ج.م.
