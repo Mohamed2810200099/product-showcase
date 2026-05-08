@@ -11,6 +11,7 @@ import { BeautyAssistant } from "@/components/BeautyAssistant";
 import { useBrand } from "@/hooks/use-brand";
 import { FloatingBeautyElements } from "@/components/three-d/FloatingBeautyElements";
 import { RevealOnView } from "@/components/three-d/RevealOnView";
+import { SplineBeautyHero } from "@/components/home/SplineBeautyHero";
 
 
 export const Route = createFileRoute("/")({
@@ -94,6 +95,9 @@ function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* SPLINE 3D BEAUTY SECTION */}
+      <SplineBeautyHero />
 
       {/* CATEGORIES */}
       <section className="container mx-auto px-4 py-16">
