@@ -84,7 +84,7 @@ export function HeroPremium() {
           alt=""
           className="w-full h-full object-cover md:object-contain object-center select-none mix-blend-multiply"
           style={{
-            opacity: 0.55,
+            opacity: 0.4,
             filter: "drop-shadow(0 40px 60px rgba(58,36,48,0.18))",
             background: "transparent",
           }}
