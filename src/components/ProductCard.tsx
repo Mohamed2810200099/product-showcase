@@ -84,12 +84,12 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
           <button
             onClick={() => {
-              if (isOut) return;
+              if (unavailable) return;
               add({ id: product.id, name: product.name, slug: product.slug, price: product.price, image: img });
               trackEvent("add_to_cart", { product_id: product.id, product_name: product.name, price: product.price, qty: 1, source: "product_card" });
               toast.success("تمت الإضافة للسلة 🛍️");
             }}
-            disabled={isOut}
+            disabled={unavailable}
             className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-soft"
             aria-label="أضيفي للسلة"
           >
