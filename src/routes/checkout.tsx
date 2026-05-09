@@ -230,18 +230,19 @@ function CheckoutPage() {
 
     // Order confirmation email is sent server-side from createOrder.
 
-    clear();
-    trackEvent("order_created", {
+    // Fire purchase BEFORE clearing cart so we still have the items.
+    trackPurchase({
       order_number: data.order_number,
-      cart_total: subtotal,
-      total,
-      discount,
+      value: total,
       shipping,
-      wallet_applied: walletApplied,
-      coupon_code: appliedCoupon?.code ?? null,
-      referral_code: appliedReferral?.code ?? null,
-      items_count: items.reduce((s, i) => s + i.qty, 0),
+      discount,
+      coupon: appliedCoupon?.code ?? null,
+      items: items.map((i) => buildItem({ id: i.id, name: i.name, price: i.price }, i.qty)),
+      city: form.city,
+      governorate: form.governorate,
     });
+
+    clear();
     navigate({
       to: "/order-success",
       search: {
