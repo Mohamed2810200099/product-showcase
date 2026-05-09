@@ -33,6 +33,7 @@ import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminProductsIndexRouteImport } from './routes/admin.products.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AdminProductsIdRouteImport } from './routes/admin.products.$id'
@@ -162,6 +163,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/admin/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
   id: '/admin/products/',
   path: '/admin/products/',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/return-policy': typeof ReturnPolicyRoute
   '/shop': typeof ShopRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/return-policy'
     | '/shop'
     | '/unsubscribe'
+    | '/admin/audit'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/return-policy'
     | '/shop'
     | '/unsubscribe'
+    | '/admin/audit'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/return-policy'
     | '/shop'
     | '/unsubscribe'
+    | '/admin/audit'
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/login'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   ReturnPolicyRoute: typeof ReturnPolicyRoute
   ShopRoute: typeof ShopRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -619,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/products/': {
       id: '/admin/products/'
       path: '/admin/products'
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReturnPolicyRoute: ReturnPolicyRoute,
   ShopRoute: ShopRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminLoginRoute: AdminLoginRoute,

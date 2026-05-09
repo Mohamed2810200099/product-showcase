@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Image as ImageIcon,
   Settings as SettingsIcon,
+  ShieldCheck,
   LogOut,
   Menu,
   X,
@@ -27,6 +28,7 @@ const nav = [
   { to: "/admin/testimonials", label: "آراء العملاء", icon: MessageSquare },
   { to: "/admin/media", label: "مكتبة الصور", icon: ImageIcon },
   { to: "/admin/settings", label: "الإعدادات", icon: SettingsIcon },
+  { to: "/admin/audit", label: "سجل الأمان", icon: ShieldCheck },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {
