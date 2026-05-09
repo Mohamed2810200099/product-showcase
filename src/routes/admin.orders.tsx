@@ -335,9 +335,18 @@ function OrderModal({ order, onClose, onDelete, onStatus, onToggleWhatsapp }: { 
             ))}
           </div>
 
-          <button onClick={onDelete} className="w-full bg-destructive/10 text-destructive py-2 rounded-full text-sm inline-flex items-center justify-center gap-2 hover:bg-destructive/20">
-            <Trash2 className="h-4 w-4" /> حذف الطلب
-          </button>
+          <div className="space-y-2">
+            {order.status !== "cancelled" && (
+              <button onClick={() => onStatus("cancelled")} className="w-full bg-amber-100 text-amber-800 py-2 rounded-full text-sm inline-flex items-center justify-center gap-2 hover:bg-amber-200 border border-amber-300">
+                <X className="h-4 w-4" /> إلغاء الطلب (آمن — يرجع المخزون والمحفظة)
+              </button>
+            )}
+            {order.status === "cancelled" && (
+              <button onClick={onDelete} className="w-full bg-destructive/10 text-destructive py-2 rounded-full text-sm inline-flex items-center justify-center gap-2 hover:bg-destructive/20">
+                <Trash2 className="h-4 w-4" /> حذف نهائي (للاختبار فقط)
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
