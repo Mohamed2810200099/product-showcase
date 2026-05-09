@@ -22,6 +22,30 @@ const updateOrderStatusSchema = z.object({
   access_token: z.string().max(4000).optional().nullable(),
 });
 
+type OrderItemRow = { product_id?: string; qty?: number };
+
+async function logAdminAction(
+  actorUserId: string,
+  actorEmail: string | null,
+  action: string,
+  targetType: string,
+  targetId: string,
+  details: Record<string, unknown> = {},
+) {
+  try {
+    await supabaseAdmin.from("admin_audit_log").insert({
+      actor_user_id: actorUserId,
+      actor_email: actorEmail,
+      action,
+      target_type: targetType,
+      target_id: targetId,
+      details: details as unknown as never,
+    });
+  } catch (e) {
+    console.error("audit log failed", e);
+  }
+}
+
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d) => updateOrderStatusSchema.parse(d))
   .handler(async ({ data }) => {
@@ -32,7 +56,7 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
 
     const { data: existing, error: loadErr } = await supabaseAdmin
       .from("orders")
-      .select("id, status")
+      .select("id, status, items, stock_restored, wallet_redeemed, referrer_credit_status, order_number")
       .eq("id", data.order_id)
       .maybeSingle();
     if (loadErr || !existing) {
@@ -44,12 +68,41 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       return { ok: true as const, previousStatus, status: data.status, referral: { ran: false as const } };
     }
 
+    // Block re-opening cancelled orders to avoid undoing reversals.
+    if (previousStatus === "cancelled") {
+      return { ok: false as const, code: "locked", error: "لا يمكن إعادة فتح طلب ملغي" };
+    }
+
+    const updatePayload: Record<string, unknown> = { status: data.status };
+    if (data.status === "cancelled") {
+      updatePayload.cancelled_at = new Date().toISOString();
+    }
+
     const { error: updErr } = await supabaseAdmin
       .from("orders")
-      .update({ status: data.status })
+      .update(updatePayload)
       .eq("id", data.order_id);
     if (updErr) {
       return { ok: false as const, code: "update_failed", error: "فشل تحديث حالة الطلب" };
+    }
+
+    // On cancellation, restore stock once (idempotent via stock_restored flag).
+    if (data.status === "cancelled" && previousStatus !== "cancelled" && !existing.stock_restored) {
+      const items = Array.isArray(existing.items) ? (existing.items as OrderItemRow[]) : [];
+      const stockItems = items
+        .filter((it) => it && typeof it.product_id === "string" && Number(it.qty) > 0)
+        .map((it) => ({ product_id: it.product_id as string, qty: Number(it.qty) }));
+      if (stockItems.length > 0) {
+        try {
+          await supabaseAdmin.rpc("restore_product_stock", { _items: stockItems as unknown as never });
+        } catch (e) {
+          console.error("restore_product_stock failed", e);
+        }
+      }
+      await supabaseAdmin.from("orders").update({ stock_restored: true }).eq("id", data.order_id);
+      await logAdminAction(admin.userId, admin.email, "order.stock_restored", "order", data.order_id, {
+        order_number: existing.order_number,
+      });
     }
 
     let referral: {
@@ -83,7 +136,50 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       };
     }
 
+    await logAdminAction(admin.userId, admin.email, `order.status.${data.status}`, "order", data.order_id, {
+      order_number: existing.order_number,
+      from: previousStatus,
+      to: data.status,
+      referral,
+    });
+
     return { ok: true as const, previousStatus, status: data.status, referral };
+  });
+
+// Hard delete is intentionally separated and meant for test data only.
+// The UI must double-confirm; the action is verified server-side and audited.
+const hardDeleteSchema = z.object({
+  order_id: z.string().uuid(),
+  access_token: z.string().max(4000).optional().nullable(),
+  confirm: z.literal("DELETE"),
+});
+
+export const hardDeleteOrder = createServerFn({ method: "POST" })
+  .inputValidator((d) => hardDeleteSchema.parse(d))
+  .handler(async ({ data }) => {
+    const admin = await isAdminAccess(data.access_token);
+    if (!admin) return { ok: false as const, error: "صلاحيات غير كافية" };
+
+    const { data: existing } = await supabaseAdmin
+      .from("orders")
+      .select("id, order_number, status")
+      .eq("id", data.order_id)
+      .maybeSingle();
+    if (!existing) return { ok: false as const, error: "الطلب غير موجود" };
+
+    // Only allow hard-delete on cancelled orders (so financial reversals
+    // already ran). This protects against losing live orders.
+    if (existing.status !== "cancelled") {
+      return { ok: false as const, error: "ألغي الطلب أولاً قبل الحذف النهائي" };
+    }
+
+    const { error } = await supabaseAdmin.from("orders").delete().eq("id", data.order_id);
+    if (error) return { ok: false as const, error: "فشل الحذف" };
+
+    await logAdminAction(admin.userId, admin.email, "order.hard_deleted", "order", data.order_id, {
+      order_number: existing.order_number,
+    });
+    return { ok: true as const };
   });
 
 
