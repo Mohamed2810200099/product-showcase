@@ -9,6 +9,7 @@ import { useBrand } from "@/hooks/use-brand";
 import { formatEGP } from "@/lib/format";
 import { toast } from "sonner";
 import placeholderImg from "@/assets/product-placeholder.jpg";
+import { trackEvent } from "@/lib/analytics";
 
 type Goal =
   | "hair_growth"
