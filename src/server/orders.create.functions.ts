@@ -101,8 +101,10 @@ export const createOrder = createServerFn({ method: "POST" })
 
     let discount = 0;
     let couponCode: string | null = null;
-
-    // Coupon
+    // NOTE: We hold off on the atomic coupon redemption RPC until AFTER the
+    // order row exists, so the redemption is recorded against a real order.
+    // For pricing, we do a non-mutating preview here using the same logic.
+    let pendingCouponCode: string | null = null;
     if (data.coupon_code) {
       const code = data.coupon_code.trim().toUpperCase();
       const { data: row } = await supabaseAdmin.from("coupons").select("*").eq("code", code).maybeSingle();
@@ -125,6 +127,7 @@ export const createOrder = createServerFn({ method: "POST" })
       discount = row.type === "percent" ? Math.round((subtotal * Number(row.value)) / 100) : Number(row.value);
       if (discount > subtotal) discount = subtotal;
       couponCode = row.code;
+      pendingCouponCode = row.code;
     }
 
     // Personal referral code (mutually exclusive with coupon)
