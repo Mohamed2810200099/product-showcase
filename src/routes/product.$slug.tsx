@@ -83,11 +83,18 @@ function ProductPage() {
 
   useEffect(() => {
     if (product?.id) {
-      trackEvent("product_view", {
-        product_id: product.id,
-        product_name: product.name,
-        price: Number(product.price),
-        slug: product.slug,
+      trackEvent("view_item", {
+        currency: "EGP",
+        value: Number(product.price),
+        items: [{
+          item_id: product.id,
+          item_name: (product as any).arabic_title || product.name,
+          item_brand: (product as any).brand ?? undefined,
+          item_category: (product as any).categories?.name ?? undefined,
+          price: Number(product.price),
+          quantity: 1,
+        }],
+        source: "product_page",
       });
     }
   }, [product?.id, product?.name, product?.price, product?.slug]);
