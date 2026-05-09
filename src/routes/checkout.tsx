@@ -84,14 +84,14 @@ function CheckoutPage() {
     return () => { cancelled = true; };
   }, [isAuthenticated, user]);
 
-  // Fire checkout_started once when entering with a non-empty cart
+  // Fire begin_checkout once when entering with a non-empty cart
   useEffect(() => {
     if (items.length > 0) {
-      trackEvent("checkout_started", {
-        cart_total: subtotal,
-        items_count: items.reduce((s, i) => s + i.qty, 0),
-        product_ids: items.map((i) => i.id),
-      });
+      trackBeginCheckout(
+        items.map((i) => buildItem({ id: i.id, name: i.name, price: i.price }, i.qty)),
+        subtotal,
+        appliedCoupon?.code ?? null,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
