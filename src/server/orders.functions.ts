@@ -73,15 +73,15 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       return { ok: false as const, code: "locked", error: "لا يمكن إعادة فتح طلب ملغي" };
     }
 
-    const updatePayload: Record<string, unknown> = { status: data.status };
-    if (data.status === "cancelled") {
-      updatePayload.cancelled_at = new Date().toISOString();
-    }
-
-    const { error: updErr } = await supabaseAdmin
-      .from("orders")
-      .update(updatePayload)
-      .eq("id", data.order_id);
+    const { error: updErr } = data.status === "cancelled"
+      ? await supabaseAdmin
+          .from("orders")
+          .update({ status: data.status, cancelled_at: new Date().toISOString() })
+          .eq("id", data.order_id)
+      : await supabaseAdmin
+          .from("orders")
+          .update({ status: data.status })
+          .eq("id", data.order_id);
     if (updErr) {
       return { ok: false as const, code: "update_failed", error: "فشل تحديث حالة الطلب" };
     }
