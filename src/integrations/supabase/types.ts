@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_user_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -230,6 +263,7 @@ export type Database = {
       orders: {
         Row: {
           address: string
+          cancelled_at: string | null
           city: string
           coupon_code: string | null
           created_at: string
@@ -249,6 +283,7 @@ export type Database = {
           referrer_credit_status: string
           shipping: number
           status: string
+          stock_restored: boolean
           subtotal: number
           total: number
           updated_at: string
@@ -257,6 +292,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          cancelled_at?: string | null
           city: string
           coupon_code?: string | null
           created_at?: string
@@ -276,6 +312,7 @@ export type Database = {
           referrer_credit_status?: string
           shipping?: number
           status?: string
+          stock_restored?: boolean
           subtotal?: number
           total?: number
           updated_at?: string
@@ -284,6 +321,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          cancelled_at?: string | null
           city?: string
           coupon_code?: string | null
           created_at?: string
@@ -303,6 +341,7 @@ export type Database = {
           referrer_credit_status?: string
           shipping?: number
           status?: string
+          stock_restored?: boolean
           subtotal?: number
           total?: number
           updated_at?: string
@@ -757,6 +796,20 @@ export type Database = {
           read_ct: number
         }[]
       }
+      redeem_coupon_atomic: {
+        Args: { _code: string; _phone: string; _subtotal: number }
+        Returns: Json
+      }
+      redeem_wallet_atomic: {
+        Args: {
+          _amount: number
+          _order_id: string
+          _order_number: string
+          _user_id: string
+        }
+        Returns: number
+      }
+      restore_product_stock: { Args: { _items: Json }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "customer" | "user" | "moderator"

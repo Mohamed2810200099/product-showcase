@@ -101,8 +101,10 @@ export const createOrder = createServerFn({ method: "POST" })
 
     let discount = 0;
     let couponCode: string | null = null;
-
-    // Coupon
+    // NOTE: We hold off on the atomic coupon redemption RPC until AFTER the
+    // order row exists, so the redemption is recorded against a real order.
+    // For pricing, we do a non-mutating preview here using the same logic.
+    let pendingCouponCode: string | null = null;
     if (data.coupon_code) {
       const code = data.coupon_code.trim().toUpperCase();
       const { data: row } = await supabaseAdmin.from("coupons").select("*").eq("code", code).maybeSingle();
@@ -125,6 +127,7 @@ export const createOrder = createServerFn({ method: "POST" })
       discount = row.type === "percent" ? Math.round((subtotal * Number(row.value)) / 100) : Number(row.value);
       if (discount > subtotal) discount = subtotal;
       couponCode = row.code;
+      pendingCouponCode = row.code;
     }
 
     // Personal referral code (mutually exclusive with coupon)
@@ -224,16 +227,32 @@ export const createOrder = createServerFn({ method: "POST" })
     }
 
 
-    // increment coupon usage and auto-deactivate when usage limit reached
-    if (couponCode) {
-      const { data: cRow } = await supabaseAdmin
-        .from("coupons").select("id, used_count, max_uses").eq("code", couponCode).maybeSingle();
-      if (cRow) {
-        const newUsed = (cRow.used_count ?? 0) + 1;
-        const shouldDeactivate = cRow.max_uses != null && newUsed >= cRow.max_uses;
-        await supabaseAdmin.from("coupons")
-          .update({ used_count: newUsed, ...(shouldDeactivate ? { active: false } : {}) })
-          .eq("id", cRow.id);
+    // Atomic coupon redemption (locks coupon row, validates again, increments
+    // used_count, auto-deactivates when exhausted). Wins the race even when
+    // multiple checkouts try to use the last available coupon at once.
+    if (pendingCouponCode) {
+      const { data: redeemRes, error: rErr } = await supabaseAdmin.rpc(
+        "redeem_coupon_atomic",
+        { _code: pendingCouponCode, _subtotal: subtotal, _phone: phoneNorm },
+      );
+      const res = (redeemRes ?? {}) as { ok?: boolean; discount?: number; error?: string };
+      if (rErr || !res.ok) {
+        // roll back: restore stock, drop the order
+        if (stockItems.length > 0) {
+          await supabaseAdmin.rpc("restore_product_stock", { _items: stockItems as unknown as never });
+        }
+        await supabaseAdmin.from("orders").delete().eq("id", inserted.id);
+        return { ok: false, error: res.error ?? "تعذر تطبيق كود الخصم" };
+      }
+      // If atomic discount differs from the previewed value (rare, e.g. coupon
+      // edited between preview and commit), reconcile order totals.
+      const atomicDiscount = Math.max(0, Math.min(Number(res.discount ?? discount), subtotal));
+      if (atomicDiscount !== discount) {
+        const newTotal = Math.max(0, subtotal - atomicDiscount - walletRedeemed + shipping);
+        await supabaseAdmin.from("orders")
+          .update({ discount: atomicDiscount, total: newTotal })
+          .eq("id", inserted.id);
+        discount = atomicDiscount;
       }
     }
 
@@ -250,21 +269,23 @@ export const createOrder = createServerFn({ method: "POST" })
       });
     }
 
-    // Wallet redemption debit
+    // Atomic wallet redemption (locks profile, deducts safely, records tx).
+    // Returns the actual amount taken — may be less than requested if balance
+    // changed between preview and commit. Reconcile order totals if so.
     if (walletRedeemed > 0 && customerUserId) {
-      await supabaseAdmin.from("wallet_transactions").insert({
-        user_id: customerUserId,
-        amount: -walletRedeemed,
-        kind: "redemption",
-        order_id: inserted.id,
-        note: `استخدام رصيد في طلب ${inserted.order_number}`,
+      const { data: actualRaw } = await supabaseAdmin.rpc("redeem_wallet_atomic", {
+        _user_id: customerUserId,
+        _amount: walletRedeemed,
+        _order_id: inserted.id,
+        _order_number: inserted.order_number,
       });
-      const { data: cp } = await supabaseAdmin
-        .from("customer_profiles").select("wallet_balance").eq("user_id", customerUserId).single();
-      if (cp) {
-        await supabaseAdmin.from("customer_profiles")
-          .update({ wallet_balance: Math.max(0, Number(cp.wallet_balance) - walletRedeemed) })
-          .eq("user_id", customerUserId);
+      const actualRedeemed = Math.max(0, Number(actualRaw ?? 0));
+      if (actualRedeemed !== walletRedeemed) {
+        const newTotal = Math.max(0, subtotal - discount - actualRedeemed + shipping);
+        await supabaseAdmin.from("orders")
+          .update({ wallet_redeemed: actualRedeemed, total: newTotal })
+          .eq("id", inserted.id);
+        walletRedeemed = actualRedeemed;
       }
     }
 
