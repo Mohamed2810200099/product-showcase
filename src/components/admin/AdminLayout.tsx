@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Image as ImageIcon,
   Settings as SettingsIcon,
+  ShieldCheck,
   LogOut,
   Menu,
   X,
