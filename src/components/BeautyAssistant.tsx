@@ -144,6 +144,12 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     recommended.forEach((p: any) => {
       const img = (p.images && p.images.length > 0 ? p.images[0] : null) ?? placeholderImg;
       add({ id: p.id, name: p.arabic_title || p.name, slug: p.slug, price: Number(p.price), image: img }, 1);
+      trackEvent("add_to_cart", {
+        currency: "EGP",
+        value: Number(p.price),
+        items: [{ item_id: p.id, item_name: p.arabic_title || p.name, price: Number(p.price), quantity: 1 }],
+        source: "assistant",
+      });
     });
     toast.success("تمت إضافة الروتين للسلة 💕");
   };
