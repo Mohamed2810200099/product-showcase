@@ -121,6 +121,23 @@ export function BeautyAssistant({ embedded = false }: { embedded?: boolean }) {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: "smooth" });
   }, [step, goal, size]);
 
+  // Fire start event when user picks first goal; completed when result with recs is shown.
+  useEffect(() => {
+    if (goal && step === "size") {
+      trackEvent("beauty_assistant_started", { goal });
+    }
+  }, [goal, step]);
+  useEffect(() => {
+    if (step === "result" && goal && recommended.length > 0) {
+      trackEvent("beauty_assistant_completed", {
+        goal,
+        size,
+        product_ids: recommended.map((p: any) => p.id),
+        products_count: recommended.length,
+      });
+    }
+  }, [step, goal, size, recommended]);
+
   const reset = () => { setStep("intro"); setGoal(null); setSize(null); setDescribe(null); };
 
   const addRoutineToCart = () => {
