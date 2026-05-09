@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 const nav = [
   { to: "/admin", label: "لوحة التحكم", icon: LayoutDashboard, exact: true },
+  { to: "/admin/marketing", label: "تقرير التسويق", icon: LayoutDashboard },
   { to: "/admin/products", label: "المنتجات", icon: Package },
   { to: "/admin/categories", label: "الفئات", icon: FolderTree },
   { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },

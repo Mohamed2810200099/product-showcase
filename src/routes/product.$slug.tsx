@@ -83,11 +83,18 @@ function ProductPage() {
 
   useEffect(() => {
     if (product?.id) {
-      trackEvent("product_view", {
-        product_id: product.id,
-        product_name: product.name,
-        price: Number(product.price),
-        slug: product.slug,
+      trackEvent("view_item", {
+        currency: "EGP",
+        value: Number(product.price),
+        items: [{
+          item_id: product.id,
+          item_name: (product as any).arabic_title || product.name,
+          item_brand: (product as any).brand ?? undefined,
+          item_category: (product as any).categories?.name ?? undefined,
+          price: Number(product.price),
+          quantity: 1,
+        }],
+        source: "product_page",
       });
     }
   }, [product?.id, product?.name, product?.price, product?.slug]);
@@ -176,8 +183,58 @@ function ProductPage() {
 
   const statusLabel = isComingSoonProduct ? "قريباً" : isOutProduct ? "نفد المخزون" : "متاح للطلب";
 
+  // SEO: per-product title/description + Product JSON-LD.
+  const seoTitle = `${product.arabic_title || product.name} — The Girl House`;
+  const seoDescription = (
+    product.short_description ||
+    product.description ||
+    `${product.arabic_title || product.name} — منتج ألماني أصلي من The Girl House، ${formatEGP(Number(product.price))}.`
+  ).toString().slice(0, 158);
+
+  const ldAvailability = isComingSoonProduct
+    ? "https://schema.org/PreOrder"
+    : isOutProduct
+    ? "https://schema.org/OutOfStock"
+    : "https://schema.org/InStock";
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.arabic_title || product.name,
+    description: seoDescription,
+    image: hasImages ? (product.images as string[]) : undefined,
+    sku: (product as any).sku ?? product.id,
+    brand: (product as any).brand ? { "@type": "Brand", name: (product as any).brand } : undefined,
+    category: (product as any).categories?.name ?? undefined,
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "EGP",
+      price: Number(product.price),
+      availability: ldAvailability,
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.title = seoTitle;
+    let m = document.querySelector('meta[name="description"]');
+    if (!m) {
+      m = document.createElement("meta");
+      m.setAttribute("name", "description");
+      document.head.appendChild(m);
+    }
+    m.setAttribute("content", seoDescription);
+  }, [seoTitle, seoDescription]);
+
   return (
     <PublicLayout>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <div className="container mx-auto px-4 py-8 pb-[180px] md:pb-8">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/" className="hover:text-primary">الرئيسية</Link>
