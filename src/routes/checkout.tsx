@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { CreditCard, Tag, Wallet } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackBeginCheckout, trackPurchase, buildItem } from "@/lib/analytics";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "إتمام الطلب — The Girl House" }] }),
